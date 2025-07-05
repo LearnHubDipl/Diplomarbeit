@@ -1,0 +1,93 @@
+@startuml
+entity User {
+  * ID : int
+  * Name : string
+  * isAdmin : boolean
+  * profilePicture : string
+}
+
+entity Question {
+  * ID : int
+  * type : string
+  * difficulty : string
+  * topicPoolId : int
+  * text : string
+  * imageId : string
+  * userId : int
+  * explanation : string
+}
+
+entity AnswerOption {
+  * ID : int
+  * questionId : int
+  * text : string
+}
+
+entity Answer {
+  * ID : int
+  * questionId : int
+  * text : string
+}
+
+entity QuestionPool {
+  * ID : int
+  * userId : int
+}
+
+entity Question_QuestionPool {
+  * questionId : int
+  * questionPoolId : int
+  * answeredAt : datetime
+  * lastAnsweredCorrectly : boolean
+  * correctCount : int
+}
+
+entity TopicPool {
+  * ID : int
+  * subjectId : int
+  * name : string
+}
+
+entity Subject {
+  * ID : int
+  * name : string
+}
+
+entity Solution {
+  * ID : int
+  * questionId : int
+  * userId : int
+}
+
+entity SolutionStep {
+  * ID : int
+  * solutionId : int
+  * title : string
+  * text : string
+}
+
+entity SolutionVote {
+  * ID : int
+  * solutionId : int
+  * userId : int
+  * isUpvote : boolean
+}
+
+' Beziehungen
+User ||--o{ Question : creates
+User ||--o{ QuestionPool : owns
+User ||--o{ Solution : writes
+User ||--o{ SolutionVote : votes
+
+Question ||--o{ AnswerOption : has
+Question ||--o{ Answer : has
+Question ||--o{ Solution : has
+QuestionPool ||--o{ Question_QuestionPool : includes
+Question ||--o{ Question_QuestionPool : linked
+Question }o--|| TopicPool : belongsTo
+
+TopicPool }o--|| Subject : inSubject
+
+Solution ||--o{ SolutionStep : contains
+Solution ||--o{ SolutionVote
+@enduml
