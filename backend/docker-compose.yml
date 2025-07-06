@@ -1,0 +1,42 @@
+version: "2.4"
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: learnhub-mysql
+    environment:
+      MYSQL_DATABASE: learnhub-db
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: quarkus
+      MYSQL_PASSWORD: quarkus
+    ports:
+      - "3306:3306"
+    networks:
+      - quarkus-net
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  quarkus:
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile
+    container_name: learnhub-app
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      DB_KIND: mysql
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:mysql://mysql:3306/learnhub-db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      QUARKUS_DATASOURCE_USERNAME: quarkus
+      QUARKUS_DATASOURCE_PASSWORD: quarkus
+      QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: update
+    networks:
+      - quarkus-net
+
+networks:
+  quarkus-net:
