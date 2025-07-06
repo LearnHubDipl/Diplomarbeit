@@ -31,6 +31,7 @@ services:
       - "8080:8080"
     environment:
       DB_KIND: mysql
+      QUARKUS_PROFILE: prod
       QUARKUS_DATASOURCE_JDBC_URL: jdbc:mysql://mysql:3306/learnhub-db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       QUARKUS_DATASOURCE_USERNAME: quarkus
       QUARKUS_DATASOURCE_PASSWORD: quarkus
