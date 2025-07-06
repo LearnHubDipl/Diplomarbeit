@@ -1,0 +1,156 @@
+@startuml
+entity User {
+  * ID
+  --
+  Name
+  isAdmin
+  profilePicture
+}
+
+entity Question {
+  * ID
+  --
+  Type
+  difficulty
+  TopicPoolId
+  text
+  imgId
+  userId
+  explanation
+}
+
+entity AnswerOption {
+  * ID
+  --
+  questionId
+  text
+}
+
+entity Answer {
+  * ID
+  --
+  questionId
+  text
+}
+
+entity QuestionPool {
+  * ID
+  --
+  userId
+}
+
+entity Question_QuestionPool {
+  * ID
+  --
+  questionId
+  questionPoolId
+  answeredAt
+  lastAnsweredCorrectly
+  correctCount
+}
+
+entity StreakTracking {
+  * ID
+  --
+  userId
+  loginDate
+  streak
+}
+
+entity Note {
+  * path
+  --
+  topicPoolId
+  userId
+  isApproved
+  approvedBy
+  date
+  teacher
+}
+
+entity Subject {
+  * ID
+  --
+  name
+  imgId
+}
+
+entity TopicPool {
+  * ID
+  --
+  subjectId
+  name
+}
+
+entity Solution {
+  * ID
+  --
+  questionId
+  userId
+}
+
+entity SolutionStep {
+  * ID
+  --
+  solutionId
+  title
+  text
+}
+
+entity SolutionVote {
+  * ID
+  --
+  solutionId
+  userId
+  isUpVote
+}
+
+entity Exam {
+  * ID
+  --
+  userId
+  timeLimit
+  startedAt
+  endedAt
+  score
+  questionCount
+}
+
+entity Exam_Question {
+  * ID
+  --
+  examId
+  questionId
+  correct
+}
+
+entity Exam_TopicPool {
+  * ID
+  --
+  examId
+  topicPoolId
+}
+
+' Relationships
+User ||--o{ Question : creates
+Question ||--o{ AnswerOption : has
+Question ||--o{ Answer : has
+QuestionPool ||--o{ Question_QuestionPool : contains
+Question ||--o{ Question_QuestionPool : appears_in
+User ||--o{ QuestionPool : owns
+User ||--o{ StreakTracking : has
+User ||--o{ Note : writes
+User ||--o{ Note : approves
+User ||--o{ Note
+TopicPool ||--o{ Note : relates_to
+Subject ||--o{ TopicPool : has
+Question ||--o{ Solution : has
+Solution ||--o{ SolutionStep : has
+Solution ||--o{ SolutionVote : receives
+User ||--o{ SolutionVote : casts
+Exam ||--o{ Exam_Question : contains
+Question ||--o{ Exam_Question : appears_in
+Exam ||--o{ Exam_TopicPool : covers
+TopicPool ||--o{ Exam_TopicPool : appears_in
+User ||--o{ Exam : takes
+@enduml
