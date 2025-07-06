@@ -1,6 +1,6 @@
 # learnhub
 
-Use docker-compose up --build to start the quarkus application and the database simultaneously. This also sets everything up if you do it for the first time.
+Use docker-compose up to start the quarkus application and the database simultaneously. This also sets everything up if you do it for the first time.
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
