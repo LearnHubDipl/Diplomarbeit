@@ -14,7 +14,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Start MySQL container
-      run: docker-compose up -d mysql
+      run: docker compose up -d mysql
 
     - name: Wait for MySQL to initialize
       run: sleep 15
@@ -23,10 +23,10 @@ jobs:
       run: ./mvnw clean package
 
     - name: Build and start all containers
-      run: docker-compose up --build -d
+      run: docker compose up --build -d
 
     - name: Stop and remove all containers
-      run: docker-compose down
+      run: docker compose down
 
     - name: Commit changes if any
       run: |
