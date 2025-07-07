@@ -1,0 +1,42 @@
+name: Build and Push on backend changes
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Start MySQL container
+      run: docker-compose up -d mysql
+
+    - name: Wait for MySQL to initialize
+      run: sleep 15
+
+    - name: Build Maven project
+      run: ./mvnw clean package
+
+    - name: Build and start all containers
+      run: docker-compose up --build -d
+
+    - name: Stop and remove all containers
+      run: docker-compose down
+
+    - name: Commit changes if any
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add backend
+        # check if something changed
+        if ! git diff --cached --quiet; then
+          git commit -m "Auto build and update backend [ci skip]"
+          git push
+        else
+          echo "No changes to commit"
+        fi

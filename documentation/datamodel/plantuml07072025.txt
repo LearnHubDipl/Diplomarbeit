@@ -1,0 +1,164 @@
+@startuml
+entity User {
+  * ID : UUID
+  --
+  Name : String
+  isAdmin : Boolean
+  isTeacher : Boolean
+  profilePictureId : UUID
+}
+
+entity Question {
+  * ID : UUID
+  --
+  Type : Integer
+  difficulty : Integer
+  TopicPoolId : UUID
+  text : String
+  imgId : UUID
+  userId : UUID
+  explanation : String
+}
+
+entity AnswerOption {
+  * ID : UUID
+  --
+  questionId : UUID
+  text : String
+}
+
+entity Answer {
+  * ID : UUID
+  --
+  questionId : UUID
+  text : String
+}
+
+entity QuestionPool {
+  * ID : UUID
+  --
+  userId : UUID
+  name : String
+  description : String
+}
+
+entity Question_QuestionPool {
+  * ID : UUID
+  --
+  questionId : UUID
+  questionPoolId : UUID
+  answeredAt : DateTime
+  lastAnsweredCorrectly : Boolean
+  correctCount : Integer
+}
+
+entity StreakTracking {
+  * ID : UUID
+  --
+  userId : UUID
+  loginDate : Date
+  streak : Integer
+}
+
+entity TopicContent {
+  * path : String
+  --
+  topicPoolId : UUID
+  userId : UUID
+  isApproved : Boolean
+  approvedBy : UUID
+  date : Date
+  teacher : UUID
+}
+
+entity Subject {
+  * ID : UUID
+  --
+  name : String
+  description : String
+  imgId : UUID
+}
+
+entity TopicPool {
+  * ID : UUID
+  --
+  subjectId : UUID
+  name : String
+  description : String
+}
+
+entity Solution {
+  * ID : UUID
+  --
+  questionId : UUID
+  userId : UUID
+}
+
+entity SolutionStep {
+  * ID : UUID
+  --
+  solutionId : UUID
+  title : String
+  text : String
+}
+
+entity SolutionVote {
+  * ID : UUID
+  --
+  solutionId : UUID
+  userId : UUID
+  isUpVote : Boolean
+}
+
+entity Exam {
+  * ID : UUID
+  --
+  userId : UUID
+  timeLimit : Integer
+  startedAt : DateTime
+  endedAt : DateTime
+  score : Float
+  questionCount : Integer
+}
+
+entity Exam_TopicPool {
+  * ID : UUID
+  --
+  examId : UUID
+  topicPoolId : UUID
+}
+
+entity Exam_QuestionPoolEntry {
+  * ID : UUID
+  --
+  examId : UUID
+  questionQuestionPoolId : UUID
+  selectedAnswer : String
+  isCorrect : Boolean
+}
+
+
+
+' Relationships
+User ||--o{ Question : creates
+Question ||--o{ AnswerOption : has
+Question ||--o{ Answer : has
+QuestionPool ||--o{ Question_QuestionPool : contains
+Question ||--o{ Question_QuestionPool : appears_in
+User ||--|| QuestionPool : has_one
+User ||--o{ StreakTracking : has
+User ||--o{ TopicContent : writes
+User ||--o{ TopicContent : approves
+User ||--o{ TopicContent
+TopicPool ||--o{ TopicContent : relates_to
+Subject ||--o{ TopicPool : has
+Question ||--o{ Solution : has
+Solution ||--o{ SolutionStep : has
+Solution ||--o{ SolutionVote : receives
+User ||--o{ SolutionVote : casts
+Exam ||--o{ Exam_TopicPool : covers
+TopicPool ||--o{ Exam_TopicPool : appears_in
+User ||--o{ Exam : takes
+Exam ||--o{ Exam_QuestionPoolEntry : includes
+Question_QuestionPool ||--o{ Exam_QuestionPoolEntry : used_in
+@enduml
