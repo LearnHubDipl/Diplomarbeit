@@ -11,6 +11,6 @@ public class GreetingResource {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String hello() {
-        return "Final Test - Real changes";
+        return "Final Test - Real changes 2";
     }
 }
