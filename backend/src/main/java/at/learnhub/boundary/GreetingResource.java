@@ -1,4 +1,4 @@
-package at.learnhub;
+package at.learnhub.boundary;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
