@@ -21,9 +21,14 @@ public class TopicPool {
     private Subject subject;
 
 
-    @OneToMany(mappedBy = "topic")
-    @JsonIgnoreProperties({"topic"})
+    @OneToMany(mappedBy = "topicPool")
+    @JsonIgnoreProperties({"topicPool"})
     private List<TopicContent> topicContents;
+
+
+    @OneToMany(mappedBy = "topicPool")
+    @JsonIgnoreProperties({"topicPool"})
+    private List<Question> questions;
 
 
     @ManyToMany(mappedBy = "topicPools")
@@ -78,5 +83,13 @@ public class TopicPool {
 
     public void setExams(List<Exam> exams) {
         this.exams = exams;
+    }
+
+    public List<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<Question> questions) {
+        this.questions = questions;
     }
 }
