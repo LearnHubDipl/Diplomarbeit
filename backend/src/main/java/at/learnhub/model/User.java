@@ -8,6 +8,7 @@ import java.util.List;
 
 
 @Entity
+@Table(name = "\"user\"")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,8 +34,8 @@ public class User {
     @JsonIgnoreProperties({"approvedBy"})
     private List<TopicContent> approvedTopicContents;
 
-    @OneToMany(mappedBy = "teacher")
-    @JsonIgnoreProperties({"teacher"})
+    @OneToMany(mappedBy = "taughtBy")
+    @JsonIgnoreProperties({"taughtBy"})
     private List<TopicContent> teacherOfTopicContents;
 
 

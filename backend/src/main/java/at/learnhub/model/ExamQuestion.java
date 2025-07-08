@@ -20,9 +20,13 @@ public class ExamQuestion {
 
     @ManyToOne
     @MapsId("entryId")
-    @JoinColumn(name = "question_pool_entry_id")
+    @JoinColumns({
+            @JoinColumn(name = "question_id", referencedColumnName = "question_id"),
+            @JoinColumn(name = "pool_id", referencedColumnName = "pool_id")
+    })
     @JsonIgnoreProperties("examQuestions")
     private QuestionPoolEntry entry;
+
 
     /*
     If Question Type is MultipleChoice, then this field will contain all given answers
@@ -32,12 +36,14 @@ public class ExamQuestion {
             name = "exam_question_selected_answers",
             joinColumns = {
                     @JoinColumn(name = "exam_id", referencedColumnName = "exam_id"),
-                    @JoinColumn(name = "question_pool_entry_id", referencedColumnName = "question_pool_entry_id")
+                    @JoinColumn(name = "question_id", referencedColumnName = "question_id"),
+                    @JoinColumn(name = "pool_id", referencedColumnName = "pool_id")
             },
             inverseJoinColumns = @JoinColumn(name = "answer_id")
     )
     @JsonIgnoreProperties("examQuestions")
     private List<Answer> selectedAnswers;
+
 
     /*
     If Question Type is freeText, then this field will contain the given text answer

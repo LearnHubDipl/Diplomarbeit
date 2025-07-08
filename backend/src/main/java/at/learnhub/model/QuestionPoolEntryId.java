@@ -21,4 +21,21 @@ public class QuestionPoolEntryId implements Serializable {
     public int hashCode() {
         return Objects.hash(questionId, poolId);
     }
+
+
+    public Long getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(Long questionId) {
+        this.questionId = questionId;
+    }
+
+    public Long getPoolId() {
+        return poolId;
+    }
+
+    public void setPoolId(Long poolId) {
+        this.poolId = poolId;
+    }
 }

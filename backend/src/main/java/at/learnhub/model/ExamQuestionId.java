@@ -8,7 +8,7 @@ import java.util.Objects;
 @Embeddable
 public class ExamQuestionId implements Serializable {
     private Long examId;
-    private Long entryId;
+    private QuestionPoolEntryId entryId;
 
     @Override
     public boolean equals(Object o) {
@@ -20,6 +20,23 @@ public class ExamQuestionId implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(examId, entryId);
+    }
+
+
+    public Long getExamId() {
+        return examId;
+    }
+
+    public void setExamId(Long examId) {
+        this.examId = examId;
+    }
+
+    public QuestionPoolEntryId getEntryId() {
+        return entryId;
+    }
+
+    public void setEntryId(QuestionPoolEntryId entryId) {
+        this.entryId = entryId;
     }
 }
 
