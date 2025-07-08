@@ -1,16 +1,9 @@
 /* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
 /* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
-  "extends": "./tsconfig.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "shared-services": [
-        "./dist/shared-services",
-        "projects/shared-services/src/public-api.ts"
-      ]
-    },
-    "outDir": "./out-tsc/app",
+    "outDir": "../../out-tsc/app",
     "types": []
   },
   "files": [
