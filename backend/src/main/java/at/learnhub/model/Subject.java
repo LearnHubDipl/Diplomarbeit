@@ -15,7 +15,7 @@ public class Subject {
 
 
     @ManyToOne()
-    @JoinColumn(name = "media_id")
+    @JoinColumn(name = "img_id")
     private MediaFile img;
 
 

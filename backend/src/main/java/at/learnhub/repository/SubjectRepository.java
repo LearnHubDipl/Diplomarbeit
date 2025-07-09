@@ -10,7 +10,7 @@ import java.util.List;
 @ApplicationScoped
 public class SubjectRepository {
     @Inject
-    private EntityManager em;
+    EntityManager em;
 
     public List<Subject> findAll() {
         return em.createQuery("select s from Subject s", Subject.class).getResultList();

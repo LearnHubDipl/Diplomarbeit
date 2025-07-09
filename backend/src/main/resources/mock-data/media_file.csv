@@ -1,4 +1,4 @@
-path,type
-/images/math.jpg,image
-/images/physics.jpg,image
-/images/biology.jpg,image
+path,type,description,uploadedAt
+/images/math.jpg,image,"Math diagram","2025-07-01T10:00:00"
+/images/physics.jpg,image,"Physics illustration","2025-07-02T11:30:00"
+/images/biology.jpg,image,"Biology chart","2025-07-03T09:15:00"

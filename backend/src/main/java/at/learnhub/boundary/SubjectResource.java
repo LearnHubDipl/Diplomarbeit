@@ -22,6 +22,10 @@ public class SubjectResource {
     public Response getSubjectList() {
         List<Subject> subjects = subjectRepository.findAll();
 
+        for (Subject subject : subjects) {
+            System.out.println(subject.getImg());
+        }
+
         return Response.status(Response.Status.OK).entity(subjects).build();
     }
 }
