@@ -55,7 +55,7 @@ public class User {
 
 
     @OneToMany(mappedBy = "user")
-    @JsonIgnoreProperties({"user", "topicPool"})
+    @JsonIgnoreProperties({"user", "topicPool", "entries"})
     private List<Question> createdQuestions;
 
 

@@ -1,0 +1,7 @@
+isUpVote,solutionId,userId
+true,1,2
+false,1,3
+true,2,1
+true,3,5
+false,4,2
+true,5,4

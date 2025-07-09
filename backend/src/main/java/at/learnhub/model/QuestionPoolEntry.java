@@ -9,8 +9,9 @@ import java.util.List;
 @Entity
 @Table(name = "question_pool_entry")
 public class QuestionPoolEntry {
-    @EmbeddedId
-    private QuestionPoolEntryId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "answered_at")
     private LocalDateTime answeredAt;
@@ -21,15 +22,13 @@ public class QuestionPoolEntry {
 
 
     @ManyToOne
-    @MapsId("questionId")
     @JoinColumn(name = "question_id")
-    @JsonIgnoreProperties({"entries"})
+    @JsonIgnoreProperties({"entries", "user"})
     private Question question;
 
     @ManyToOne
-    @MapsId("poolId")
     @JoinColumn(name = "pool_id")
-    @JsonIgnoreProperties({"entries"})
+    @JsonIgnoreProperties({"entries", "user"})
     private QuestionPool questionPool;
 
     @OneToMany(mappedBy = "entry")
@@ -37,11 +36,11 @@ public class QuestionPoolEntry {
     private List<ExamQuestion> examQuestions;
 
 
-    public QuestionPoolEntryId getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(QuestionPoolEntryId id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

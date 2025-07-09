@@ -1,0 +1,6 @@
+answeredAt,lastAnsweredCorrectly,correctCount,questionId,questionPoolId
+2025-07-08T09:10:00,true,3,1,1
+2025-07-07T14:30:00,false,1,2,2
+2025-07-06T10:20:00,true,2,3,3
+2025-07-09T08:50:00,false,0,4,4
+2025-07-05T13:20:00,true,4,5,5

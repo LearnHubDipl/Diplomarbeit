@@ -6,59 +6,45 @@ import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "exam_question")
+@Table(name = "exam_question", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"exam_id", "entry_id"})
+})
 public class ExamQuestion {
 
-    @EmbeddedId
-    private ExamQuestionId id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
-    @MapsId("examId")
-    @JoinColumn(name = "exam_id")
+    @JoinColumn(name = "exam_id", nullable = false)
     @JsonIgnoreProperties("questions")
     private Exam exam;
 
     @ManyToOne
-    @MapsId("entryId")
-    @JoinColumns({
-            @JoinColumn(name = "question_id", referencedColumnName = "question_id"),
-            @JoinColumn(name = "pool_id", referencedColumnName = "pool_id")
-    })
+    @JoinColumn(name = "entry_id", nullable = false)
     @JsonIgnoreProperties("examQuestions")
     private QuestionPoolEntry entry;
 
-
-    /*
-    If Question Type is MultipleChoice, then this field will contain all given answers
-     */
     @ManyToMany
     @JoinTable(
             name = "exam_question_selected_answers",
-            joinColumns = {
-                    @JoinColumn(name = "exam_id", referencedColumnName = "exam_id"),
-                    @JoinColumn(name = "question_id", referencedColumnName = "question_id"),
-                    @JoinColumn(name = "pool_id", referencedColumnName = "pool_id")
-            },
+            joinColumns = @JoinColumn(name = "exam_question_id"),
             inverseJoinColumns = @JoinColumn(name = "answer_id")
     )
     @JsonIgnoreProperties("examQuestions")
     private List<Answer> selectedAnswers;
 
-
-    /*
-    If Question Type is freeText, then this field will contain the given text answer
-     */
     @Column(name = "freet_text_answer")
     private String freeTextAnswer;
+
     @Column(name = "is_correct")
     private Boolean isCorrect;
 
-
-    public ExamQuestionId getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(ExamQuestionId id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

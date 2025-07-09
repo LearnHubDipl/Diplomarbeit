@@ -1,0 +1,21 @@
+text,isCorrect,questionId
+"4",true,1
+"vier",true,1
+
+"Trägheit",true,2
+"Ein Körper verharrt im Zustand der Ruhe oder gleichförmigen Bewegung",true,2
+"Kraft ist Masse mal Beschleunigung",false,2
+"Das zweite Gesetz von Newton",false,2
+
+"Thymin",true,3
+"T",true,3
+"Guanin",false,3
+"Cytosin",false,3
+
+"2x",true,4
+"Die Ableitung von x^2 ist 2x",true,4
+
+"Druck bleibt konstant",true,5
+"Temperatur bleibt konstant",false,5
+"Energie steigt",false,5
+"Volumen bleibt konstant",false,5

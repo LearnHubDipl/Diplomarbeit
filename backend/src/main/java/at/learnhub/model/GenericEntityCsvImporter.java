@@ -5,6 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.transaction.Transactional;
@@ -45,7 +46,6 @@ public class GenericEntityCsvImporter {
             throw new RuntimeException("Error importing CSVs", e);
         }
     }
-
 
     @Transactional
     public void importAllCsvEntities() throws IOException {
@@ -120,8 +120,8 @@ public class GenericEntityCsvImporter {
                     String csvField = entry.getKey();
                     String csvValue = entry.getValue();
 
-                    if (csvField.endsWith("Id")) {
-                        // skip relations for now
+                    // skip these fields because they are relations
+                    if (csvField.endsWith("Id") || csvField.endsWith("Ids")) {
                         continue;
                     }
 
@@ -131,7 +131,7 @@ public class GenericEntityCsvImporter {
                         Object convertedValue = convertValue(field.getType(), csvValue);
                         field.set(entity, convertedValue);
                     } catch (NoSuchFieldException e) {
-                        // just ignore if the field is missing
+                        // ignore
                     }
                 }
                 entities.put(index++, entity);
@@ -167,15 +167,18 @@ public class GenericEntityCsvImporter {
                     String csvField = entry.getKey();
                     String csvValue = entry.getValue();
 
-                    if (csvField.endsWith("Id") && csvValue != null && !csvValue.isEmpty()) {
-                        String relationFieldName = csvField.substring(0, csvField.length() - 2);
+                    if ((csvField.endsWith("Id") || csvField.endsWith("Ids")) && csvValue != null && !csvValue.isEmpty()) {
+                        String relationFieldName = csvField.endsWith("Ids") ?
+                                csvField.substring(0, csvField.length() - 3) :
+                                csvField.substring(0, csvField.length() - 2);
+
                         try {
                             Field relationField = entityClass.getDeclaredField(relationFieldName);
                             relationField.setAccessible(true);
 
                             if (relationField.isAnnotationPresent(ManyToOne.class) || relationField.isAnnotationPresent(OneToOne.class)) {
+                                // einfache ManyToOne / OneToOne Relation
                                 Class<?> relatedClass = relationField.getType();
-
                                 Map<Long, Object> relatedEntities = entityCache.get(relatedClass.getName());
                                 if (relatedEntities == null) {
                                     System.out.printf("No cached entities found for related class %s%n", relatedClass.getSimpleName());
@@ -192,6 +195,35 @@ public class GenericEntityCsvImporter {
                                 } else {
                                     relationField.set(entity, relatedEntity);
                                 }
+                            } else if (relationField.isAnnotationPresent(ManyToMany.class)) {
+                                // ManyToMany field
+                                Class<?> collectionType = getCollectionGenericType(relationField);
+                                Map<Long, Object> relatedEntities = entityCache.get(collectionType.getName());
+                                if (relatedEntities == null) {
+                                    System.out.printf("No cached entities found for related class %s%n", collectionType.getSimpleName());
+                                    allRelationsSet = false;
+                                    continue;
+                                }
+
+                                Collection<Object> collection = getOrCreateCollection(relationField.getType());
+                                relationField.set(entity, collection);
+
+                                String[] relatedIds = csvValue.split(";");
+                                for (String idStr : relatedIds) {
+                                    Long relatedId = Long.parseLong(idStr.trim());
+                                    Object relatedEntity = relatedEntities.get(relatedId);
+                                    if (relatedEntity == null) {
+                                        System.out.printf("Related entity %s with index %s not found for field %s%n",
+                                                collectionType.getSimpleName(), relatedId, relationFieldName);
+                                        allRelationsSet = false;
+                                    } else {
+                                        collection.add(relatedEntity);
+                                    }
+                                }
+                            } else {
+                                System.out.printf("Field '%s' in %s is not a supported relation type%n",
+                                        relationFieldName, entityClass.getSimpleName());
+                                allRelationsSet = false;
                             }
                         } catch (NoSuchFieldException e) {
                             System.out.printf("Field '%s' not found in %s%n", relationFieldName, entityClass.getSimpleName());
@@ -213,6 +245,25 @@ public class GenericEntityCsvImporter {
         }
     }
 
+    private Class<?> getCollectionGenericType(Field field) {
+        try {
+            java.lang.reflect.ParameterizedType stringListType = (java.lang.reflect.ParameterizedType) field.getGenericType();
+            return (Class<?>) stringListType.getActualTypeArguments()[0];
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to determine generic type of collection for field: " + field.getName(), e);
+        }
+    }
+
+    private Collection<Object> getOrCreateCollection(Class<?> fieldType) {
+        if (fieldType.isAssignableFrom(List.class)) {
+            return new ArrayList<>();
+        }
+        if (fieldType.isAssignableFrom(Set.class)) {
+            return new HashSet<>();
+        }
+        // Default fallback
+        return new ArrayList<>();
+    }
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;

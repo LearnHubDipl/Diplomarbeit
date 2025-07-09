@@ -14,12 +14,12 @@ public class Solution {
 
     @ManyToOne
     @JoinColumn(name = "question_id")
-    @JsonIgnoreProperties({"solutions"})
+    @JsonIgnoreProperties({"solutions", "user"})
     private Question question;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties({"solutions"})
+    @JsonIgnoreProperties({"solutions", "createdQuestions", "questionPool"})
     private User user;
 
     @OneToMany(mappedBy = "solution")
