@@ -27,15 +27,15 @@ public class User {
     private MediaFile profilePicture;
 
     @OneToMany(mappedBy = "createdBy")
-    @JsonIgnoreProperties({"createdBy"})
+    @JsonIgnoreProperties({"createdBy", "approvedBy", "taughtBy"})
     private List<TopicContent> ownedTopicContents;
 
     @OneToMany(mappedBy = "approvedBy")
-    @JsonIgnoreProperties({"approvedBy"})
+    @JsonIgnoreProperties({"createdBy", "approvedBy", "taughtBy"})
     private List<TopicContent> approvedTopicContents;
 
     @OneToMany(mappedBy = "taughtBy")
-    @JsonIgnoreProperties({"taughtBy"})
+    @JsonIgnoreProperties({"createdBy", "approvedBy", "taughtBy"})
     private List<TopicContent> teacherOfTopicContents;
 
 
@@ -55,7 +55,7 @@ public class User {
 
 
     @OneToMany(mappedBy = "user")
-    @JsonIgnoreProperties({"user"})
+    @JsonIgnoreProperties({"user", "topicPool"})
     private List<Question> createdQuestions;
 
 

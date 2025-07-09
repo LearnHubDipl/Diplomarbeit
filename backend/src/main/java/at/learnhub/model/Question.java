@@ -14,11 +14,13 @@ public class Question {
     private String explanation;
     private Integer type;
     private Integer difficulty;
+    @Column(name = "is_public")
+    private Boolean isPublic;
 
 
     @ManyToOne
     @JoinColumn(name = "topic_pool_id")
-    @JsonIgnoreProperties({"questions"})
+    @JsonIgnoreProperties({"questions", "topicContents"})
     private TopicPool topicPool;
 
 
@@ -29,7 +31,7 @@ public class Question {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties({"createdQuestions"})
+    @JsonIgnoreProperties({"createdQuestions", "topicContents"})
     private User user;
 
 
@@ -134,5 +136,13 @@ public class Question {
 
     public void setSolutions(List<Solution> solutions) {
         this.solutions = solutions;
+    }
+
+    public Boolean getPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(Boolean aPublic) {
+        isPublic = aPublic;
     }
 }

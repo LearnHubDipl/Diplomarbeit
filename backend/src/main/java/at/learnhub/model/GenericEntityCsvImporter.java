@@ -222,6 +222,7 @@ public class GenericEntityCsvImporter {
 
         if (type == Long.class || type == long.class) return Long.parseLong(value);
         if (type == Integer.class || type == int.class) return Integer.parseInt(value);
+        if (type == Double.class || type == double.class) return Double.parseDouble(value);
         if (type == Boolean.class || type == boolean.class) return Boolean.parseBoolean(value);
         if (type == LocalDate.class) return LocalDate.parse(value, DATE_FORMATTER);
         if (type == LocalDateTime.class) return LocalDateTime.parse(value, DATETIME_FORMATTER);

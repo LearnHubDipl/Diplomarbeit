@@ -24,22 +24,22 @@ public class TopicContent {
 
     @ManyToOne
     @JoinColumn(name = "topic_pool_id")
-    @JsonIgnoreProperties({"topicContents"})
+    @JsonIgnoreProperties({"topicContents", "user", "questions"})
     private TopicPool topicPool;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties({"ownedTopicContents"})
+    @JsonIgnoreProperties({"ownedTopicContents", "approvedTopicContents", "teacherOfTopicContents"})
     private User createdBy;
 
     @ManyToOne
     @JoinColumn(name = "approved_by")
-    @JsonIgnoreProperties({"approvedTopicContents"})
+    @JsonIgnoreProperties({"ownedTopicContents", "approvedTopicContents", "teacherOfTopicContents"})
     private User approvedBy;
 
     @ManyToOne
     @JoinColumn(name = "teacher")
-    @JsonIgnoreProperties({"teacherOfTopicContents"})
+    @JsonIgnoreProperties({"ownedTopicContents", "approvedTopicContents", "teacherOfTopicContents"})
     private User taughtBy;
 
 

@@ -1,0 +1,6 @@
+name,email,isTeacher,isAdmin,profilePictureId
+Anna Müller,anna.mueller@example.com,true,false,4
+Thomas Becker,thomas.becker@example.com,true,true,5
+Lisa Schneider,lisa.schneider@example.com,false,false,6
+Maximilian Roth,max.roth@example.com,false,true,7
+Eva Klein,eva.klein@example.com,true,false,8
