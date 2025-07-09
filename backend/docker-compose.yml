@@ -20,6 +20,7 @@ services:
       retries: 5
 
   quarkus:
+    user: root
     build:
       context: .
       dockerfile: src/main/docker/Dockerfile
@@ -38,7 +39,8 @@ services:
       QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: update
       MOCKDATA_PATH: /app/mock-data
     volumes:
-      - ./mock-data:/app/mock-data:ro
+      - ./mock-data:/app/mock-data:Z
+
     networks:
       - quarkus-net
 
