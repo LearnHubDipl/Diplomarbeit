@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 @ApplicationScoped
 public class GenericEntityCsvImporter {
 
-    private static final String DATA_FOLDER = "/mock-data";
+    private static final String DATA_FOLDER = "/app/mock-data";
     private static final String ENTITY_PACKAGE = "at.learnhub.model";
 
     @Inject
@@ -49,18 +49,16 @@ public class GenericEntityCsvImporter {
 
     @Transactional
     public void importAllCsvEntities() throws IOException {
-        URL folderUrl = getClass().getResource(DATA_FOLDER);
-        if (folderUrl == null) {
-            System.out.println("No mock-data folder found");
+        // fallback to ./mock-data
+        String folder = System.getenv().getOrDefault("MOCKDATA_PATH", "mock-data");
+        Path folderPath = Paths.get(folder);
+
+        if (!Files.exists(folderPath) || !Files.isDirectory(folderPath)) {
+            System.out.println("No mock-data folder found at: " + folderPath.toAbsolutePath());
             return;
         }
 
-        Path folderPath;
-        try {
-            folderPath = Paths.get(folderUrl.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Invalid mock-data path", e);
-        }
+        System.out.println("Importing CSV files from: " + folderPath.toAbsolutePath());
 
         Map<String, Map<Long, Object>> entityCache = new HashMap<>();
 
@@ -104,6 +102,7 @@ public class GenericEntityCsvImporter {
         em.flush();
         System.out.println("Import completed!");
     }
+
 
     private Map<Long, Object> loadEntitiesWithoutRelations(Path path, String className) {
         Map<Long, Object> entities = new HashMap<>();

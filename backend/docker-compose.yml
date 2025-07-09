@@ -36,8 +36,12 @@ services:
       QUARKUS_DATASOURCE_USERNAME: quarkus
       QUARKUS_DATASOURCE_PASSWORD: quarkus
       QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: update
+      MOCKDATA_PATH: /app/mock-data
+    volumes:
+      - ./mock-data:/app/mock-data:ro
     networks:
       - quarkus-net
+
 
 networks:
   quarkus-net:
