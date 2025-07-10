@@ -1,25 +1,44 @@
 package at.learnhub.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "topic_content")
+@Schema(description = "Content associated with a topic, including media and approval status")
 public class TopicContent {
+
     @Id
     @GeneratedValue
+    @Schema(
+            description = "Unique identifier of the topic content",
+            example = "42",
+            readOnly = true
+    )
     private Long id;
+
     @Column(name = "is_approved")
+    @Schema(
+            description = "Indicates whether the content has been approved",
+            example = "true"
+    )
     private Boolean isApproved;
+
+    @Schema(
+            description = "Date the content was created",
+            example = "2025-07-10"
+    )
     private LocalDate date;
-
-
 
     @ManyToOne()
     @JoinColumn(name = "media_id")
+    @Schema(
+            description = "Associated media file",
+            implementation = MediaFile.class
+    )
     private MediaFile media;
 
     @ManyToOne
@@ -42,6 +61,7 @@ public class TopicContent {
     @JsonIgnoreProperties({"ownedTopicContents", "approvedTopicContents", "teacherOfTopicContents"})
     private User taughtBy;
 
+    // Getter und Setter
 
     public Long getId() {
         return id;

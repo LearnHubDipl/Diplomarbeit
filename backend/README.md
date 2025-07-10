@@ -1,77 +1,104 @@
-# learnhub
+# Learnhub
 
-Use docker-compose up to start the quarkus application and the database simultaneously. This also sets everything up if you do it for the first time.
+## Getting Started with Docker
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+The Learnhub application is containerized using Docker. You can spin up the entire environment, including the database and backend, with one command.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+### Requirements
 
-## Running the application in dev mode
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
-You can run your application in dev mode that enables live coding using:
+### Start the application
 
-```shell script
-./mvnw quarkus:dev
+You can use the `start-docker.sh`, `start-podman.sh` files based on if you are on linux and want to use docker or podman to start the application.__
+Or you can use the `start.bat` if you are on windows.
+
+This will close all remaining docker container from the last time this application was started.
+
+ALternatively you can just use the terminal and use following command to start the application:
+
+```bash
+docker-compose up --build
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+Both options will:
 
-## Packaging and running the application
+    Start a MySQL 8 container with the database learnhub-db
 
-The application can be packaged using:
+    Build and start the Quarkus backend application
 
-```shell script
-./mvnw package
+    Mount the mock-data folder into the container for CSV import
+
+Once running, the backend will be available at:
+
+```txt
+http://localhost:8080
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+## Swagger UI Usage
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+Learnhub includes Swagger UI to interactively explore and test the REST API.
 
-If you want to build an _über-jar_, execute the following command:
+### How to access Swagger UI
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+1. Start the application.  
+2. Open your browser and go to:
+
+```txt
+http://localhost:8080/q/swagger-ui/
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
 
-## Creating a native executable
+3. You will see the Swagger UI interface listing all available API endpoints.  
+4. You can expand any endpoint to see details, request parameters, response schemas, and even execute requests directly from the browser.
 
-You can create a native executable using:
+### Notes
 
-```shell script
-./mvnw package -Dnative
-```
+- The OpenAPI documentation is automatically generated from your code annotations.  
+- If you make changes to the API, the Swagger UI will reflect those changes on restart.
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+---
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
+## Mock Data CSV File Format
 
-You can then execute your native executable with: `./target/learnhub-1.0.0-SNAPSHOT-runner`
+To import mock data into the application, you can place CSV files in the `mock-data` folder. The application reads these files on startup and imports the data accordingly.
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+### CSV file naming
 
-## Related Guides
+- The file name should match the entity name, e.g.:  
+  - `subject.csv`  
+  - `user.csv`  
+  - `topic_content.csv`
 
-- Hibernate ORM ([guide](https://quarkus.io/guides/hibernate-orm)): Define your persistent model with Hibernate ORM and Jakarta Persistence
-- JDBC Driver - MySQL ([guide](https://quarkus.io/guides/datasource)): Connect to the MySQL database via JDBC
+### CSV file structure
 
-## Provided Code
+- The first row **must** contain the column headers.  
+- Each following row represents one entity record.  
+- The columns must correspond to the entity's attributes in the **java class**, e.g., for `subject.csv`:
 
-### Hibernate ORM
+| name        | description        | imgId  |
+|-------------|--------------------|--------|
+| Mathematics | Math basics intro  | 10     |
+| Physics     | Physics concepts   | 11     |
 
-Create your first JPA entity
+- For foreign key fields should be named like the attribute name in the **java class** followed by *Id* immediately after, just like `imgId`. The value should reference a related entity defined in another csv file by its ID.  
+- Dates should be formatted as `YYYY-MM-DDTHH:MM:SS`.
+- If there is a ManyToMany relation your csv attribute should have the **java class attribute name** just as before but instead of *Id* followed by *Ids*. The Value of these ids should be the ids of the referenced entities in another csv file separated by `;`. e.g. for `exam.csv:
 
-[Related guide section...](https://quarkus.io/guides/hibernate-orm)
+| timeLimit  | startedAt            | ... | topicPoolsIds |
+|------------|----------------------|-----|---------------|
+| 30         | 2025-07-08T09:00:00  | ... | "1;2"         |
+| 45         | 2025-07-08T13:14:00  | ... | "3;5"         |
 
+### Example CSV (`user.csv`)
 
+| name      | email             | isTeacher  | isAdmin  | profilePictureId   |
+|-----------|-------------------|------------|----------|--------------------|
+| Alice Doe | alice@example.com | true       | false    | 5                  |
+| Bob Smith | bob@example.com   | false      | true     | 6                  |
 
-### RESTEasy JAX-RS
+### Important Notes
 
-Easily start your RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
+- Ids are generated by the system, so in each csv file the first entry has the id 1, the second the id 2 and so on, for each csv file individually.__
+- Errors during import will be logged if they don't cause immediate crashes on startup.

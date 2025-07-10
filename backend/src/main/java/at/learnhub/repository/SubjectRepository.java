@@ -1,5 +1,6 @@
 package at.learnhub.repository;
 
+import at.learnhub.dto.SubjectDto;
 import at.learnhub.model.Subject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -12,7 +13,7 @@ public class SubjectRepository {
     @Inject
     EntityManager em;
 
-    public List<Subject> findAll() {
-        return em.createQuery("select s from Subject s", Subject.class).getResultList();
+    public List<SubjectDto> findAll() {
+        return em.createQuery("select new at.learnhub.dto.SubjectDto(s.name, s.description, s.img) from Subject s", SubjectDto.class).getResultList();
     }
 }
