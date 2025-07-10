@@ -3,6 +3,17 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "paths": {
+      "content-management": [
+        "./dist/content-management"
+      ],
+      "matura-trainer": [
+        "./dist/matura-trainer"
+      ],
+      "shared": [
+        "./dist/shared"
+      ]
+    },
     "outDir": "./dist/out-tsc",
     "strict": true,
     "noImplicitOverride": true,
@@ -14,13 +25,6 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "moduleResolution": "bundler",
-    "baseUrl": ".",
-    "paths": {
-      "shared-services": [
-        "./dist/shared-services",
-        "projects/shared-services/src/public-api.ts"
-      ]
-    },
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022"

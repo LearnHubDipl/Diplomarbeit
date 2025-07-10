@@ -3,13 +3,6 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "shared-services": [
-        "./dist/shared-services",
-        "projects/shared-services/src/public-api.ts"
-      ]
-    },
     "outDir": "./out-tsc/app",
     "types": []
   },

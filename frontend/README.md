@@ -2,6 +2,72 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.2.
 
+## Overview
+
+Learnhub is structured as a **modular Angular workspace** that separates responsibilities into independent **feature libraries**. This makes the project more scalable, maintainable, and allows multiple teams to work in parallel.
+
+---
+
+## 📁 Project Structure
+
+learnhub/
+├── src/ ← Root Angular App
+│ └── app/
+│ ├── app.routes.ts         ← Main routes (route hierarchie)
+│ └── layouts/              ← Layout wrappers (AppLayout, TrainerLayout)
+├── projects/
+│ ├── content-management/   ← Library for content management    (components and services exclusive to content management)
+│ ├── matura-trainer/       ← Library for trainer feature   (components and services exclusive to the matura trainer)
+│ └── shared/               ← Shared library (models, services, ...)
+
+
+---
+
+## 📦 Libraries
+
+| Library              | Responsibility                          | Maintained by       |
+|----------------------|-----------------------------------------|---------------------|
+| `content-management` | Pages & UI for managing content         | Team Content        |
+| `matura-trainer`     | Trainer feature (questions, scoring...) | Team MaturaTrainer  |
+| `shared`             | Common interfaces, services, ...        | Both teams          |
+
+Each library is a full Angular library and is located under `projects/<name>`.
+
+---
+
+## 🧩 Routing Structure
+
+The main app defines the routes in `src/app/app.routes.ts`. We use **two layout components** to separate areas:
+
+- `AppLayoutComponent`: main navigation - (content management)
+- `TrainerLayoutComponent`: special layout for trainer mode (separate nav)
+
+Example:
+
+```ts
+{
+  path: '',
+  component: AppLayoutComponent,
+  children: [
+    { path: '', component: HomeComponent },
+    { path: 'about', component: AboutComponent }
+  ]
+},
+{
+  path: 'trainer',
+  component: TrainerLayoutComponent,
+  children: [
+    { path: '', component: QuestionRunnerComponent }
+  ]
+}
+
+In this example there are two main routes defined, AppLayoutComponent in "/" and TrainerLayoutComponent in "/trainer"
+Under the **AppLayoutComponent** there are two other routes defined, Home through "/" and About through "/about".
+Under **TrainerLayoutComponent** through "/trainer" there is only one route defined, QuestionRunner through "/".
+
+If the user now decides to navigate between home and about, the navigation bar **doesn't change**. But if they decide to go to the trainer route, the navigation changes to what is defined in the **TrainerLayoutComponent**!
+Going Back from trainer to content management is simply just another routerlink to "/".
+
 ## Development server
 
 To start a local development server, run:
@@ -12,47 +78,24 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
-## Code scaffolding
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## How To Develop
 
-```bash
-ng generate component component-name
-```
+Since this project is now modular and uses libraries, there are a few differences in how to generate new components, services, ...
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Add a new component to the library (e.g add my-component to the matura-trainer library):
 
 ```bash
-ng generate --help
+ng generate component my-component --project=matura-trainer
 ```
 
-## Building
+You can change matura-trainer here to content-management or shared, this is just the name of the library
 
-To build the project run:
+Add a new service to shared (e.g service my-helper):
 
 ```bash
-ng build
+ng generate service my-helper --project=shared
 ```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
 ## Additional Resources
 
