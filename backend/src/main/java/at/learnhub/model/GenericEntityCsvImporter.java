@@ -16,8 +16,6 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Field;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -176,7 +174,7 @@ public class GenericEntityCsvImporter {
                             relationField.setAccessible(true);
 
                             if (relationField.isAnnotationPresent(ManyToOne.class) || relationField.isAnnotationPresent(OneToOne.class)) {
-                                // einfache ManyToOne / OneToOne Relation
+                                // simple ManyToOne / OneToOne Relation
                                 Class<?> relatedClass = relationField.getType();
                                 Map<Long, Object> relatedEntities = entityCache.get(relatedClass.getName());
                                 if (relatedEntities == null) {

@@ -17,7 +17,7 @@ public class ExamQuestion {
 
     @ManyToOne
     @JoinColumn(name = "exam_id", nullable = false)
-    @JsonIgnoreProperties("questions")
+    @JsonIgnoreProperties({"questions", "user"})
     private Exam exam;
 
     @ManyToOne
@@ -31,7 +31,7 @@ public class ExamQuestion {
             joinColumns = @JoinColumn(name = "exam_question_id"),
             inverseJoinColumns = @JoinColumn(name = "answer_id")
     )
-    @JsonIgnoreProperties("examQuestions")
+    @JsonIgnoreProperties({"examQuestions", "question"})
     private List<Answer> selectedAnswers;
 
     @Column(name = "freet_text_answer")

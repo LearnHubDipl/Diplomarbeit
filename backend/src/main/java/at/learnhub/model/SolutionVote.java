@@ -20,7 +20,8 @@ public class SolutionVote {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties({"solutionVotes", "solutions", "questionPool", "createdQuestions"})
+    @JsonIgnoreProperties({"solutionVotes", "solutions", "questionPool", "createdQuestions",
+            "exams", "ownedTopicContents", "approvedTopicContents", "teacherOfTopicContents"})
     private User user;
 
 

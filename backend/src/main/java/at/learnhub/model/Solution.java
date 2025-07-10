@@ -19,7 +19,8 @@ public class Solution {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties({"solutions", "createdQuestions", "questionPool"})
+    @JsonIgnoreProperties({"solutions", "createdQuestions", "questionPool", "exams",
+            "solutionVotes", "ownedTopicContents", "approvedTopicContents", "teacherOfTopicContents"})
     private User user;
 
     @OneToMany(mappedBy = "solution")

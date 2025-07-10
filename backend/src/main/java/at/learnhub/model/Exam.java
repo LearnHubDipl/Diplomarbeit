@@ -25,7 +25,7 @@ public class Exam {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnoreProperties({"exams"})
+    @JsonIgnoreProperties({"exams", "ownedTopicContents", "approvedTopicContents", "teacherOfTopicContents"})
     private User user;
 
     @ManyToMany
@@ -34,7 +34,7 @@ public class Exam {
             joinColumns = @JoinColumn(name = "exam_id"),
             inverseJoinColumns = @JoinColumn(name = "topic_pool_id")
     )
-    @JsonIgnoreProperties({"exams"})
+    @JsonIgnoreProperties({"exams", "topicContents", "questions"})
     private List<TopicPool> topicPools;
 
     @OneToMany(mappedBy = "exam")

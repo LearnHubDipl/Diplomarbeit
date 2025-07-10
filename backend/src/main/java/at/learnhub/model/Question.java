@@ -20,7 +20,7 @@ public class Question {
 
     @ManyToOne
     @JoinColumn(name = "topic_pool_id")
-    @JsonIgnoreProperties({"questions", "topicContents"})
+    @JsonIgnoreProperties({"questions", "topicContents", "exams"})
     private TopicPool topicPool;
 
 
