@@ -11,8 +11,8 @@ The Learnhub application is containerized using Docker. You can spin up the enti
 
 ### Start the application
 
-You can use the `start-docker.sh`, `start-podman.sh` files based on if you are on linux and want to use docker or podman to start the application.__
-Or you can use the `start.bat` if you are on windows.
+- You can use the `start-docker.sh`, `start-podman.sh` files based on if you are on linux and want to use docker or podman to start the application.__
+- Or you can use the `start.bat` if you are on windows.
 
 This will close all remaining docker container from the last time this application was started.
 
@@ -84,7 +84,7 @@ To import mock data into the application, you can place CSV files in the `mock-d
 
 - For foreign key fields should be named like the attribute name in the **java class** followed by *Id* immediately after, just like `imgId`. The value should reference a related entity defined in another csv file by its ID.  
 - Dates should be formatted as `YYYY-MM-DDTHH:MM:SS`.
-- If there is a ManyToMany relation your csv attribute should have the **java class attribute name** just as before but instead of *Id* followed by *Ids*. The Value of these ids should be the ids of the referenced entities in another csv file separated by `;`. e.g. for `exam.csv:
+- If there is a ManyToMany relation your csv attribute should have the **java class attribute name** just as before but instead of *Id* followed by *Ids*. The Value of these ids should be the ids of the referenced entities in another csv file separated by `;`. e.g. for `exam.csv`:
 
 | timeLimit  | startedAt            | ... | topicPoolsIds |
 |------------|----------------------|-----|---------------|
