@@ -10,6 +10,7 @@ Learnhub is structured as a **modular Angular workspace** that separates respons
 
 ## Project Structure
 
+``` txt
 learnhub/
 ├── src/                             # Root Angular App
 │   └── app/
@@ -25,7 +26,7 @@ learnhub/
 │
 │   └── shared/                      # Shared library
 │       └── ...                      # Shared models, services, utilities
-
+```
 
 
 ---
