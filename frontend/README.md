@@ -68,6 +68,7 @@ Example:
     { path: '', component: QuestionRunnerComponent }
   ]
 }
+```
 
 In this example there are two main routes defined, AppLayoutComponent in "/" and TrainerLayoutComponent in "/trainer"
 Under the **AppLayoutComponent** there are two other routes defined, Home through "/" and About through "/about".
