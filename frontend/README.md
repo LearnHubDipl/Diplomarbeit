@@ -8,7 +8,7 @@ Learnhub is structured as a **modular Angular workspace** that separates respons
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 learnhub/
 ├── src/ ← Root Angular App
@@ -23,7 +23,7 @@ learnhub/
 
 ---
 
-## 📦 Libraries
+## Libraries
 
 | Library              | Responsibility                          | Maintained by       |
 |----------------------|-----------------------------------------|---------------------|
@@ -35,7 +35,7 @@ Each library is a full Angular library and is located under `projects/<name>`.
 
 ---
 
-## 🧩 Routing Structure
+## Routing Structure
 
 The main app defines the routes in `src/app/app.routes.ts`. We use **two layout components** to separate areas:
 
