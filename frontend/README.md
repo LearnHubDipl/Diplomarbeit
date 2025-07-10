@@ -10,15 +10,7 @@ Learnhub is structured as a **modular Angular workspace** that separates respons
 
 ## Project Structure
 
-learnhub/
-├── src/ ← Root Angular App
-│ └── app/
-│ ├── app.routes.ts         ← Main routes (route hierarchie)
-│ └── layouts/              ← Layout wrappers (AppLayout, TrainerLayout)
-├── projects/
-│ ├── content-management/   ← Library for content management    (components and services exclusive to content management)
-│ ├── matura-trainer/       ← Library for trainer feature   (components and services exclusive to the matura trainer)
-│ └── shared/               ← Shared library (models, services, ...)
+<pre lang="md"> ``` learnhub/ ├── src/ ← Root Angular App │ └── app/ │ ├── app.routes.ts ← Main routes (route hierarchy) │ └── layouts/ ← Layout wrappers (AppLayout, TrainerLayout) ├── projects/ │ ├── content-management/ ← Library for content management │ │ └── ... ← Components and services exclusive to content management │ ├── matura-trainer/ ← Library for trainer feature │ │ └── ... ← Components and services exclusive to the matura trainer │ └── shared/ ← Shared library │ └── ... ← Shared models, services, utilities ``` </pre>
 
 
 ---
