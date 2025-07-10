@@ -11,7 +11,7 @@ The Learnhub application is containerized using Docker. You can spin up the enti
 
 ### Start the application
 
-- You can use the `start-docker.sh`, `start-podman.sh` files based on if you are on linux and want to use docker or podman to start the application.__
+- You can use the `start-docker.sh`, `start-podman.sh` files based on if you are on linux and want to use docker or podman to start the application.
 - Or you can use the `start.bat` if you are on windows.
 
 This will close all remaining docker container from the last time this application was started.
@@ -53,10 +53,36 @@ http://localhost:8080/q/swagger-ui/
 3. You will see the Swagger UI interface listing all available API endpoints.  
 4. You can expand any endpoint to see details, request parameters, response schemas, and even execute requests directly from the browser.
 
-### Notes
+### How to annotate endpoints
 
-- The OpenAPI documentation is automatically generated from your code annotations.  
-- If you make changes to the API, the Swagger UI will reflect those changes on restart.
+Use annotations from `org.eclipse.microprofile.openapi.annotations.*` to make your endpoints show up properly in Swagger UI.
+Minimal example:
+
+```java
+@GET
+@Path("list")
+@Produces(MediaType.APPLICATION_JSON)
+@Operation(
+    summary = "Get all subjects",
+    description = "Returns a list of all available subjects"
+)
+@APIResponses({
+    @APIResponse(
+        responseCode = "200",
+        description = "List of subjects",
+        content = @Content(
+            mediaType = MediaType.APPLICATION_JSON,
+            schema = @Schema(
+                implementation = SubjectDto.class,
+                type = SchemaType.ARRAY
+            )
+        )
+    )
+})
+public Response getSubjectList() {
+    ...
+}
+```
 
 ---
 
