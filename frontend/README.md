@@ -71,10 +71,10 @@ Example:
 ```
 
 In this example there are two main routes defined, AppLayoutComponent in "/" and TrainerLayoutComponent in "/trainer"
-Under the **AppLayoutComponent** there are two other routes defined, Home through "/" and About through "/about".
-Under **TrainerLayoutComponent** through "/trainer" there is only one route defined, QuestionRunner through "/".
+Under the `AppLayoutComponent` there are two other routes defined, Home through "/" and About through "/about".
+Under `TrainerLayoutComponent` through "/trainer" there is only one route defined, QuestionRunner through "/".
 
-If the user now decides to navigate between home and about, the navigation bar **doesn't change**. But if they decide to go to the trainer route, the navigation changes to what is defined in the **TrainerLayoutComponent**!
+If the user now decides to navigate between home and about, the navigation bar **doesn't change**. But if they decide to go to the trainer route, the navigation changes to what is defined in the `TrainerLayoutComponent`!
 Going Back from trainer to content management is simply just another routerlink to "/".
 
 ## Development server
