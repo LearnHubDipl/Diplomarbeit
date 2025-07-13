@@ -17,7 +17,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
-@Path("/api/subjects/")
+@Path("/api/subjects")
 public class SubjectResource {
     @Inject
     SubjectRepository subjectRepository;
@@ -40,6 +40,6 @@ public class SubjectResource {
     })
     public Response getSubjectList() {
         List<SubjectDto> subjects = subjectRepository.findAll();
-        return Response.ok(subjects).build();
+        return Response.status(Response.Status.OK).entity(subjects).build();
     }
 }
