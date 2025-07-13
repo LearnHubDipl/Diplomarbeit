@@ -1,0 +1,21 @@
+/**
+ MAIN LAYOUT
+ */
+.trainer-main-layout {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  margin: 0; padding: 0;
+  width: 100%;
+  height: 100vh;
+}
+
+.trainer-main-layout .trainer-navigation {
+  height: 100%;
+  width: 100%;
+  background-color: green;  /* for testing */
+}
+
+.trainer-main-layout .trainer-content {
+  padding: 4% 10%;
+  /*background-color: red;*/ /* for testing */
+}
