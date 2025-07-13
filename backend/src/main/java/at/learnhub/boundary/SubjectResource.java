@@ -1,6 +1,6 @@
 package at.learnhub.boundary;
 
-import at.learnhub.dto.SubjectDto;
+import at.learnhub.dto.simple.SubjectDto;
 import at.learnhub.repository.SubjectRepository;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -24,7 +24,6 @@ public class SubjectResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("list")
     @Operation(summary = "List all subjects", description = "Returns a list of all subjects as DTOs")
     @APIResponses({
             @APIResponse(
