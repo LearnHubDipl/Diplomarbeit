@@ -6,45 +6,58 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
+/**
+ * A pool of topics within a subject.
+ */
 @Entity
 @Table(name = "topic_pool")
-@Schema(description = "A pool of topics within a subject")
 public class TopicPool {
 
+    /**
+     * Unique identifier of the topic pool.
+     * Example: 10
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(
-            description = "Unique identifier of the topic pool",
-            example = "10",
-            readOnly = true
-    )
     private Long id;
 
-    @Schema(
-            description = "Name of the topic pool",
-            example = "Algebra Basics"
-    )
+    /**
+     * Name of the topic pool.
+     * Example: Algebra Basics
+     */
     private String name;
 
-    @Schema(
-            description = "Description or summary of the topic pool",
-            example = "This topic pool covers the basics of algebra including variables and equations."
-    )
+    /**
+     * Description or summary of the topic pool.
+     * Example: This topic pool covers the basics of algebra including variables and equations.
+     */
     private String description;
 
+    /**
+     * Subject this topic pool belongs to.
+     */
     @ManyToOne
     @JoinColumn(name = "subject_id")
     @JsonIgnoreProperties({"topicPools"})
     private Subject subject;
 
+    /**
+     * List of topic contents belonging to this topic pool.
+     */
     @OneToMany(mappedBy = "topicPool")
     @JsonIgnoreProperties({"topicPool"})
     private List<TopicContent> topicContents;
 
+    /**
+     * List of questions belonging to this topic pool.
+     */
     @OneToMany(mappedBy = "topicPool")
     @JsonIgnoreProperties({"topicPool"})
     private List<Question> questions;
 
+    /**
+     * Exams associated with this topic pool.
+     */
     @ManyToMany(mappedBy = "topicPools")
     @JsonIgnoreProperties({"topicPools"})
     private List<Exam> exams;
