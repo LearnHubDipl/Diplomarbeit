@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
-import {HomeComponent} from '../../projects/content-management/src/lib/home/home.component';
+import {HomeComponent as ContentHomeComponent } from '../../projects/content-management/src/lib/home/home.component';
+import {HomeComponent as TrainerHomeComponent } from '../../projects/matura-trainer/src/lib/home/home.component';
 import {QuestionRunnerComponent} from '../../projects/matura-trainer/src/lib/question-runner/question-runner.component';
 import {TrainerLayoutComponent} from './layouts/trainer-layout/trainer-layout.component';
 import {AppLayoutComponent} from './layouts/app-layout/app-layout.component';
@@ -10,7 +11,7 @@ export const routes: Routes = [
     path: '',
     component: AppLayoutComponent,
     children: [
-      { path: '', component: HomeComponent },
+      { path: '', component: ContentHomeComponent },
       { path: 'about', component: AboutComponent }
     ]
   },
@@ -18,7 +19,8 @@ export const routes: Routes = [
     path: 'trainer',
     component: TrainerLayoutComponent,
     children: [
-      { path: '', component: QuestionRunnerComponent }
+      { path: '', component:  TrainerHomeComponent },
+      { path: 'quiz', component: QuestionRunnerComponent }
     ]
   }
 ];

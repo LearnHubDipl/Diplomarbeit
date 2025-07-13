@@ -4,6 +4,15 @@
   the router outlet.
 -->
 
-<a routerLink="">Zurück zur Stoffsammlung</a>
+<div class="trainer-main-layout">
+  <div class="trainer-navigation">
+    <lib-side-navigation></lib-side-navigation>
+  </div>
 
-<router-outlet></router-outlet>
+  <div class="trainer-content">
+    <lib-bread-crumbs></lib-bread-crumbs>
+
+    <router-outlet></router-outlet>
+  </div>
+</div>
+

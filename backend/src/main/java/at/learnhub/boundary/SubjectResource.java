@@ -17,7 +17,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
-@Path("/api/subject/")
+@Path("/api/subjects/")
 public class SubjectResource {
     @Inject
     SubjectRepository subjectRepository;
