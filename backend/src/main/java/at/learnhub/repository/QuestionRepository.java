@@ -1,6 +1,6 @@
 package at.learnhub.repository;
 
-import at.learnhub.dto.QuestionDto;
+import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.model.Question;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -30,10 +30,5 @@ public class QuestionRepository {
             throw new EntityNotFoundException("Question with id " + id + " not found.");
         }
         return convertToDto(question);
-    }
-
-    public QuestionDto convertToDto(Question question) {
-        return new QuestionDto(question.getId(), question.getText(), question.getExplanation(),
-                question.getMedia(), question.getType(), question.getDifficulty(), question.getPublic());
     }
 }

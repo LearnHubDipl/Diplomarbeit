@@ -1,7 +1,10 @@
-package at.learnhub.dto;
+package at.learnhub.dto.simple;
 
 import at.learnhub.model.MediaFile;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+import java.util.List;
 
 @Schema(description = "DTO representing a quiz question with core details for API communication.")
 public record QuestionDto(
@@ -26,7 +29,8 @@ public record QuestionDto(
         String explanation,
 
         @Schema(
-                description = "Optional media file associated with this question (e.g., image, diagram)."
+                description = "Optional media file associated with this question (e.g., image, diagram).",
+                implementation = MediaFile.class
         )
         MediaFile media,
 
@@ -46,6 +50,24 @@ public record QuestionDto(
                 description = "Whether this question is publicly available to all users.",
                 example = "true"
         )
-        Boolean isPublic
+        Boolean isPublic,
+
+        @Schema(
+                description = "The topic pool this question belongs to. Used to categorize questions.",
+                implementation = TopicPoolSlimDto.class
+        )
+        TopicPoolSlimDto topicPool,
+
+        @Schema(
+                description = "List of possible answers for this question.",
+                implementation = AnswerSlimDto.class
+        )
+        List<AnswerSlimDto> answers,
+
+        @Schema(
+                description = "List of submitted solutions for this question.",
+                implementation = SolutionSlimDto.class
+        )
+        List<SolutionSlimDto> solutions
 
 ) {}
