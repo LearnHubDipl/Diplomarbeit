@@ -1,6 +1,7 @@
 package at.learnhub.repository;
 
-import at.learnhub.dto.SubjectDto;
+import at.learnhub.dto.simple.SubjectDto;
+import at.learnhub.mapper.SubjectMapper;
 import at.learnhub.model.Subject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -14,6 +15,7 @@ public class SubjectRepository {
     EntityManager em;
 
     public List<SubjectDto> findAll() {
-        return em.createQuery("select new at.learnhub.dto.SubjectDto(s.name, s.description, s.img) from Subject s", SubjectDto.class).getResultList();
+        return em.createQuery("select s from Subject s", Subject.class).getResultList()
+                .stream().map(SubjectMapper::toDto).toList();
     }
 }
