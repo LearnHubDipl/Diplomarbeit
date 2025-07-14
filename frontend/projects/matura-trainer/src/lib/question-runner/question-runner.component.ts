@@ -1,11 +1,14 @@
 import {Component, inject, OnInit} from '@angular/core';
 import { Question } from '../../../../shared/src/lib/interfaces/question';
 import { QuestionService } from '../../../../shared/src/lib/services/question.service';
+import {NgForOf} from '@angular/common';
 
 
 @Component({
   selector: 'lib-question-runner',
-  imports: [],
+  imports: [
+    NgForOf
+  ],
   templateUrl: './question-runner.component.html',
   styleUrl: './question-runner.component.css'
 })
