@@ -1,6 +1,8 @@
 text,explanation,type,difficulty,isPublic,topicPoolId,mediaId,userId
+"Was versteht man in der Kombinatorik unter einer Variation ohne Wiederholung?","Eine Variation ohne Wiederholung ist eine Anordnung von Objekten, bei der die Reihenfolge wichtig ist und kein Objekt mehrfach verwendet wird.",1,1,true,7,,1
 Was ist 2 + 2?,Einfache Addition,1,1,true,1,,1
 Was beschreibt das 1. Newtonsche Gesetz?,Trägheitsprinzip,2,2,true,2,14,2
 Welche Base paart sich mit Adenin in der DNA?,Thymin ist komplementär zu Adenin,1,2,true,3,15,3
 Was ist die Ableitung von x^2?,Grundregel der Ableitung,1,1,false,4,,4
 Was passiert bei isobarer Expansion?,Druck bleibt konstant,2,3,true,5,16,5
+"Wie viele verschiedene Permutationen (Anordnungen) gibt es von 3 verschiedenen Büchern?","Hierbei ist die Reihenfolge wichtig und es gibt keine Wiederholung.",1,1,true,7,17,1

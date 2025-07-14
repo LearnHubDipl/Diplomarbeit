@@ -1,30 +1,16 @@
-/* Outer content */
-.widget-wrapper {
-  width: 80%;
-  margin: 5% auto;
-  background-color: #ffffff;
-  border-radius: 1rem;
-  box-shadow: 0 0.4rem 1.2rem rgba(0, 0, 0, 0.1);
-  overflow: hidden; /* ensures rounded corners apply to header */
-}
-
-.widget-wrapper .header {
-  background-color: #f3c400;
-  color: white;
-  font-weight: bold;
-  padding: 1.5rem 2rem;
-  font-size: 1.2rem;
-}
-
-.widget-content {
-  padding: 2rem;
+/* Question section */
+.question {
+  margin-top: 2%;
+  margin-left: 3rem;
+  font-size: 1.5rem;
+  font-weight: 500;
 }
 
 /* Answer list styles */
 .answers {
   list-style: none;
   padding: 0;
-  margin: 5% 0;
+  margin: 5% 4rem 5% 5rem;
 }
 
 .answers li {
@@ -32,34 +18,28 @@
   align-items: flex-start;
   gap: 3%;
   margin-bottom: 4%;
-  font-size: 1rem;
+  font-size: 1.2rem;
   line-height: 1.4;
+  width: 100%;
 }
 
 .answers input[type="checkbox"] {
   transform: scale(1.5);
-  margin-top: 0.3em;
+  align-self: center;
 }
 
-/* Submit button */
-.button-container {
+
+
+
+/* additional widget styles */
+.widget-content-top {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 2rem;
 }
-
-button.submit-btn {
-  background-color: #f3c400;
-  color: white;
-  font-weight: bold;
-  padding: 1rem 3rem;
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
+.widget-content-right {
+  width: 40%;
+  justify-self: flex-end;
+  padding: 1.5rem;
 }
-
-button.submit-btn:hover {
-  background-color: #e0b000;
+.widget-content-right img {
+  width: 100%;
 }
