@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e  # Skript bei Fehler abbrechen
+set -e
 
 echo "Stopping existing containers..."
 podman-compose down

@@ -1,6 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
-import {QuestionService} from '../services/question.service';
-import {Question} from '../interfaces/question';
+import { Question } from '../../../../shared/src/lib/interfaces/question';
+import { QuestionService } from '../../../../shared/src/lib/services/question.service';
+
 
 @Component({
   selector: 'lib-question-runner',
