@@ -2,93 +2,120 @@ package at.learnhub.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
+/**
+ * Represents a user in the LearnHub system with roles and associated content.
+ */
 @Entity
 @Table(name = "\"user\"")
-@Schema(description = "Represents a user in the LearnHub system with roles and associated content")
 public class User {
 
+    /**
+     * Unique identifier of the user.
+     * Example: 123
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(
-            description = "Unique identifier of the user",
-            example = "123",
-            readOnly = true
-    )
     private Long id;
 
-    @Schema(
-            description = "Full name of the user",
-            example = "Max Mustermann"
-    )
+    /**
+     * Full name of the user.
+     * Example: Max Mustermann
+     */
     private String name;
 
-    @Schema(
-            description = "Email address of the user",
-            example = "max@example.com"
-    )
+    /**
+     * Email address of the user.
+     * Example: max@example.com
+     */
     private String email;
 
+    /**
+     * Indicates if the user is a teacher.
+     * Example: true
+     */
     @Column(name = "is_teacher")
-    @Schema(
-            description = "Indicates if the user is a teacher",
-            example = "true"
-    )
     private Boolean isTeacher;
 
+    /**
+     * Indicates if the user has admin privileges.
+     * Example: false
+     */
     @Column(name = "is_admin")
-    @Schema(
-            description = "Indicates if the user has admin privileges",
-            example = "false"
-    )
     private Boolean isAdmin;
 
+    /**
+     * Profile picture associated with the user.
+     */
     @ManyToOne()
     @JoinColumn(name = "profile_picture_id")
-    @Schema(
-            description = "Profile picture associated with the user",
-            implementation = MediaFile.class
-    )
     private MediaFile profilePicture;
 
+    /**
+     * Topic contents created by this user.
+     */
     @OneToMany(mappedBy = "createdBy")
     @JsonIgnoreProperties({"createdBy", "approvedBy", "taughtBy"})
     private List<TopicContent> ownedTopicContents;
 
+    /**
+     * Topic contents approved by this user.
+     */
     @OneToMany(mappedBy = "approvedBy")
     @JsonIgnoreProperties({"createdBy", "approvedBy", "taughtBy"})
     private List<TopicContent> approvedTopicContents;
 
+    /**
+     * Topic contents taught by this user.
+     */
     @OneToMany(mappedBy = "taughtBy")
     @JsonIgnoreProperties({"createdBy", "approvedBy", "taughtBy"})
     private List<TopicContent> teacherOfTopicContents;
 
+    /**
+     * Streak tracking record of the user.
+     */
     @OneToOne(mappedBy = "user")
     @JsonIgnoreProperties({"user"})
     private StreakTracking streakTracking;
 
+    /**
+     * Exams associated with the user.
+     */
     @OneToMany(mappedBy = "user")
     @JsonIgnoreProperties({"user"})
     private List<Exam> exams;
 
+    /**
+     * Question pool associated with the user.
+     */
     @OneToOne(mappedBy = "user")
     @JsonIgnoreProperties({"user"})
     private QuestionPool questionPool;
 
+    /**
+     * Questions created by the user.
+     */
     @OneToMany(mappedBy = "user")
     @JsonIgnoreProperties({"user", "topicPool", "entries"})
     private List<Question> createdQuestions;
 
+    /**
+     * Solutions submitted by the user.
+     */
     @OneToMany(mappedBy = "user")
     @JsonIgnoreProperties({"user"})
     private List<Solution> solutions;
 
+    /**
+     * Votes on solutions submitted by the user.
+     */
     @OneToMany(mappedBy = "user")
     @JsonIgnoreProperties({"user"})
     private List<SolutionVote> solutionVotes;
+
 
     // Getter und Setter
 
