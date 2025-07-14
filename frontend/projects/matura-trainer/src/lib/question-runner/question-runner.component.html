@@ -1,1 +1,20 @@
-<p>{{ this.question?.text }}</p>
+<div class="widget-wrapper">
+  <div class="header">Mathematik &gt; {{ this.question?.topicPool?.name }}</div>
+
+  <div class="widget-content">
+    <div class="question">
+      {{ this.question?.text }}
+    </div>
+
+    <ul class="answers">
+      <li *ngFor="let currentAnswer of this.question?.answers">
+        <input type="checkbox">
+        {{ currentAnswer.text }}
+      </li>
+    </ul>
+
+    <div class="button-container">
+      <button class="submit-btn">Prüfen</button>
+    </div>
+  </div>
+</div>
