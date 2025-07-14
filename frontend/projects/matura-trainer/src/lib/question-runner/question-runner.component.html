@@ -1,20 +1,34 @@
 <div class="widget-wrapper">
   <div class="header">Mathematik &gt; {{ this.question?.topicPool?.name }}</div>
 
-  <div class="widget-content">
-    <div class="question">
-      {{ this.question?.text }}
-    </div>
+  <form [formGroup]="form" class="widget-content" (ngSubmit)="submit()">
+    <div class="widget-content-top">
+      <div class="widget-content-left" [ngStyle]="{ width: this.question?.media ? '60%' : '100%' }">
+        <div class="question">{{ this.question?.text }}</div>
 
-    <ul class="answers">
-      <li *ngFor="let currentAnswer of this.question?.answers">
-        <input type="checkbox">
-        {{ currentAnswer.text }}
-      </li>
-    </ul>
+        <ul class="answers" formArrayName="answers">
+          <li *ngFor="let answer of this.question?.answers; let i = index">
+            <input type="checkbox" [formControlName]="i">
+            {{ answer.text }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="widget-content-right" [ngStyle]="{ display: this.question?.media ? 'block' : 'none'}">
+        <img [src]="this.question?.media?.path" [alt]="this.question?.media?.description">
+      </div>
+    </div>
 
     <div class="button-container">
-      <button class="submit-btn">Prüfen</button>
+      <button class="submit-btn" type="submit" [disabled]="!anySelected()">Prüfen</button>
     </div>
+  </form>
+</div>
+
+<div style="margin-top: 3rem" class="widget-wrapper">
+  <div class="header">TOP Lösungsweg</div>
+
+  <div class="widget-content">
+    <!-- TODO: add solution content, first statically and eventually dynamically from the backend -->
   </div>
 </div>

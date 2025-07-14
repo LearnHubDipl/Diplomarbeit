@@ -1,21 +1,31 @@
 text,isCorrect,questionId
-"4",true,1
-"vier",true,1
+"Eine Auswahl von Objekten, bei der Reihenfolge egal ist und Wiederholung erlaubt ist.",false,1
+"Eine Auswahl von Objekten, bei der Reihenfolge wichtig ist und Wiederholung erlaubt ist.",false,1
+"Eine Auswahl von Objekten, bei der Reihenfolge wichtig ist und keine Wiederholung erlaubt ist.",true,1
+"Eine Auswahl von Objekten, bei der Reihenfolge egal ist und keine Wiederholung erlaubt ist.",false,1
 
-"Trägheit",true,2
-"Ein Körper verharrt im Zustand der Ruhe oder gleichförmigen Bewegung",true,2
-"Kraft ist Masse mal Beschleunigung",false,2
-"Das zweite Gesetz von Newton",false,2
+"4",true,2
+"vier",true,2
 
-"Thymin",true,3
-"T",true,3
-"Guanin",false,3
-"Cytosin",false,3
+"Trägheit",true,3
+"Ein Körper verharrt im Zustand der Ruhe oder gleichförmigen Bewegung",true,3
+"Kraft ist Masse mal Beschleunigung",false,3
+"Das zweite Gesetz von Newton",false,3
 
-"2x",true,4
-"Die Ableitung von x^2 ist 2x",true,4
+"Thymin",true,4
+"T",true,4
+"Guanin",false,4
+"Cytosin",false,4
 
-"Druck bleibt konstant",true,5
-"Temperatur bleibt konstant",false,5
-"Energie steigt",false,5
-"Volumen bleibt konstant",false,5
+"2x",true,5
+"Die Ableitung von x^2 ist 2x",true,5
+
+"Druck bleibt konstant",true,6
+"Temperatur bleibt konstant",false,6
+"Energie steigt",false,
+"Volumen bleibt konstant",false,6
+
+"3",false,7
+"6",true,7
+"9",false,7
+"12",false,7
