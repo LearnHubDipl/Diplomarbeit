@@ -10,7 +10,7 @@ import {BreadCrumbsComponent} from '../../../../projects/matura-trainer/src/lib/
   imports: [
     RouterOutlet,
     SideNavigationComponent,
-    BreadCrumbsComponent
+    BreadCrumbsComponent,
   ],
   templateUrl: './trainer-layout.component.html',
   styleUrl: './trainer-layout.component.css'
