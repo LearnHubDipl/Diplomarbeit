@@ -33,9 +33,11 @@ services:
     environment:
       DB_KIND: mysql
       QUARKUS_PROFILE: prod
-      QUARKUS_DATASOURCE_JDBC_URL: jdbc:mysql://mysql:3306/learnhub-db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       QUARKUS_DATASOURCE_USERNAME: quarkus
       QUARKUS_DATASOURCE_PASSWORD: quarkus
+      QUARKUS_DATASOURCE_JDBC_ACQUIRERETRYATTEMPTS: 10
+      QUARKUS_DATASOURCE_JDBC_ACQUIRERETRYDELAY: 2000
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:mysql://mysql:3306/learnhub-db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       QUARKUS_HIBERNATE_ORM_DATABASE_GENERATION: update
       MOCKDATA_PATH: /app/mock-data
     volumes:
