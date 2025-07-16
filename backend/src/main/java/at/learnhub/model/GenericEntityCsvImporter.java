@@ -282,7 +282,17 @@ public class GenericEntityCsvImporter {
         if (type == Boolean.class || type == boolean.class) return Boolean.parseBoolean(value);
         if (type == LocalDate.class) return LocalDate.parse(value, DATE_FORMATTER);
         if (type == LocalDateTime.class) return LocalDateTime.parse(value, DATETIME_FORMATTER);
-        if (type.isEnum()) return Enum.valueOf((Class<Enum>) type, value);
+        if (type.isEnum()) {
+            @SuppressWarnings("unchecked")
+            Class<Enum> enumType = (Class<Enum>) type;
+            String enumValue = value.trim();
+            for (Enum constant : enumType.getEnumConstants()) {
+                if (constant.name().equalsIgnoreCase(enumValue)) {
+                    return constant;
+                }
+            }
+            throw new IllegalArgumentException("Invalid enum value: " + value + " for enum " + type.getSimpleName());
+        }
         return value;
     }
 
