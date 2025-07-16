@@ -4,15 +4,43 @@
 
   <form [formGroup]="form" class="widget-content" (ngSubmit)="submit()">
     <div class="widget-content-top">
-      <div class="widget-content-left" [ngStyle]="{ width: this.question?.media ? '60%' : '100%' }">
-        <div class="question">{{ this.question?.text }}</div>
+      <div class="widget-content-left" [ngStyle]="{ width: question?.media ? '60%' : '100%' }">
+        <div class="question">{{ question?.text }}</div>
 
-        <ul class="answers" formArrayName="answers">
-          <li *ngFor="let answer of this.question?.answers; let i = index">
-            <input type="checkbox" [formControlName]="i">
-            {{ answer.text }}
-          </li>
-        </ul>
+        <ng-container *ngIf="question?.type === 'MULTIPLE_CHOICE'">
+          <ul class="answers" formArrayName="answers">
+            <li
+              *ngFor="let answer of question?.answers; let i = index"
+              [ngClass]="{
+                'correct': isCorrectAnswer(answer.id),
+                'incorrect': isIncorrectAnswer(answer.id, i)
+              }"
+            >
+              <input type="checkbox" [formControlName]="i" [disabled]="submitted">
+              {{ answer.text }}
+            </li>
+          </ul>
+        </ng-container>
+
+        <ng-container *ngIf="question?.type === 'FREETEXT'">
+          <textarea
+            formControlName="freeTextAnswer"
+            [readonly]="submitted"
+            rows="4"
+            placeholder="Bitte Antwort eingeben..."
+          ></textarea>
+
+          <div *ngIf="submitted" class="feedback" [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
+            <p *ngIf="answerResult?.correct">Richtig!</p>
+            <div *ngIf="!answerResult?.correct">
+              Falsche Antwort.<br>
+              Mögliche Antworten:
+              <ul>
+                <li *ngFor="let correctAnswer of answerResult?.correctFreeTextAnswers">{{ correctAnswer }}</li>
+              </ul>
+            </div>
+          </div>
+        </ng-container>
       </div>
 
       <div class="widget-content-right" [ngStyle]="{ display: this.question?.media ? 'block' : 'none'}">
@@ -21,7 +49,13 @@
     </div>
 
     <div class="button-container">
-      <button class="submit-btn" type="submit" [disabled]="!anySelected()">Prüfen</button>
+      <button
+        class="submit-btn"
+        type="button"
+        [disabled]="!anySelected() && !submitted"
+        (click)="submitted ? loadNextQuestion() : submit()">
+        {{ submitted ? 'Nächste Frage' : 'Prüfen' }}
+      </button>
     </div>
   </form>
 </div>

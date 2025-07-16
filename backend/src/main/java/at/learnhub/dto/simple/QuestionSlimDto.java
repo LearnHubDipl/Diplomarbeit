@@ -1,6 +1,7 @@
 package at.learnhub.dto.simple;
 
 import at.learnhub.model.MediaFile;
+import at.learnhub.model.QuestionType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
@@ -35,9 +36,10 @@ public record QuestionSlimDto(
 
         @Schema(
                 description = "Numerical code representing the question type (e.g., multiple choice, freetext).",
-                example = "1"
+                example = "1",
+                implementation = QuestionType.class
         )
-        Integer type,
+        QuestionType type,
 
         @Schema(
                 description = "Difficulty level of the question, e.g., 1 (easy) to 3 (hard).",

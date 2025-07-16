@@ -2,11 +2,16 @@ import {Answer} from './answer';
 import {TopicPool} from './topic-pool';
 import {Media} from './media';
 
+export enum QuestionType {
+  FREETEXT = 'FREETEXT',
+  MULTIPLE_CHOICE = 'MULTIPLE_CHOICE'
+}
+
 export interface Question {
   id: number;
   text: string;
   explanation: string;
-  type: number;
+  type: QuestionType;
   difficulty: number;
   isPublic: boolean;
   answers: Answer[];
