@@ -24,22 +24,49 @@ public class AnswerService {
         if (request.questionId() == null) {
             throw new BadRequestException("Missing question ID");
         }
-        if (request.selectedAnswerIds() == null || request.selectedAnswerIds().isEmpty()) {
-            throw new BadRequestException("No answers selected");
-        }
 
         Question question = questionRepository.getQuestionById(request.questionId());
 
-        List<Long> correctAnswerIds = answerRepository.getCorrectAnswersIdsForQuestion(request.questionId());
+        return switch (question.getType()) {
+            case MULTIPLE_CHOICE -> checkMultipleChoiceAnswer(question, request);
+            case FREETEXT -> checkFreeTextAnswer(question, request);
+        };
+    }
 
-        boolean isCorrect = new HashSet<>(request.selectedAnswerIds())
-                .equals(new HashSet<>(correctAnswerIds));
+
+    private CheckAnswersResponseDto checkMultipleChoiceAnswer(Question question, CheckAnswersRequestDto request) {
+        if (request.selectedAnswerIds() == null || request.selectedAnswerIds().isEmpty()) {
+            throw new BadRequestException("No selected answers provided.");
+        }
+
+        List<Long> correctIds = answerRepository.getCorrectAnswersIdsForQuestion(question.getId());
+        boolean isCorrect = new HashSet<>(correctIds).equals(new HashSet<>(request.selectedAnswerIds()));
 
         return new CheckAnswersResponseDto(
                 question.getId(),
                 isCorrect,
-                correctAnswerIds,
+                correctIds,
+                List.of(),
                 question.getExplanation()
         );
+    }
+
+    private CheckAnswersResponseDto checkFreeTextAnswer(Question question, CheckAnswersRequestDto request) {
+        String userAnswer = request.freeTextAnswer();
+        if (userAnswer == null || userAnswer.isBlank()) {
+            throw new BadRequestException("Text freeTextAnswer field is required for freetext questions.");
+        }
+
+        List<String> correctAnswers = answerRepository.getCorrectAnswersForFreeTextQuestion(question.getId());
+
+        boolean isCorrect = correctAnswers.stream()
+                .anyMatch(correct -> correct.equalsIgnoreCase(userAnswer.trim()));
+
+        return new CheckAnswersResponseDto(
+                question.getId(),
+                isCorrect,
+                List.of(),
+                correctAnswers,
+                question.getExplanation());
     }
 }

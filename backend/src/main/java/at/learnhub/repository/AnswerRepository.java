@@ -44,4 +44,11 @@ public class AnswerRepository {
                 .setParameter("questionId", questionId)
                 .getResultList();
     }
+
+    public List<String> getCorrectAnswersForFreeTextQuestion(Long questionId) {
+        return em.createQuery("SELECT a.text FROM Answer a " +
+                        "WHERE a.question.id = :questionId AND a.isCorrect = true", String.class)
+                .setParameter("questionId", questionId)
+                .getResultList();
+    }
 }

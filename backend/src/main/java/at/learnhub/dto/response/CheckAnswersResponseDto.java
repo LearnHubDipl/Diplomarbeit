@@ -5,7 +5,10 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
 
-@Schema(description = "Request to check if selected answers for a given question are correct.")
+@Schema(description = """
+        Response indicating whether the provided answer(s) to a question are correct.
+        Either 'correctAnswerIds' (for multiple choice questions) or 'correctFreeTextAnswers' (for freetext questions) will be populated — not both.
+        """)
 public record CheckAnswersResponseDto(
 
         @Schema(
@@ -21,11 +24,18 @@ public record CheckAnswersResponseDto(
         Boolean correct,
 
         @Schema(
-                description = "List of the correct answer IDs for the question",
+                description = "List of the correct answer IDs for the question. Only populated for multiple choice questions. Will be null for freetext questions.",
                 example = "[101, 102]",
                 type = SchemaType.ARRAY
         )
         List<Long> correctAnswerIds,
+
+        @Schema(
+                description = "List of accepted free text answers. Only populated for freetext questions. Will be null for multiple choice questions.",
+                example = "[\"Paris\", \"The capital of France is Paris\"]",
+                type = SchemaType.ARRAY
+        )
+        List<String> correctFreeTextAnswers,
 
         @Schema(
                 description = "Explanation of the correct answers (for feedback)",
