@@ -1,5 +1,6 @@
 package at.learnhub.dto.simple;
 
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
@@ -15,7 +16,8 @@ public record SolutionSlimDto(
 
         @Schema(
                 description = "List of detailed steps that make up this solution.",
-                implementation = SolutionStepDto.class
+                implementation = SolutionStepDto.class,
+                type = SchemaType.ARRAY
         )
         List<SolutionStepDto> steps
 

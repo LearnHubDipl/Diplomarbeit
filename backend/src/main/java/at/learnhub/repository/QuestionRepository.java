@@ -1,6 +1,7 @@
 package at.learnhub.repository;
 
 import at.learnhub.dto.simple.QuestionDto;
+import at.learnhub.mapper.QuestionMapper;
 import at.learnhub.model.Question;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -19,7 +20,7 @@ public class QuestionRepository {
         return em.createQuery("SELECT q FROM Question q", Question.class)
                 .getResultList()
                 .stream()
-                .map(this::convertToDto)
+                .map(QuestionMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -29,6 +30,6 @@ public class QuestionRepository {
         if (question == null) {
             throw new EntityNotFoundException("Question with id " + id + " not found.");
         }
-        return convertToDto(question);
+        return QuestionMapper.toDto(question);
     }
 }

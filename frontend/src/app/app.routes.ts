@@ -5,6 +5,7 @@ import {QuestionRunnerComponent} from '../../projects/matura-trainer/src/lib/que
 import {TrainerLayoutComponent} from './layouts/trainer-layout/trainer-layout.component';
 import {AppLayoutComponent} from './layouts/app-layout/app-layout.component';
 import {AboutComponent} from '../../projects/content-management/src/lib/about/about.component';
+import {StatsHomeComponent} from '../../projects/matura-trainer/src/lib/stats-home/stats-home.component';
 
 export const routes: Routes = [
   {
@@ -19,8 +20,22 @@ export const routes: Routes = [
     path: 'trainer',
     component: TrainerLayoutComponent,
     children: [
-      { path: '', component:  TrainerHomeComponent },
-      { path: 'quiz', component: QuestionRunnerComponent }
+      { path: '', redirectTo: 'practice', pathMatch: 'full' },
+
+      {
+        path: 'practice',
+        data: { breadcrumb: 'Üben' },
+        children: [
+          { path: '', component: TrainerHomeComponent, data: { breadcrumb: null } }, // home of practice
+          { path: 'quiz', component: QuestionRunnerComponent, data: { breadcrumb: 'Fragen beantworten' } }
+        ]
+      },
+
+      {
+        path: 'stats',
+        component: StatsHomeComponent,
+        data: { breadcrumb: 'Statistik' }
+      }
     ]
   }
 ];

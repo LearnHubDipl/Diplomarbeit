@@ -18,12 +18,6 @@ public record AnswerDto(
         String text,
 
         @Schema(
-                description = "Whether the answer is correct or not.",
-                example = "true"
-        )
-        Boolean isCorrect,
-
-        @Schema(
                 description = "Question this answer refers to.",
                 implementation = QuestionSlimDto.class
         )
