@@ -6,6 +6,28 @@
   font-weight: 500;
 }
 
+/* correct state indicator */
+.result-badge {
+  position: absolute;
+  top: -1.4rem;
+  right: 0.6rem;
+  font-size: 1.8rem;
+  align-items: center;
+  height: fit-content;
+}
+
+.result-badge.correct {
+  color: #155724;
+}
+
+.result-badge.incorrect {
+  color: #721c24;
+}
+
+.result-badge .icon {
+  margin-right: 0.5rem;
+}
+
 /* Answer list styles */
 .answers {
   list-style: none;
@@ -46,6 +68,7 @@
 /* additional widget styles */
 .widget-content-top {
   display: flex;
+  position: relative;
 }
 .widget-content-right {
   width: 40%;

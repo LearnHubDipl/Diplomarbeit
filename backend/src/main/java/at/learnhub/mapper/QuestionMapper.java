@@ -3,6 +3,7 @@ package at.learnhub.mapper;
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.dto.simple.QuestionSlimDto;
 import at.learnhub.model.Question;
+import at.learnhub.model.QuestionType;
 
 /**
  * Utility class responsible for converting between {@link Question} entities and their DTO representations.
@@ -27,6 +28,7 @@ public class QuestionMapper {
         return new QuestionDto(question.getId(), question.getText(), question.getExplanation(),
                 question.getMedia(), question.getType(), question.getDifficulty(),
                 question.getPublic(), TopicPoolMapper.toSlimDto(question.getTopicPool()),
+                question.getType() == QuestionType.FREETEXT ? null :
                 question.getAnswers().stream().map(AnswerMapper::toSlimDto).toList(),
                 question.getSolutions().stream().map(SolutionMapper::toSlimDto).toList());
     }
