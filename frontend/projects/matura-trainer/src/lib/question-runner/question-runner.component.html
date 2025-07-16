@@ -4,6 +4,13 @@
 
   <form [formGroup]="form" class="widget-content" (ngSubmit)="submit()">
     <div class="widget-content-top">
+      <div *ngIf="submitted" class="result-badge" [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
+        <span class="icon">
+          <ng-container *ngIf="answerResult?.correct">✔️</ng-container>
+          <ng-container *ngIf="!answerResult?.correct">❌</ng-container>
+        </span>
+        {{ answerResult?.correct ? 'Richtig!' : 'Falsch!' }}
+      </div>
       <div class="widget-content-left" [ngStyle]="{ width: question?.media ? '60%' : '100%' }">
         <div class="question">{{ question?.text }}</div>
 
