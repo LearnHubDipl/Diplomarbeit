@@ -1,5 +1,6 @@
 <div class="widget-wrapper">
-  <div class="header">Mathematik &gt; {{ this.question?.topicPool?.name }}</div>
+  <!-- inner 'bread crumbs' showing the subject and the topic pool -->
+  <div class="header">{{ this.question?.topicPool?.subject?.name }} &gt; {{ this.question?.topicPool?.name }}</div>
 
   <form [formGroup]="form" class="widget-content" (ngSubmit)="submit()">
     <div class="widget-content-top">

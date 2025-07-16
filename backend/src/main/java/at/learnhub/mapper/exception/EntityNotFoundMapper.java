@@ -1,4 +1,4 @@
-package at.learnhub.mapper;
+package at.learnhub.mapper.exception;
 
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;

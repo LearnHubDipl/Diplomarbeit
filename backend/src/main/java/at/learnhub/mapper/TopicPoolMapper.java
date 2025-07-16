@@ -27,7 +27,12 @@ public class TopicPoolMapper {
      * @return the slim {@link TopicPoolSlimDto}
      */
     public static TopicPoolSlimDto toSlimDto(TopicPool topicPool) {
-        return new TopicPoolSlimDto(topicPool.getId(), topicPool.getName(), topicPool.getDescription());
+        return new TopicPoolSlimDto(
+                topicPool.getId(),
+                topicPool.getName(),
+                topicPool.getDescription(),
+                SubjectMapper.toSlimDto(topicPool.getSubject())
+        );
     }
 
 }

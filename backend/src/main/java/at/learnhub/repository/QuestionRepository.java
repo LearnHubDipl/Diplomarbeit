@@ -26,10 +26,15 @@ public class QuestionRepository {
 
 
     public QuestionDto getQuestionDtoById(Long id) {
+        Question question = getQuestionById(id);
+        return QuestionMapper.toDto(question);
+    }
+
+    public Question getQuestionById(Long id) {
         Question question = em.find(Question.class, id);
         if (question == null) {
             throw new EntityNotFoundException("Question with id " + id + " not found.");
         }
-        return QuestionMapper.toDto(question);
+        return question;
     }
 }

@@ -2,8 +2,10 @@ package at.learnhub.dto.simple;
 
 import at.learnhub.model.MediaFile;
 
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Schema(description = "DTO representing a quiz question with core details for API communication.")
@@ -60,13 +62,15 @@ public record QuestionDto(
 
         @Schema(
                 description = "List of possible answers for this question.",
-                implementation = AnswerSlimDto.class
+                implementation = AnswerSlimDto.class,
+                type = SchemaType.ARRAY
         )
         List<AnswerSlimDto> answers,
 
         @Schema(
                 description = "List of submitted solutions for this question.",
-                implementation = SolutionSlimDto.class
+                implementation = SolutionSlimDto.class,
+                type = SchemaType.ARRAY
         )
         List<SolutionSlimDto> solutions
 

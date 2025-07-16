@@ -1,6 +1,7 @@
 package at.learnhub.dto.simple;
 
 import at.learnhub.model.MediaFile;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
@@ -35,7 +36,8 @@ public record SubjectDto(
 
         @Schema(
                 description = "List of topic pools related to this subject.",
-                implementation = TopicPoolSlimDto.class
+                implementation = TopicPoolSlimDto.class,
+                type = SchemaType.ARRAY
         )
         List<TopicPoolSlimDto> topicPools
 
