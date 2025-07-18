@@ -36,7 +36,8 @@ public class Question {
      * Numerical code indicating the type of the question.
      * For example: 1 = multiple choice, 2 = free text, etc.
      */
-    private Integer type;
+    @Enumerated(EnumType.STRING)
+    private QuestionType type;
 
     /**
      * Difficulty level of the question.
@@ -121,11 +122,11 @@ public class Question {
         this.explanation = explanation;
     }
 
-    public Integer getType() {
+    public QuestionType getType() {
         return type;
     }
 
-    public void setType(Integer type) {
+    public void setType(QuestionType type) {
         this.type = type;
     }
 
