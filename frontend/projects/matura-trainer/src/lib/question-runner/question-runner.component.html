@@ -1,8 +1,8 @@
-<div class="widget-wrapper">
+<div class="widget-wrapper question-wrapper">
   <!-- inner 'bread crumbs' showing the subject and the topic pool -->
   <div class="header">{{ this.question?.topicPool?.subject?.name }} &gt; {{ this.question?.topicPool?.name }}</div>
 
-  <form [formGroup]="form" class="widget-content" (ngSubmit)="submit()">
+  <form [formGroup]="form" class="widget-content question-content" (ngSubmit)="submit()">
     <div class="widget-content-top">
       <div *ngIf="submitted" class="result-badge" [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
         <span class="icon">
@@ -37,14 +37,21 @@
             placeholder="Bitte Antwort eingeben..."
           ></textarea>
 
-          <div *ngIf="submitted" class="feedback" [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
-            <p *ngIf="answerResult?.correct">Richtig!</p>
-            <div *ngIf="!answerResult?.correct">
-              Falsche Antwort.<br>
-              Mögliche Antworten:
-              <ul>
-                <li *ngFor="let correctAnswer of answerResult?.correctFreeTextAnswers">{{ correctAnswer }}</li>
-              </ul>
+          <!-- Reserved feedback container -->
+          <div class="feedback-wrapper">
+            <div
+              *ngIf="submitted"
+              class="feedback"
+              [ngClass]="{ 'correct': answerResult?.correct, 'incorrect': !answerResult?.correct }"
+            >
+              <p *ngIf="answerResult?.correct">Richtig!</p>
+              <div *ngIf="!answerResult?.correct">
+                Falsche Antwort.<br>
+                Mögliche Antworten:
+                <ul>
+                  <li *ngFor="let correctAnswer of answerResult?.correctFreeTextAnswers">{{ correctAnswer }}</li>
+                </ul>
+              </div>
             </div>
           </div>
         </ng-container>
