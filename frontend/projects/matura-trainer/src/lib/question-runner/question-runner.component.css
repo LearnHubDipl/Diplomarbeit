@@ -63,18 +63,96 @@
 
 
 
+/* Free text textarea */
+textarea[formControlName="freeTextAnswer"] {
+  width: 90%;
+  margin: 2rem 3rem;
+  padding: 1rem;
+  font-size: 1.2rem;
+  border: 2px solid #ccc;
+  border-radius: 0.5rem;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.3s ease-in-out, box-shadow 0.2s;
+}
+
+textarea[formControlName="freeTextAnswer"]:focus {
+  border-color: #f3c400;
+  box-shadow: 0 0 0 0.2rem rgba(243, 196, 0, 0.25);
+  outline: none;
+}
+
+/* Feedback wrapper reserves space even when empty */
+.feedback-wrapper {
+  min-height: 10rem;
+  margin: 0 3rem;
+  transition: all 0.3s ease-in-out;
+}
+
+.feedback {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+  max-height: 10rem;
+  overflow: scroll;
+}
+
+.feedback.correct {
+  background-color: #c8e6c9;
+  color: #155724;
+  border-left: 4px solid #155724;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+}
+
+.feedback.incorrect {
+  background-color: #ffcdd2;
+  color: #721c24;
+  border-left: 4px solid #721c24;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+}
+
+.feedback ul {
+  padding-left: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.feedback li {
+  list-style-type: disc;
+}
+
+
+
 
 
 /* additional widget styles */
+.question-wrapper {
+  height: 70%;
+  position: relative;
+}
+.question-content {
+  padding: 2.5rem 2.5rem 0 2.5rem;
+  height: 75%;
+  overflow: scroll;
+}
 .widget-content-top {
+  height: 100%;
   display: flex;
   position: relative;
 }
 .widget-content-right {
   width: 40%;
+  height: 100%;
   justify-self: flex-end;
   padding: 1.5rem;
+  display: flex;
 }
 .widget-content-right img {
   width: 100%;
+  align-self: center;
+}
+
+.button-container {
+  position: absolute;
+  right: 1rem; bottom: 1rem;
 }
