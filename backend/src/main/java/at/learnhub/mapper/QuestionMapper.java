@@ -2,10 +2,13 @@ package at.learnhub.mapper;
 
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.dto.simple.QuestionSlimDto;
+import at.learnhub.dto.simple.SolutionSlimDto;
+import at.learnhub.dto.simple.SolutionVoteSlimDto;
 import at.learnhub.model.Question;
 import at.learnhub.model.QuestionType;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -37,7 +40,10 @@ public class QuestionMapper {
                             Collections.shuffle(list);
                             return list;
                         })),
-                question.getSolutions().stream().map(SolutionMapper::toSlimDto).toList());
+                question.getSolutions().stream()
+                        .map(SolutionMapper::toSlimDto)
+                        .sorted(Comparator.comparingLong(SolutionSlimDto::upVotes).reversed())
+                        .toList());
     }
 
     /**

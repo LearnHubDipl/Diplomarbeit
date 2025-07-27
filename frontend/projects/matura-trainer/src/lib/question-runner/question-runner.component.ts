@@ -1,10 +1,12 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, Input, OnInit} from '@angular/core';
 import { Question } from '../../../../shared/src/lib/interfaces/question';
 import { QuestionService } from '../../../../shared/src/lib/services/question.service';
 import {NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {CheckAnswerRequest} from '../../../../shared/src/lib/interfaces/answer';
 import {AnswerService} from '../../../../shared/src/lib/services/answer.service';
+import {ActivatedRoute} from '@angular/router';
+import {Location} from '@angular/common';
 
 
 @Component({
@@ -23,9 +25,15 @@ import {AnswerService} from '../../../../shared/src/lib/services/answer.service'
   ]
 })
 export class QuestionRunnerComponent implements OnInit {
+  questionIdList: number[] = [];
+  currentQuestionIndex: number = 0;
+  isFinished = false;
+
   questionService = inject(QuestionService);
   answerService = inject(AnswerService);
   fb = inject(FormBuilder);
+  route: ActivatedRoute = inject(ActivatedRoute);
+  location: Location = inject(Location)
 
   question: Question | undefined;
   form: FormGroup = this.fb.group({
@@ -42,7 +50,16 @@ export class QuestionRunnerComponent implements OnInit {
   submitted = false;
 
   ngOnInit() {
-    this.loadQuestion(1)
+    this.route.queryParamMap.subscribe(params => {
+      const raw = params.getAll('ids');
+      this.questionIdList = raw.map(id => +id);
+    });
+
+    if (this.questionIdList.length > 0) {
+      this.loadQuestion(this.questionIdList[this.currentQuestionIndex]);
+    } else {
+      // TODO: Screen that states that there are no question that could be loaded
+    }
   }
 
   loadQuestion(id: number) {
@@ -114,15 +131,23 @@ export class QuestionRunnerComponent implements OnInit {
       }
 
       this.submitted = true;
+      this.currentQuestionIndex++;
+      if(this.currentQuestionIndex >= this.questionIdList.length) {
+        this.isFinished = true;
+      }
     });
   }
 
   loadNextQuestion(): void {
-    const nextId = (this.question?.id ?? 0) + 1;
-
-    this.loadQuestion(nextId);
+    if (!this.isFinished) {
+      let nextIndex = this.questionIdList![this.currentQuestionIndex];
+      this.loadQuestion(nextIndex);
+    }
   }
 
+  get hasSolutions(): boolean {
+    return (this.question?.solutions?.length ?? 0) > 0;
+  }
 
   isCorrectAnswer(answerId: number): boolean {
     return this.answerResult?.correctAnswerIds?.includes(answerId) ?? false;
@@ -135,6 +160,10 @@ export class QuestionRunnerComponent implements OnInit {
     const isActuallyCorrect = this.answerResult.correctAnswerIds.includes(answerId);
 
     return wasSelected && !isActuallyCorrect;
+  }
+
+  finish() {
+    this.location.back()
   }
 }
 
