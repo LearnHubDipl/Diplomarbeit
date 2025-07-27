@@ -5,6 +5,7 @@ import at.learnhub.dto.simple.QuestionSlimDto;
 import at.learnhub.dto.simple.SolutionSlimDto;
 import at.learnhub.model.Question;
 import at.learnhub.model.Solution;
+import at.learnhub.model.SolutionVote;
 
 
 public class SolutionMapper {
@@ -19,8 +20,15 @@ public class SolutionMapper {
     }*/
 
     public static SolutionSlimDto toSlimDto(Solution solution) {
+        Long upvoteCount = 0L;
+        for (SolutionVote currentSolution : solution.getVotes()) {
+            if (currentSolution.getUpVote()) upvoteCount++;
+            else upvoteCount--;
+        }
+
         return new SolutionSlimDto(solution.getId(),
-                solution.getSteps().stream().map(SolutionStepMapper::toDto).toList());
+                solution.getSteps().stream().map(SolutionStepMapper::toDto).toList(),
+                upvoteCount);
     }
 
     /*

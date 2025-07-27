@@ -11,7 +11,7 @@
   <!-- topic pool selection and button for the practice mode -->
   <div>
 
-    <a routerLink="/trainer/practice/quiz">Üben</a>
+    <a routerLink="/trainer/practice/quiz" [queryParams]="{ ids: [1, 2, 3] }">Üben</a>
   </div>
 
 </div>

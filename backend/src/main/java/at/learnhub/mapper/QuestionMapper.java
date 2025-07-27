@@ -5,6 +5,9 @@ import at.learnhub.dto.simple.QuestionSlimDto;
 import at.learnhub.model.Question;
 import at.learnhub.model.QuestionType;
 
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 /**
  * Utility class responsible for converting between {@link Question} entities and their DTO representations.
  * <p>
@@ -29,7 +32,11 @@ public class QuestionMapper {
                 question.getMedia(), question.getType(), question.getDifficulty(),
                 question.getPublic(), TopicPoolMapper.toSlimDto(question.getTopicPool()),
                 question.getType() == QuestionType.FREETEXT ? null :
-                question.getAnswers().stream().map(AnswerMapper::toSlimDto).toList(),
+                question.getAnswers().stream().map(AnswerMapper::toSlimDto)
+                        .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
+                            Collections.shuffle(list);
+                            return list;
+                        })),
                 question.getSolutions().stream().map(SolutionMapper::toSlimDto).toList());
     }
 

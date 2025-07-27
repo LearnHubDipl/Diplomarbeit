@@ -123,6 +123,27 @@ textarea[formControlName="freeTextAnswer"]:focus {
 
 
 
+.vote-wrapper {
+  width: 70%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+}
+.vote-wrapper img {
+  width: 6%;
+}
+.vote-wrapper p {
+  width: 10%;
+  font-weight: 500;
+  font-size: 1.5rem;
+  text-align: center;
+  align-self: center;
+  padding: 0;
+  margin: 0;
+}
+
+
+
 
 
 /* additional widget styles */

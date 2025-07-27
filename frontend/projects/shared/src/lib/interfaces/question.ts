@@ -1,6 +1,7 @@
 import {Answer} from './answer';
 import {TopicPool} from './topic-pool';
 import {Media} from './media';
+import {Solution} from './solution';
 
 export enum QuestionType {
   FREETEXT = 'FREETEXT',
@@ -17,4 +18,5 @@ export interface Question {
   answers: Answer[];
   topicPool: TopicPool;
   media: Media;
+  solutions: Solution[];
 }

@@ -67,17 +67,31 @@
         class="submit-btn"
         type="button"
         [disabled]="!anySelected() && !submitted"
-        (click)="submitted ? loadNextQuestion() : submit()">
-        {{ submitted ? 'Nächste Frage' : 'Prüfen' }}
+        (click)="isFinished
+          ? finish()
+          : (submitted ? loadNextQuestion() : submit())">
+        {{
+          isFinished
+            ? 'Abschließen'
+            : (submitted ? 'Nächste Frage' : 'Prüfen')
+        }}
       </button>
     </div>
   </form>
 </div>
 
-<div style="margin-top: 3rem" class="widget-wrapper">
+<div *ngIf="hasSolutions && submitted" style="margin-top: 3rem;" class="widget-wrapper">
   <div class="header">TOP Lösungsweg</div>
 
   <div class="widget-content">
-    <!-- TODO: add solution content, first statically and eventually dynamically from the backend -->
+    <div *ngFor="let currentStep of this.question?.solutions?.[0]?.steps">
+      <h5>{{ currentStep.title }}</h5>
+      <p>{{ currentStep.text }}</p>
+    </div>
+    <div class="vote-wrapper">
+      <img src="https://www.pngmart.com/files/23/Upvote-PNG-Photos.png">
+      <p>{{ this.question?.solutions?.[0]?.upVotes }}</p>
+      <img src="https://i.imgur.com/2mVSBqP.png">
+    </div>
   </div>
 </div>
