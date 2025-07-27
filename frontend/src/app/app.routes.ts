@@ -6,6 +6,11 @@ import {TrainerLayoutComponent} from './layouts/trainer-layout/trainer-layout.co
 import {AppLayoutComponent} from './layouts/app-layout/app-layout.component';
 import {AboutComponent} from '../../projects/content-management/src/lib/about/about.component';
 import {StatsHomeComponent} from '../../projects/matura-trainer/src/lib/stats-home/stats-home.component';
+import {
+  QuestionBrowserComponent
+} from '../../projects/matura-trainer/src/lib/question-browser/question-browser.component';
+import {StatsTopicsComponent} from '../../projects/matura-trainer/src/lib/stats-topics/stats-topics.component';
+import {StatsExamsComponent} from '../../projects/matura-trainer/src/lib/stats-exams/stats-exams.component';
 
 export const routes: Routes = [
   {
@@ -26,15 +31,22 @@ export const routes: Routes = [
         path: 'practice',
         data: { breadcrumb: 'Üben' },
         children: [
-          { path: '', component: TrainerHomeComponent, data: { breadcrumb: null } }, // home of practice
-          { path: 'quiz', component: QuestionRunnerComponent, data: { breadcrumb: 'Fragen beantworten' } }
+          { path: '', component: TrainerHomeComponent, data: { breadcrumb: null } },
+          { path: 'quiz', component: QuestionRunnerComponent, data: { breadcrumb: 'Fragen beantworten' } },
+          { path: 'fragen', component: QuestionBrowserComponent, data: { breadcrumb: 'Fragen browsen' } },
+          { path: 'pruefungsmodus', component: QuestionRunnerComponent, data: { breadcrumb: 'Prüfungsmodus' } }
         ]
       },
 
       {
         path: 'stats',
-        component: StatsHomeComponent,
-        data: { breadcrumb: 'Statistik' }
+        data: { breadcrumb: 'Statistik' },
+        children: [
+          { path: 'generell', component: StatsHomeComponent, data: { breadcrumb: 'Generell' } },
+          { path: 'themenpool', component: StatsTopicsComponent, data: { breadcrumb: 'Themenpool' } },
+          { path: 'pruefungen', component: StatsExamsComponent, data: { breadcrumb: 'Prüfungen' } },
+          { path: '', redirectTo: 'generell', pathMatch: 'full' } // optional default
+        ]
       }
     ]
   }

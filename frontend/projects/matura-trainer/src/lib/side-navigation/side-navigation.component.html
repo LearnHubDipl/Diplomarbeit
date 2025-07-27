@@ -1,1 +1,24 @@
-<p>side-navigation works!</p>
+<nav class="trainer-navigation">
+  <!-- Benutzerinfo -->
+  <div class="user-info">
+    <img src="https://via.placeholder.com/60" alt="" class="profile-img" />
+    <div class="user-details">
+      <div class="full-name">Stefanie Steinmair</div>
+      <div class="initials">SS</div>
+    </div>
+  </div>
+
+  <ul class="nav-list">
+    <!-- Üben -->
+    <li class="nav-section"><a routerLink="/trainer/practice/quiz" routerLinkActive="active">Üben</a></li>
+    <li class="nav-sub"><a routerLink="/trainer/practice/fragen" routerLinkActive="active">Fragen browsen</a></li>
+    <li class="nav-sub"><a routerLink="/trainer/practice/pruefungsmodus" routerLinkActive="active">Prüfungsmodus</a></li>
+
+    <!-- Statistik -->
+    <li class="nav-section">Statistik</li>
+    <li class="nav-sub"><a routerLink="/trainer/stats/generell" routerLinkActive="active">Generell</a></li>
+    <li class="nav-sub"><a routerLink="/trainer/stats/themenpool" routerLinkActive="active">Themenpool</a></li>
+    <li class="nav-sub"><a routerLink="/trainer/stats/pruefungen" routerLinkActive="active">Prüfungen</a></li>
+
+  </ul>
+</nav>

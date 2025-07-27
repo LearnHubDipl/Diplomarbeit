@@ -1,21 +1,98 @@
-/**
- MAIN LAYOUT
- */
 .trainer-main-layout {
   display: grid;
-  grid-template-columns: 1fr 3fr;
-  margin: 0; padding: 0;
+  grid-template-columns: 20vw auto; /* 250px Sidebar, Rest Content */
   width: 100%;
   height: 100vh;
 }
-
-.trainer-main-layout .trainer-navigation {
-  height: 100%;
-  width: 100%;
-  background-color: green;  /* for testing */
+.trainer-navigation {
+  background-color: #2c3e50;
+  color: white;
+  padding: 1rem;
+  height: 100vh;        /* immer volle Höhe */
+  box-sizing: border-box;
 }
 
-.trainer-main-layout .trainer-content {
-  padding: 4% 10%;
-  /*background-color: red;*/ /* for testing */
+.trainer-navigation a {
+  color: #ccc;               /* hellgrauer Text für Links */
+  text-decoration: none;     /* kein Unterstrich */
+  display: block;            /* Block, damit Padding gut wirkt */
+  padding: 0.5rem 1rem;      /* etwas Innenabstand */
+  border-radius: 4px;        /* leicht abgerundete Ecken */
+  transition: background-color 0.3s, color 0.3s;
 }
+
+.trainer-navigation a:hover {
+  background-color: #4a5a70; /* dunklerer Hintergrund beim Hover */
+  color: white;              /* Text weiß beim Hover */
+}
+.trainer-navigation a.active {
+  background-color: #f1c40f; /* goldgelber Hintergrund wie im Screenshot */
+  color: #222;               /* dunkler Text auf gelbem Hintergrund */
+  font-weight: bold;         /* aktiven Link hervorheben */
+}
+.trainer-navigation h2 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.profile-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-name {
+  font-weight: bold;
+  color: #fff;
+}
+
+.initials {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+/* Navigation */
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-section {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #ccc;
+}
+
+.nav-sub {
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.nav-sub a {
+  color: #bdc3c7;
+  text-decoration: none;
+  display: block;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+}
+
+.nav-sub a.active,
+.nav-sub a:hover {
+  background-color: #6693c2;
+  color: #fff;
+}
+
