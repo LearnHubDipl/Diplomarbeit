@@ -3,22 +3,23 @@
   <div class="user-info">
     <img src="https://via.placeholder.com/60" alt="" class="profile-img" />
     <div class="user-details">
-      <div class="full-name">Stefanie Steinmair</div>
-      <div class="initials">SS</div>
+      <div class="full-name">Max Mustermann</div>
+      <div class="initials">MM</div>
     </div>
   </div>
 
-  <ul class="nav-list">
+  <div class="nav-list">
     <!-- Üben -->
-    <li class="nav-section"><a routerLink="/trainer/practice/quiz" routerLinkActive="active">Üben</a></li>
-    <li class="nav-sub"><a routerLink="/trainer/practice/fragen" routerLinkActive="active">Fragen browsen</a></li>
-    <li class="nav-sub"><a routerLink="/trainer/practice/pruefungsmodus" routerLinkActive="active">Prüfungsmodus</a></li>
+    <div class="nav-section"><a routerLink="/trainer/practice" routerLinkActive="active">Üben</a></div>
+    <div class="nav-sub"><a routerLink="/trainer/practice/fragen" routerLinkActive="active">Fragen browsen</a></div>
+    <div class="nav-sub"><a routerLink="/trainer/practice/pruefungsmodus" routerLinkActive="active">Prüfungsmodus</a></div>
 
     <!-- Statistik -->
-    <li class="nav-section">Statistik</li>
-    <li class="nav-sub"><a routerLink="/trainer/stats/generell" routerLinkActive="active">Generell</a></li>
-    <li class="nav-sub"><a routerLink="/trainer/stats/themenpool" routerLinkActive="active">Themenpool</a></li>
-    <li class="nav-sub"><a routerLink="/trainer/stats/pruefungen" routerLinkActive="active">Prüfungen</a></li>
+    <div class="nav-section"><a>Statistik</a></div>
+    <div class="nav-sub"><a routerLink="/trainer/stats/generell" routerLinkActive="active">Generell</a></div>
+    <div class="nav-sub"><a routerLink="/trainer/stats/themenpool" routerLinkActive="active">Themenpool</a></div>
+    <div class="nav-sub"><a routerLink="/trainer/stats/pruefungen" routerLinkActive="active">Prüfungen</a></div>
 
-  </ul>
+    <div class="nav-back"><a routerLink="">zur Stoffsammlung</a></div>
+  </div>
 </nav>
