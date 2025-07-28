@@ -2,6 +2,7 @@ package at.learnhub.boundary;
 
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.repository.QuestionRepository;
+import at.learnhub.service.QuestionService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -23,6 +24,8 @@ import java.util.List;
 public class QuestionResource {
     @Inject
     QuestionRepository questionRepository;
+    @Inject
+    QuestionService questionService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -78,6 +81,41 @@ public class QuestionResource {
             @PathParam("id") Long id) {
         QuestionDto question = questionRepository.getQuestionDtoById(id);
         return Response.ok(question).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/byTopicPool/{id}")
+    @Operation(
+            summary = "Get a list of questions for a topic pool by the topic pool ID",
+            description = "Returns a list of Questions as their DTO that are associated with the topic pool of the given ID"
+    )
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "Topic Pool found and all Questions associated returned",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(
+                                    type = SchemaType.ARRAY,
+                                    implementation = QuestionDto.class
+                            )
+                    )
+            ),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Topic Pool not found"
+            )
+    })
+    public Response getQuestionsForTopicPool(
+            @Parameter(
+                    description = "ID of the topic pool which holds questions",
+                    required = true,
+                    example = "123"
+            )
+            @PathParam("id") Long id) {
+        List<QuestionDto> questions = questionService.getQuestionsByTopicPool(id);
+        return Response.ok(questions).build();
     }
 }
 

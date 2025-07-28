@@ -3,6 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Question} from '../interfaces/question';
 import {API_BASE_URL} from './globals';
+import {TopicPool} from '../interfaces/topic-pool';
 
 @Injectable({
   providedIn: 'root'
@@ -14,5 +15,9 @@ export class QuestionService {
 
   getQuestionById(id: number): Observable<Question> {
     return this.httpClient.get<Question>(API_BASE_URL + '/questions/' + id);
+  }
+
+  getQuestionsByTopicPool(topicPool: TopicPool): Observable<Question[]> {
+    return this.httpClient.get<Question[]>(API_BASE_URL + '/questions/byTopicPool/' + topicPool.id);
   }
 }
