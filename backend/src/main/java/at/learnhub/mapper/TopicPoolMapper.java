@@ -2,6 +2,7 @@ package at.learnhub.mapper;
 
 import at.learnhub.dto.simple.SubjectDto;
 import at.learnhub.dto.simple.SubjectSlimDto;
+import at.learnhub.dto.simple.TopicPoolDto;
 import at.learnhub.dto.simple.TopicPoolSlimDto;
 import at.learnhub.model.Subject;
 import at.learnhub.model.TopicPool;
@@ -19,6 +20,15 @@ import at.learnhub.model.TopicPool;
  * This class is stateless and should not be instantiated.
  */
 public class TopicPoolMapper {
+
+    public static TopicPoolDto toDto(TopicPool topicPool) {
+        return new TopicPoolDto(
+                topicPool.getId(),
+                topicPool.getName(),
+                topicPool.getDescription(),
+                SubjectMapper.toSlimDto(topicPool.getSubject())
+        );
+    }
 
     /**
      * Maps a {@link TopicPool} entity to a slim {@link TopicPoolSlimDto}, excluding all relations.

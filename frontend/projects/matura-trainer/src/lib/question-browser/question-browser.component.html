@@ -1,1 +1,43 @@
-<p>question-browser works!</p>
+<div class="browser-grid">
+  <!-- Topic pools on the left side -->
+  <div class="widget-wrapper">
+    <div class="browser-topic-grid">
+
+      <div *ngFor="let currentSubject of this.subjects">
+        <div class="header topicPool-header" (click)="toggleDropdown(currentSubject.id)">
+          <span class="title">{{ currentSubject.name }}</span>
+          <span class="arrow">{{ openDropdowns[currentSubject.id] ? '▲' : '▼' }}</span>
+        </div>
+
+        <div class="dropdown-content" *ngIf="openDropdowns[currentSubject.id]">
+          <ul>
+            <li *ngFor="let pool of currentSubject.topicPools"
+                (click)="loadQuestionsForTopicPool(pool)"
+                [class]="pool == this.selectedTopicPool ? 'selectedTopicPool' : ''"
+            >{{ pool.name }}</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Questions of selected Topic pool on the right side -->
+  <div class="widget-wrapper">
+    <div class="header question-header">
+      {{ this.selectedTopicPool ? this.selectedTopicPool?.subject?.name : "Fach" }} >
+      {{ this.selectedTopicPool ? this.selectedTopicPool?.name : "Themenpool" }}
+    </div>
+
+    <div class="widget-content">
+      <div *ngFor="let currentQuestion of this.questions"
+           class="widget-wrapper"
+           style="margin-bottom: 0.8rem;"
+      >
+        <div class="widget-content question-content">
+          <h5>{{ currentQuestion.text }}</h5>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
