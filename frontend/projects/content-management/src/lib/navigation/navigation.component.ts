@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
-import {RouterOutlet} from "@angular/router";
+import {RouterLink, RouterOutlet} from "@angular/router";
 
 @Component({
   selector: 'lib-navigation',
-    imports: [
-        RouterOutlet
-    ],
+  imports: [
+    RouterOutlet,
+    RouterLink
+  ],
   templateUrl: './navigation.component.html',
   styleUrl: './navigation.component.css'
 })
