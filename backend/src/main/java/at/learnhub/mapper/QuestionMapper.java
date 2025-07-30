@@ -3,6 +3,7 @@ package at.learnhub.mapper;
 import at.learnhub.dto.simple.AnswerSlimDto;
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.dto.simple.QuestionSlimDto;
+import at.learnhub.dto.simple.TopicPoolSlimDto;
 import at.learnhub.model.Question;
 import at.learnhub.model.QuestionType;
 import at.learnhub.model.User;
@@ -12,12 +13,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class QuestionMapper {
+
     public static QuestionDto toDto(Question question) {
         List<AnswerSlimDto> answers = new ArrayList<>();
-        if (question.getType() != QuestionType.FREETEXT) {
+        if(question.getType() != QuestionType.FREETEXT){
             answers = question.getAnswers().stream()
                     .map(AnswerMapper::toSlimDto)
                     .toList();
+        }
+
+        TopicPoolSlimDto topicPoolDto = null;
+        if(question.getTopicPool() != null){
+            topicPoolDto = TopicPoolMapper.toSlimDto(question.getTopicPool());
         }
 
         return new QuestionDto(
@@ -28,7 +35,7 @@ public class QuestionMapper {
                 question.getType(),
                 question.getDifficulty(),
                 question.getPublic(),
-                TopicPoolMapper.toSlimDto(question.getTopicPool()),
+                topicPoolDto,
                 UserMapper.toSlimDto(question.getUser()),
                 answers
         );
