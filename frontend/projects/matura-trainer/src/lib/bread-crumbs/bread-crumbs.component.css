@@ -1,0 +1,26 @@
+/**
+ BREADCRUMBS (From w3schools.com)
+ */
+ul.breadcrumb {
+  position: relative;
+  left: -4%;
+  margin-bottom: 6%;
+  list-style: none;
+}
+ul.breadcrumb li {
+  display: inline;
+  font-size: 2em;
+}
+ul.breadcrumb li+li:before {
+  padding: 8px;
+  color: black;
+  content: ">";
+}
+ul.breadcrumb li a {
+  color: #f99e4e;;
+  text-decoration: none;
+}
+ul.breadcrumb li a:hover {
+  color: #ec8424;;
+  text-decoration: underline;
+}

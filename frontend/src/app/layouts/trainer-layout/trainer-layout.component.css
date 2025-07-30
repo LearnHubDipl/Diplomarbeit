@@ -1,0 +1,9 @@
+.trainer-main-layout {
+  display: grid;
+  grid-template-columns:20vw auto;
+  width: 100%;
+  height: 100vh;
+}
+.trainer-main-layout .trainer-content {
+  padding: 4% 10%;
+}

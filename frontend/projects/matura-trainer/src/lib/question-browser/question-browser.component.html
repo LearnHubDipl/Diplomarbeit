@@ -1,0 +1,71 @@
+<div class="browser-grid">
+  <!-- Topic pools on the left side -->
+  <div class="widget-wrapper">
+    <div class="browser-topic-grid">
+
+      <div *ngFor="let currentSubject of this.subjects">
+        <div class="header topicPool-header" (click)="toggleSubjectDropdown(currentSubject.id)">
+          <span class="title">{{ currentSubject.name }}</span>
+          <span class="arrow">{{ openSubjectDropDowns[currentSubject.id] ? '▲' : '▼' }}</span>
+        </div>
+
+        <div class="dropdown-content" *ngIf="openSubjectDropDowns[currentSubject.id]">
+          <ul>
+            <li *ngFor="let pool of currentSubject.topicPools"
+                (click)="loadQuestionsForTopicPool(pool)"
+                [class]="pool == this.selectedTopicPool ? 'selectedTopicPool' : ''"
+            >{{ pool.name }}</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Questions of selected Topic pool on the right side -->
+  <div class="widget-wrapper">
+
+    <div class="header question-header">
+      {{ this.selectedTopicPool ? this.selectedTopicPool.subject.name : "Fach" }} >
+      {{ this.selectedTopicPool ? this.selectedTopicPool.name : "Themenpool" }}
+    </div>
+
+    <div class="widget-content">
+      <div *ngFor="let currentQuestion of this.questions"
+           class="widget-wrapper"
+           style="margin-bottom: 0.8rem;"
+      >
+        <div class="widget-content question-content" (click)="toggleQuestionDropdown(currentQuestion.id)">
+          <div class="question-title">
+            <h5
+              [class]="!openQuestionDropDowns[currentQuestion.id] ? 'truncated' : 'expanded'"
+              [style]="currentQuestion.media && openQuestionDropDowns[currentQuestion.id] ? 'width: 50%;' : 'width: 80%'"
+            >
+              {{ currentQuestion.text }}
+            </h5>
+            <img
+              [src]="currentQuestion.media.path"
+              [alt]="currentQuestion.media.description"
+              *ngIf="currentQuestion.media && openQuestionDropDowns[currentQuestion.id]"
+            >
+            <span class="arrow">{{ openQuestionDropDowns[currentQuestion.id] ? '▲' : '▼' }}</span>
+          </div>
+
+          <div class="dropdown-content" *ngIf="openQuestionDropDowns[currentQuestion.id]">
+            <div class="button-container">
+              <button
+                class="submit-btn"
+                type="button"
+                (click)="navigateToQuestionRunner(currentQuestion.id)"
+              >
+                Jetzt Üben
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

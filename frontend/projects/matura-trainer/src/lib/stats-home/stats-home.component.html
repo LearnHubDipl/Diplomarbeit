@@ -1,0 +1,41 @@
+<div class="stats-layout">
+  <div class="left-side">
+    <div class="chart">
+      <div style="display: block; width: 100%;">
+        <canvas baseChart
+                [data]="doughnutChartData"
+                [type]="doughnutChartType"
+                [options]="chartOptions"
+                [plugins]="chartPlugins">
+        </canvas>
+      </div>
+    </div>
+    <div class="stats-widgets">
+      <div class="stats-widget">
+        durchschnitt
+      </div>
+      <div class="stats-widget">
+        {{ streak }}<br>
+        Tage <br>
+        Streak
+      </div>
+    </div>
+  </div>
+
+
+    <div class="legend-card">
+      <div class="legend-header">Legende</div>
+      <div class="legend-item" *ngFor="let entry of legendData">
+        <div class="legend-info">
+          <span class="legend-dot" [ngStyle]="{'background-color': entry.color}"></span>
+          <span class="legend-label">{{ entry.label }}</span>
+          <span class="legend-percent">{{ entry.value }}%</span>
+        </div>
+        <div class="legend-bar">
+          <div class="legend-bar-fill" [ngStyle]="{'width.%': entry.value, 'background-color': entry.color}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+

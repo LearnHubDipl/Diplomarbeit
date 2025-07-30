@@ -1,1 +1,97 @@
-<p>question-runner works!</p>
+<div class="widget-wrapper question-wrapper">
+  <!-- inner 'bread crumbs' showing the subject and the topic pool -->
+  <div class="header">{{ this.question?.topicPool?.subject?.name }} &gt; {{ this.question?.topicPool?.name }}</div>
+
+  <form [formGroup]="form" class="widget-content question-content" (ngSubmit)="submit()">
+    <div class="widget-content-top">
+      <div *ngIf="submitted" class="result-badge" [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
+        <span class="icon">
+          <ng-container *ngIf="answerResult?.correct">✔️</ng-container>
+          <ng-container *ngIf="!answerResult?.correct">❌</ng-container>
+        </span>
+        {{ answerResult?.correct ? 'Richtig!' : 'Falsch!' }}
+      </div>
+      <div class="widget-content-left" [ngStyle]="{ width: question?.media ? '60%' : '100%' }">
+        <div class="question">{{ question?.text }}</div>
+
+        <ng-container *ngIf="question?.type === 'MULTIPLE_CHOICE'">
+          <ul class="answers" formArrayName="answers">
+            <li
+              *ngFor="let answer of question?.answers; let i = index"
+              [ngClass]="{
+                'correct': isCorrectAnswer(answer.id),
+                'incorrect': isIncorrectAnswer(answer.id, i)
+              }"
+            >
+              <input type="checkbox" [formControlName]="i" [disabled]="submitted">
+              {{ answer.text }}
+            </li>
+          </ul>
+        </ng-container>
+
+        <ng-container *ngIf="question?.type === 'FREETEXT'">
+          <textarea
+            formControlName="freeTextAnswer"
+            [readonly]="submitted"
+            rows="4"
+            placeholder="Bitte Antwort eingeben..."
+          ></textarea>
+
+          <!-- Reserved feedback container -->
+          <div class="feedback-wrapper">
+            <div
+              *ngIf="submitted"
+              class="feedback"
+              [ngClass]="{ 'correct': answerResult?.correct, 'incorrect': !answerResult?.correct }"
+            >
+              <p *ngIf="answerResult?.correct">Richtig!</p>
+              <div *ngIf="!answerResult?.correct">
+                Falsche Antwort.<br>
+                Mögliche Antworten:
+                <ul>
+                  <li *ngFor="let correctAnswer of answerResult?.correctFreeTextAnswers">{{ correctAnswer }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="widget-content-right" [ngStyle]="{ display: this.question?.media ? 'block' : 'none'}">
+        <img [src]="this.question?.media?.path" [alt]="this.question?.media?.description">
+      </div>
+    </div>
+
+    <div class="button-container">
+      <button
+        class="submit-btn"
+        type="button"
+        [disabled]="!anySelected() && !submitted"
+        (click)="isFinished
+          ? finish()
+          : (submitted ? loadNextQuestion() : submit())">
+        {{
+          isFinished
+            ? 'Abschließen'
+            : (submitted ? 'Nächste Frage' : 'Prüfen')
+        }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<div *ngIf="hasSolutions && submitted" style="margin-top: 3rem;" class="widget-wrapper">
+  <div class="header">TOP Lösungsweg</div>
+
+  <div class="widget-content">
+    <div *ngFor="let currentStep of this.question?.solutions?.[0]?.steps">
+      <h5>{{ currentStep.title }}</h5>
+      <p>{{ currentStep.text }}</p>
+    </div>
+    <div class="vote-wrapper">
+      <img src="https://www.pngmart.com/files/23/Upvote-PNG-Photos.png">
+      <p>{{ this.question?.solutions?.[0]?.upVotes }}</p>
+      <img src="https://i.imgur.com/2mVSBqP.png">
+    </div>
+  </div>
+</div>

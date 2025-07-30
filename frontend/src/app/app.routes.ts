@@ -1,16 +1,23 @@
 import { Routes } from '@angular/router';
-import {HomeComponent} from '../../projects/content-management/src/lib/home/home.component';
+import {HomeComponent as ContentHomeComponent } from '../../projects/content-management/src/lib/home/home.component';
+import {HomeComponent as TrainerHomeComponent } from '../../projects/matura-trainer/src/lib/home/home.component';
 import {QuestionRunnerComponent} from '../../projects/matura-trainer/src/lib/question-runner/question-runner.component';
 import {TrainerLayoutComponent} from './layouts/trainer-layout/trainer-layout.component';
 import {AppLayoutComponent} from './layouts/app-layout/app-layout.component';
 import {AboutComponent} from '../../projects/content-management/src/lib/about/about.component';
+import {StatsHomeComponent} from '../../projects/matura-trainer/src/lib/stats-home/stats-home.component';
+import {
+  QuestionBrowserComponent
+} from '../../projects/matura-trainer/src/lib/question-browser/question-browser.component';
+import {StatsTopicsComponent} from '../../projects/matura-trainer/src/lib/stats-topics/stats-topics.component';
+import {StatsExamsComponent} from '../../projects/matura-trainer/src/lib/stats-exams/stats-exams.component';
 
 export const routes: Routes = [
   {
     path: '',
     component: AppLayoutComponent,
     children: [
-      { path: '', component: HomeComponent },
+      { path: '', component: ContentHomeComponent },
       { path: 'about', component: AboutComponent }
     ]
   },
@@ -18,7 +25,29 @@ export const routes: Routes = [
     path: 'trainer',
     component: TrainerLayoutComponent,
     children: [
-      { path: '', component: QuestionRunnerComponent }
+      { path: '', redirectTo: 'practice', pathMatch: 'full' },
+
+      {
+        path: 'practice',
+        data: { breadcrumb: 'Üben' },
+        children: [
+          { path: '', component: TrainerHomeComponent, data: { breadcrumb: null } },
+          { path: 'quiz', component: QuestionRunnerComponent, data: { breadcrumb: 'Fragen beantworten' } },
+          { path: 'fragen', component: QuestionBrowserComponent, data: { breadcrumb: 'Fragen browsen' } },
+          { path: 'pruefungsmodus', component: QuestionRunnerComponent, data: { breadcrumb: 'Prüfungsmodus' } }
+        ]
+      },
+
+      {
+        path: 'stats',
+        data: { breadcrumb: 'Statistik' },
+        children: [
+          { path: 'generell', component: StatsHomeComponent, data: { breadcrumb: 'Generell' } },
+          { path: 'themenpool', component: StatsTopicsComponent, data: { breadcrumb: 'Themenpool' } },
+          { path: 'pruefungen', component: StatsExamsComponent, data: { breadcrumb: 'Prüfungen' } },
+          { path: '', redirectTo: 'generell', pathMatch: 'full' } // optional default
+        ]
+      }
     ]
   }
 ];

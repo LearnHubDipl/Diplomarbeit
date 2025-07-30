@@ -23,6 +23,12 @@ public record TopicPoolSlimDto(
                 description = "Description or summary of the topic pool",
                 example = "This topic pool covers the basics of algebra including variables and equations."
         )
-        String description
+        String description,
+
+        @Schema(
+                description = "Subject this topic pool belongs to.",
+                implementation = SubjectSlimDto.class
+        )
+        SubjectSlimDto subject
 
 ) {}
