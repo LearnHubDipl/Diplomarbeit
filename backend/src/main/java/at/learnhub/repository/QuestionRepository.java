@@ -4,9 +4,11 @@ import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.mapper.QuestionMapper;
 import at.learnhub.model.Question;
 import at.learnhub.model.QuestionType;
+import at.learnhub.model.TopicPool;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -113,5 +115,25 @@ public class QuestionRepository {
                 .stream()
                 .map(QuestionMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Persitsts a new question (of any type) in the database.
+     *
+     * @param questionDto Dto containing full question details
+     * @return the saved Question as Dto
+     */
+    @Transactional
+    public QuestionDto create(QuestionDto questionDto) {
+        Question question = QuestionMapper.toEntity(questionDto);
+
+        if(questionDto.topicPool() != null && questionDto.topicPool().id() != null) {
+            question.setTopicPool(em.getReference(TopicPool.class, questionDto.topicPool().id()));
+        }
+
+        em.persist(question);
+        em.flush();
+
+        return QuestionMapper.toDto(question);
     }
 }

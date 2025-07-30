@@ -5,15 +5,16 @@ import at.learnhub.dto.simple.SubjectDto;
 import at.learnhub.model.QuestionType;
 import at.learnhub.repository.QuestionRepository;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
@@ -134,9 +135,9 @@ public class QuestionResource {
                     )
             )
     })
-    public Response getPublicQuestions(){
+    public Response getPublicQuestions() {
         List<QuestionDto> questions = questionRepository.findAllPublicQuestions();
-        if(questions == null || questions.isEmpty()) {
+        if (questions == null || questions.isEmpty()) {
             return Response.status(Response.Status.NO_CONTENT).build();
         }
         return Response.ok(questions).build();
@@ -170,16 +171,16 @@ public class QuestionResource {
                     description = "Invalid question type"
             )
     })
-    public Response getQuestionsByType(@Parameter(description = "type of the question", required = true) @PathParam("type") String type){
-        try{
+    public Response getQuestionsByType(@Parameter(description = "type of the question", required = true) @PathParam("type") String type) {
+        try {
             QuestionType questionType = QuestionType.valueOf(type.toUpperCase());
             List<QuestionDto> questions = questionRepository.findByType(questionType);
 
-            if(questions == null || questions.isEmpty()) {
+            if (questions == null || questions.isEmpty()) {
                 return Response.status(Response.Status.NO_CONTENT).build();
             }
             return Response.ok(questions).build();
-        } catch(IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Invalid question type: " + type).build();
         }
@@ -214,16 +215,16 @@ public class QuestionResource {
             )
     })
     public Response getQuestionsByDifficulty(
-            @Parameter(description = "Difficulty level (1=easy,2=medium,3=hard)",required = true,example = "2")
+            @Parameter(description = "Difficulty level (1=easy,2=medium,3=hard)", required = true, example = "2")
             @PathParam("level") Integer level
     ) {
-        if(level < 1 || level > 3){
+        if (level < 1 || level > 3) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Invalid difficulty level: " + level).build();
         }
 
         List<QuestionDto> questions = questionRepository.findByDifficulty(level);
-        if(questions == null || questions.isEmpty()) {
+        if (questions == null || questions.isEmpty()) {
             return Response.status(Response.Status.NO_CONTENT).build();
         }
         return Response.ok(questions).build();
@@ -260,12 +261,78 @@ public class QuestionResource {
     public Response getQuestionsByTopicPoolId(
             @Parameter(description = "id of the topic pool", required = true, example = "3")
             @PathParam("id") Long topicPoolId
-    ){
+    ) {
         List<QuestionDto> questions = questionRepository.findByTopicPoolId(topicPoolId);
-        if(questions == null || questions.isEmpty()) {
+        if (questions == null || questions.isEmpty()) {
             return Response.status(Response.Status.NO_CONTENT).build();
         }
         return Response.ok(questions).build();
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Transactional
+    @Operation(
+            summary = "Create a new question",
+            description = "Creates a new question of any type and returnes the created object"
+    )
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "201",
+                    description = "Question created successfully",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = QuestionDto.class)
+                    )
+            ),
+            @APIResponse(
+                    responseCode = "400",
+                    description = "Invalid input data"
+            )
+    })
+    public Response createQuestion(
+            @RequestBody(
+                    required = true,
+                    description = "The full questionDto to create",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = QuestionDto.class),
+                            examples = @ExampleObject(
+                                    name = "exampleQuestion",
+                                    summary = "Example question",
+                                    value = """
+                                            {
+                                               "text": "Was ist 2 + 2?",
+                                               "explanation": "Einfache Addition",
+                                               "media": null,
+                                               "type": "MULTIPLE_CHOICE",
+                                               "difficulty": 1,
+                                               "isPublic": true,
+                                               "topicPoolId": 1,
+                                               "answers": [
+                                                 {
+                                                   "text": "4",
+                                                   "isCorrect": true
+                                                 },
+                                                 {
+                                                   "text": "3",
+                                                   "isCorrect": false
+                                                 }
+                                               ]
+                                             }
+                                            """
+                            )
+                    )
+            )
+            QuestionDto questionDto
+    ) {
+        if (questionDto == null || questionDto.text() == null || questionDto.type() == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Missing required fields").build();
+        }
+        QuestionDto created = questionRepository.create(questionDto);
+        return Response.status(Response.Status.CREATED).entity(created).build();
     }
 
 }

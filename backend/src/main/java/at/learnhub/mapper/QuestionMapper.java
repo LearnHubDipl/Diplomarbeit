@@ -17,9 +17,12 @@ public class QuestionMapper {
     public static QuestionDto toDto(Question question) {
         List<AnswerSlimDto> answers = new ArrayList<>();
         if(question.getType() != QuestionType.FREETEXT){
-            answers = question.getAnswers().stream()
-                    .map(AnswerMapper::toSlimDto)
-                    .toList();
+            // Nullprüfung ergänzen:
+            if(question.getAnswers() != null){
+                answers = question.getAnswers().stream()
+                        .map(AnswerMapper::toSlimDto)
+                        .toList();
+            }
         }
 
         TopicPoolSlimDto topicPoolDto = null;
@@ -41,6 +44,7 @@ public class QuestionMapper {
         );
     }
 
+
     public static QuestionSlimDto toSlimDto(Question question) {
         return new QuestionSlimDto(
                 question.getId(),
@@ -55,13 +59,14 @@ public class QuestionMapper {
 
     public static Question toEntity(QuestionDto questionDto) {
         Question question = new Question();
-        question.setId(question.getId());
-        question.setText(question.getText());
-        question.setExplanation(question.getExplanation());
-        question.setMedia(question.getMedia());
-        question.setType(question.getType());
-        question.setDifficulty(question.getDifficulty());
-        question.setPublic(question.getPublic());
+
+        question.setId(questionDto.id());
+        question.setText(questionDto.text());
+        question.setExplanation(questionDto.explanation());
+        question.setMedia(questionDto.media());
+        question.setType(questionDto.type());
+        question.setDifficulty(questionDto.difficulty());
+        question.setPublic(questionDto.isPublic());
         return question;
     }
 }
