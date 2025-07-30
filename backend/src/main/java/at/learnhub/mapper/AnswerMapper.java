@@ -26,8 +26,11 @@ public class AnswerMapper {
      * @return the corresponding AnswerDto
      */
     public static AnswerDto toDto(Answer answer) {
-        return new AnswerDto(answer.getId(), answer.getText(),
-                answer.getCorrect(), QuestionMapper.toSlimDto(answer.getQuestion()));
+        return new AnswerDto(
+                answer.getId(),
+                answer.getText(),
+                QuestionMapper.toSlimDto(answer.getQuestion())
+        );
     }
 
     /**
@@ -37,7 +40,10 @@ public class AnswerMapper {
      * @return the slim AnswerSlimDto
      */
     public static AnswerSlimDto toSlimDto(Answer answer) {
-        return new AnswerSlimDto(answer.getId(), answer.getText(), answer.getCorrect());
+        return new AnswerSlimDto(
+                answer.getId(),
+                answer.getText()
+        );
     }
 
     /**

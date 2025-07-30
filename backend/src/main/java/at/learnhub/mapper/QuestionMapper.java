@@ -2,10 +2,13 @@ package at.learnhub.mapper;
 
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.dto.simple.QuestionSlimDto;
+import at.learnhub.dto.simple.SolutionSlimDto;
+import at.learnhub.dto.simple.SolutionVoteSlimDto;
 import at.learnhub.model.Question;
 import at.learnhub.model.QuestionType;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -30,14 +33,18 @@ public class QuestionMapper {
     public static QuestionDto toDto(Question question) {
         return new QuestionDto(question.getId(), question.getText(), question.getExplanation(),
                 question.getMedia(), question.getType(), question.getDifficulty(),
-                question.getPublic(), TopicPoolMapper.toSlimDto(question.getTopicPool()),
+                question.getPublic(), UserMapper.toSlimDto(question.getUser()),
+                TopicPoolMapper.toSlimDto(question.getTopicPool()),
                 question.getType() == QuestionType.FREETEXT ? null :
                 question.getAnswers().stream().map(AnswerMapper::toSlimDto)
                         .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
                             Collections.shuffle(list);
                             return list;
                         })),
-                question.getSolutions().stream().map(SolutionMapper::toSlimDto).toList());
+                question.getSolutions().stream()
+                        .map(SolutionMapper::toSlimDto)
+                        .sorted(Comparator.comparingLong(SolutionSlimDto::upVotes).reversed())
+                        .toList());
     }
 
     /**

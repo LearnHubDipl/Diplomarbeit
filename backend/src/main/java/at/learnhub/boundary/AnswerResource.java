@@ -27,6 +27,7 @@ public class AnswerResource {
     @Inject
     AnswerService answerService;
 
+    /*
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(
@@ -50,6 +51,7 @@ public class AnswerResource {
         List<AnswerDto> answers = answerRepository.findAll();
         return Response.ok(answers).build();
     }
+    */
 
     @POST
     @Path("/check")

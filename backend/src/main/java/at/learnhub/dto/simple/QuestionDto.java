@@ -2,6 +2,7 @@ package at.learnhub.dto.simple;
 
 import at.learnhub.model.MediaFile;
 
+import at.learnhub.model.QuestionType;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -38,9 +39,10 @@ public record QuestionDto(
 
         @Schema(
                 description = "Numerical code representing the question type (e.g., multiple choice, freetext).",
-                example = "1"
+                example = "1",
+                implementation = QuestionType.class
         )
-        Integer type,
+        QuestionType type,
 
         @Schema(
                 description = "Difficulty level of the question, e.g., 1 (easy) to 3 (hard).",
@@ -53,6 +55,11 @@ public record QuestionDto(
                 example = "true"
         )
         Boolean isPublic,
+
+        @Schema(
+                description = "User who created the question"
+        )
+        UserSlimDto user,
 
         @Schema(
                 description = "The topic pool this question belongs to. Used to categorize questions.",

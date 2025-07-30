@@ -1,6 +1,6 @@
 package at.learnhub.boundary;
 
-import at.learnhub.dto.SubjectDto;
+import at.learnhub.dto.simple.SubjectDto;
 import at.learnhub.repository.SubjectRepository;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
