@@ -11,6 +11,16 @@ import {
 } from '../../projects/matura-trainer/src/lib/question-browser/question-browser.component';
 import {StatsTopicsComponent} from '../../projects/matura-trainer/src/lib/stats-topics/stats-topics.component';
 import {StatsExamsComponent} from '../../projects/matura-trainer/src/lib/stats-exams/stats-exams.component';
+import {
+  StudyOrCreateComponent
+} from '../../projects/content-management/src/lib/study-or-create/study-or-create.component';
+import {StartCreateComponent} from '../../projects/content-management/src/lib/start-create/start-create.component';
+import {
+  StartLearningComponent
+} from '../../projects/content-management/src/lib/start-learning/start-learning.component';
+import {
+  FragenKonfiguratorComponent
+} from '../../projects/content-management/src/lib/fragen-konfigurator/fragen-konfigurator.component';
 
 export const routes: Routes = [
   {
@@ -18,7 +28,11 @@ export const routes: Routes = [
     component: AppLayoutComponent,
     children: [
       { path: '', component: ContentHomeComponent },
-      { path: 'about', component: AboutComponent }
+      { path: 'about', component: AboutComponent },
+      {path: 'chooseStudyOrCreate', component: StudyOrCreateComponent},
+      {path: 'startCreate', component: StartCreateComponent},
+      {path: 'startStudy', component: StartLearningComponent},
+      {path: 'fragenkonfigurator', component: FragenKonfiguratorComponent}
     ]
   },
   {

@@ -1,0 +1,82 @@
+<div class="container py-5">
+  <h1 class="fw-bold mb-1">
+    Fragenkonfigurator
+  </h1>
+  <p class="mb-4">Individuelle Fragen erstellen &amp; Themen gezielt abdecken</p>
+
+  <form>
+
+    <div class="mb-3">
+      <label for="fragentyp" class="form-label">Fragentyp *</label>
+      <select id="fragentyp" class="form-select border-warning" required>
+        <option value="" disabled selected>Bitte wählen</option>
+        <option>Multiple Choice</option>
+        <option>Wahr/Falsch</option>
+        <option>Offene Frage</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="fach" class="form-label">Schulfach *</label>
+      <select id="fach" class="form-select border-warning" required>
+        <option value="" disabled selected>Bitte wählen</option>
+        <option>Mathematik</option>
+        <option>Deutsch</option>
+        <option>Biologie</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="themenpool" class="form-label">Themenpool *</label>
+      <select id="themenpool" class="form-select border-warning" required>
+        <option value="" disabled selected>Bitte wählen</option>
+        <option>Thema 1</option>
+        <option>Thema 2</option>
+        <option>Thema 3</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="frage" class="form-label">Frage</label>
+      <textarea id="frage" class="form-control border-warning" rows="2"></textarea>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label">Antwortmöglichkeiten *</label>
+        <input type="text" class="form-control mb-2" placeholder="Richtige Antwort" required>
+
+        <input type="text" class="form-control mb-2" placeholder="Falsche Antwort" required>
+        <input type="text" class="form-control mb-2" placeholder="Falsche Antwort" required>
+        <input type="text" class="form-control" placeholder="Falsche Antwort">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label d-block">Schwierigkeitsgrad *</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" id="leicht" name="schwierigkeit" value="Leicht" required>
+          <label class="form-check-label" for="leicht">Leicht</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" id="mittel" name="schwierigkeit" value="Mittel" checked>
+          <label class="form-check-label" for="mittel">Mittel</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" id="schwer" name="schwierigkeit" value="Schwer">
+          <label class="form-check-label" for="schwer">Schwer</label>
+        </div>
+
+        <label for="bild" class="form-label mt-3">Bild Upload (optional)</label>
+        <input id="bild" type="file" class="form-control">
+
+        <label for="erklaerung" class="form-label mt-3">Erklärung (optional)</label>
+        <textarea id="erklaerung" class="form-control" rows="2"></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm text-white">
+      Veröffentlichen
+    </button>
+
+  </form>
+</div>
