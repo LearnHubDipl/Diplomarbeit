@@ -12,7 +12,7 @@
         <div class="dropdown-content" *ngIf="openSubjectDropDowns[currentSubject.id]">
           <ul>
             <li *ngFor="let pool of currentSubject.topicPools"
-                (click)="loadQuestionsForTopicPool(pool)"
+                #(click)
                 [class]="pool == this.selectedTopicPool ? 'selectedTopicPool' : ''"
             >{{ pool.name }}</li>
           </ul>
@@ -34,44 +34,44 @@
 
       <div class="selectionButton-flex-container">
         <button *ngIf="selecting"
-          (click)="!this.allQuestionsSelected() ? selectAllQuestions() : deSelectAllQuestions()"
+                (click)="!this.allQuestionsSelected() ? selectAllQuestions() : deSelectAllQuestions()"
         >{{ !this.allQuestionsSelected() ? "Alle auswählen" : "Alle abwählen" }}</button>
         <button
           (click)="toggleSelectionMode()"
         >{{ !this.selecting ? "Auswählen" : "Abbrechen" }}</button>
       </div>
 
-      <div *ngFor="let currentQuestion of this.questions"
+      <div *ngFor="let currentQuestion of this.entries"
            class="widget-wrapper question-wrapper"
            style="margin-bottom: 0.8rem;"
            [ngClass]="{
             'selecting': selecting,
             'not-selecting': !selecting,
-            'selected': selectedQuestionIds.includes(currentQuestion.id)
+            'selected': selectedQuestionIds.includes(currentQuestion.question.id)
           }"
       >
         <div
           class="widget-content question-content"
           (click)="!this.selecting
-            ? toggleQuestionDropdown(currentQuestion.id)
-            : toggleQuestionSelected(currentQuestion.id)"
+            ? toggleQuestionDropdown(currentQuestion.question.id)
+            : toggleQuestionSelected(currentQuestion.question.id)"
         >
           <div class="question-title">
             <h5
               [class]="!openQuestionDropDowns[currentQuestion.id] ? 'truncated' : 'expanded'"
-              [style]="currentQuestion.media && openQuestionDropDowns[currentQuestion.id] ? 'width: 50%;' : 'width: 80%'"
+              [style]="currentQuestion.question.media && openQuestionDropDowns[currentQuestion.question.id] ? 'width: 50%;' : 'width: 80%'"
             >
-              {{ currentQuestion.text }}
+              {{ currentQuestion.question.text }}
             </h5>
             <img
-              [src]="currentQuestion.media.path"
-              [alt]="currentQuestion.media.description"
-              *ngIf="currentQuestion.media && openQuestionDropDowns[currentQuestion.id]"
+              [src]="currentQuestion.question.media.path"
+              [alt]="currentQuestion.question.media.description"
+              *ngIf="currentQuestion.question.media && openQuestionDropDowns[currentQuestion.question.id]"
             >
-            <span class="arrow">{{ openQuestionDropDowns[currentQuestion.id] ? '▲' : '▼' }}</span>
+            <span class="arrow">{{ openQuestionDropDowns[currentQuestion.question.id] ? '▲' : '▼' }}</span>
           </div>
 
-          <div class="dropdown-content" *ngIf="openQuestionDropDowns[currentQuestion.id]">
+          <div class="dropdown-content" *ngIf="openQuestionDropDowns[currentQuestion.question.id]">
             <div class="button-container">
               <button
                 class="submit-btn"

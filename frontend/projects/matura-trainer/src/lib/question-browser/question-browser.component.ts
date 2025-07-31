@@ -1,17 +1,20 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {SubjectService} from '../../../../shared/src/lib/services/subject.service';
 import { Subject } from '../../../../shared/src/lib/interfaces/subject';
-import {NgForOf, NgIf} from '@angular/common';
+import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
 import {QuestionService} from '../../../../shared/src/lib/services/question.service';
 import {Question} from '../../../../shared/src/lib/interfaces/question';
 import {Router} from '@angular/router';
+import {QuestionPoolService} from '../../../../shared/src/lib/services/question-pool.service';
+import {QuestionPoolEntryRequest} from '../../../../shared/src/lib/interfaces/question-pool';
 
 @Component({
   selector: 'lib-question-browser',
   imports: [
     NgForOf,
-    NgIf
+    NgIf,
+    NgClass
   ],
   templateUrl: './question-browser.component.html',
   styleUrls: [
@@ -28,12 +31,17 @@ export class QuestionBrowserComponent implements OnInit {
   questionService: QuestionService = inject(QuestionService);
   questions: Question[] = [];
 
+  questionPoolService: QuestionPoolService = inject(QuestionPoolService);
+
   openSubjectDropDowns: { [id: number]: boolean } = {};
   openQuestionDropDowns: { [id: number]: boolean } = {};
   selectedTopicPool: TopicPool | null = null;
 
+  selecting = false;
+  selectedQuestionIds: number[] = [];
+
   ngOnInit() {
-    this.subjectService.getAllSubject().subscribe(subjects => {
+    this.subjectService.getAllSubjects().subscribe(subjects => {
       this.subjects = subjects;
       this.subjects.forEach(subject => {
         this.openSubjectDropDowns[subject.id] = false;
@@ -67,10 +75,8 @@ export class QuestionBrowserComponent implements OnInit {
   toggleQuestionDropdown(id: number): void {
     this.openQuestionDropDowns[id] = !this.openQuestionDropDowns[id];
     if(this.openQuestionDropDowns[id]){
-      for (let i = 0; i < this.questions.length; i++) {
-        let currId = this.questions[i].id;
-        if (id !== currId) this.openQuestionDropDowns[currId] = false;
-      }
+      this.closeAllQuestionDropDowns()
+      this.openQuestionDropDowns[id] = true;
     }
   }
 
@@ -87,6 +93,60 @@ export class QuestionBrowserComponent implements OnInit {
       }));
     });
   }
+
+  closeAllQuestionDropDowns() {
+    for (let curr of this.questions) {
+      this.openQuestionDropDowns[curr.id] = false;
+    }
+  }
+
+
+  toggleSelectionMode() {
+    this.selecting = !this.selecting;
+    if(this.selecting) {
+      this.closeAllQuestionDropDowns()
+    } else {
+      this.selectedQuestionIds = []
+    }
+  }
+
+  toggleQuestionSelected(id: number) {
+    if (!this.selectedQuestionIds.includes(id)) {
+      this.selectedQuestionIds.push(id);
+    } else {
+      this.selectedQuestionIds = this.selectedQuestionIds.filter(includedId => includedId !== id);
+    }
+  }
+
+  selectAllQuestions() {
+    for (let currQuestion of this.questions) {
+      if(!this.selectedQuestionIds.includes(currQuestion.id)) {
+        this.selectedQuestionIds.push(currQuestion.id);
+      }
+    }
+  }
+  deSelectAllQuestions() {
+    for (let currQuestion of this.questions) {
+      this.selectedQuestionIds = this.selectedQuestionIds.filter(id => id !== currQuestion.id);
+    }
+  }
+
+  allQuestionsSelected() :boolean {
+    return this.questions.every(q => this.selectedQuestionIds.includes(q.id));
+  }
+
+  addQuestionsToQuestionPool() {
+    let payload: QuestionPoolEntryRequest = {
+      userId: 1,
+      questionIds: this.selectedQuestionIds
+    };
+    this.questionPoolService.postQuestionsToQuestionPool(payload).subscribe(p => {
+      console.log(p)
+      this.selectedQuestionIds = []
+      this.selecting = false;
+    })
+  }
+
 
   navigateToQuestionRunner(questionId: number) {
     sessionStorage.setItem('questionBrowserState', JSON.stringify({
