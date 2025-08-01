@@ -21,6 +21,9 @@ import {
 import {
   FragenKonfiguratorComponent
 } from '../../projects/content-management/src/lib/fragen-konfigurator/fragen-konfigurator.component';
+import {
+  PersonalPlaceComponent
+} from '../../projects/content-management/src/lib/personal-place/personal-place.component';
 
 export const routes: Routes = [
   {
@@ -32,7 +35,8 @@ export const routes: Routes = [
       {path: 'chooseStudyOrCreate', component: StudyOrCreateComponent},
       {path: 'startCreate', component: StartCreateComponent},
       {path: 'startStudy', component: StartLearningComponent},
-      {path: 'fragenkonfigurator', component: FragenKonfiguratorComponent}
+      {path: 'fragenkonfigurator', component: FragenKonfiguratorComponent},
+      {path: 'personalPlace', component: PersonalPlaceComponent}
     ]
   },
   {
