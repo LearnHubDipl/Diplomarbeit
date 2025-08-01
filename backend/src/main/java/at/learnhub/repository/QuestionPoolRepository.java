@@ -2,6 +2,8 @@ package at.learnhub.repository;
 
 import at.learnhub.dto.request.AddQuestionToQuestionPoolRequestDto;
 import at.learnhub.dto.simple.QuestionPoolDto;
+import at.learnhub.dto.simple.QuestionPoolEntrySlimDto;
+import at.learnhub.mapper.QuestionPoolEntryMapper;
 import at.learnhub.mapper.QuestionPoolMapper;
 import at.learnhub.model.QuestionPool;
 import at.learnhub.model.QuestionPoolEntry;
@@ -31,5 +33,12 @@ public class QuestionPoolRepository {
                 .getSingleResult();
         if (pool == null) throw new NotFoundException("Question pool of user with id " + userId + " not found");
         return pool;
+    }
+
+    public List<QuestionPoolEntrySlimDto> findByTopicPool(Long userId, Long topicPoolId) {
+        QuestionPool pool = findEntityByUserId(userId);
+        return pool.getEntries().stream()
+                .filter(e -> e.getQuestion().getTopicPool().getId().equals(topicPoolId))
+                .map(QuestionPoolEntryMapper::toSlimDto).toList();
     }
 }

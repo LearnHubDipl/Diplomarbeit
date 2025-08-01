@@ -49,7 +49,25 @@ export class QuestionPoolComponent {
         this.openSubjectDropDowns[subject.id] = false;
       });
 
-      this.loadQuestionsForUser()
+      // restore states from session storage
+      const raw = sessionStorage.getItem('questionPoolBrowserState');
+      if (raw) {
+        const savedState = JSON.parse(raw);
+        this.openSubjectDropDowns = savedState.openSubjectDropDowns || {};
+        this.openQuestionDropDowns = savedState.openQuestionDropDowns || {};
+
+        const topicPoolId = savedState.selectedTopicPoolId;
+        if (topicPoolId) {
+          for (const subject of this.subjects) {
+            const match = subject.topicPools?.find(tp => tp.id === topicPoolId);
+            if (match) {
+              this.selectedTopicPool = match;
+              this.loadQuestionsForTopicPool(match);
+              break;
+            }
+          }
+        }
+      }
     });
   }
 
@@ -67,6 +85,20 @@ export class QuestionPoolComponent {
   loadQuestionsForUser() {
     this.questionPoolService.getQuestionPoolForUser(1).subscribe(pool => {
       this.entries = pool.entries;
+    });
+  }
+
+  loadQuestionsForTopicPool(topicPool: TopicPool) {
+    this.selectedTopicPool = topicPool;
+    this.questionPoolService.getEntriesByTopicPool(1, topicPool).subscribe(entries => {
+      this.entries = entries;
+
+      // save state for later
+      sessionStorage.setItem('questionPoolBrowserState', JSON.stringify({
+        openSubjectDropDowns: this.openSubjectDropDowns,
+        openQuestionDropDowns: this.openQuestionDropDowns,
+        selectedTopicPoolId: topicPool.id
+      }));
     });
   }
 

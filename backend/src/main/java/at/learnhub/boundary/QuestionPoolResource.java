@@ -5,7 +5,9 @@ import at.learnhub.dto.request.CheckAnswersRequestDto;
 import at.learnhub.dto.response.CheckAnswersResponseDto;
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.dto.simple.QuestionPoolDto;
+import at.learnhub.dto.simple.QuestionPoolEntrySlimDto;
 import at.learnhub.model.QuestionPool;
+import at.learnhub.model.QuestionPoolEntry;
 import at.learnhub.model.StreakTracking;
 import at.learnhub.model.User;
 import at.learnhub.repository.QuestionPoolRepository;
@@ -24,6 +26,8 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
+
+import java.util.List;
 
 @Path("/api/questionPools")
 @Produces(MediaType.APPLICATION_JSON)
@@ -60,6 +64,44 @@ public class QuestionPoolResource {
         QuestionPoolDto questionPool = questionPoolRepository.findByUserId(userId);
         return Response.ok(questionPool).build();
     }
+
+
+    @GET
+    @Path("/{userId}/{topicPoolId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Get question pool entries of a specific topic pool and user by their IDs",
+            description = "Returns a question pool with its entries for a specific topic pool"
+    )
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "The question pool entries",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(
+                                    implementation = QuestionPoolEntrySlimDto.class,
+                                    type = SchemaType.ARRAY
+                            )
+                    )
+            )
+    })
+    public Response getQuestionPoolByTopicPool(
+            @Parameter(
+                description = "ID of the user owning the question pool to be fetched",
+                required = true,
+                example = "1"
+            ) @PathParam("userId") Long userId,
+            @Parameter(
+                description = "ID of the topic pool the requested entries are in",
+                required = true,
+                example = "1"
+            ) @PathParam("topicPoolId") Long topicPoolId
+    ) {
+        List<QuestionPoolEntrySlimDto> questionPool = questionPoolRepository.findByTopicPool(userId, topicPoolId);
+        return Response.ok(questionPool).build();
+    }
+
 
 
     @POST

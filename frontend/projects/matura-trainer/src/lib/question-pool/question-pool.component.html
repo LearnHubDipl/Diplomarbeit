@@ -12,7 +12,7 @@
         <div class="dropdown-content" *ngIf="openSubjectDropDowns[currentSubject.id]">
           <ul>
             <li *ngFor="let pool of currentSubject.topicPools"
-                #(click)
+                (click)="loadQuestionsForTopicPool(pool)"
                 [class]="pool == this.selectedTopicPool ? 'selectedTopicPool' : ''"
             >{{ pool.name }}</li>
           </ul>
@@ -32,7 +32,7 @@
 
     <div class="widget-content browser-content">
 
-      <div class="selectionButton-flex-container">
+      <div class="selectionButton-flex-container" *ngIf="this.entries.length > 0">
         <button *ngIf="selecting"
                 (click)="!this.allQuestionsSelected() ? selectAllQuestions() : deSelectAllQuestions()"
         >{{ !this.allQuestionsSelected() ? "Alle auswählen" : "Alle abwählen" }}</button>
