@@ -4,11 +4,12 @@ import {ChartConfiguration, ChartData, ChartType} from 'chart.js';
 import {NgForOf, NgStyle} from '@angular/common';
 import {StatsService} from '../stats.service';
 import { Chart, Plugin } from 'chart.js';
+import {CenterTextPlugin} from '../plugin/chart-text.plugin';
 
 // nur zu testzwecken
 export interface QuestionPoolEntry {
   answeredAt: string | null;
-  lastAnsweredCorrectly: boolean;
+  lastAnsweredCorrectly: boolean ;
   correctCount: number;
   questionId: number;
   questionPoolId: number;
@@ -24,30 +25,15 @@ export interface QuestionPoolEntry {
     NgStyle
   ],
   templateUrl: './stats-home.component.html',
-  styleUrl: './stats-home.component.css'
+  styleUrls: [
+    '../styles/shared-styles.css',
+    './/stats-home.component.css'
+  ]
 })
 
 export class StatsHomeComponent implements OnInit {
 
-  public chartPlugins: Plugin[] = [];
-
-  getCenterTextPlugin():Plugin{
-    return {
-      id: 'centerText',
-      beforeDraw(chart) {
-        const { width, height, ctx } = chart;
-        const text = '2993 offene Fragen';
-
-        ctx.save();
-        ctx.font = 'bold 1rem Arial';
-        ctx.fillStyle = '#444';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(text, width / 2, height / 2);
-        ctx.restore();
-      }
-    };
-  }
+  chartPlugins: Plugin[] = [CenterTextPlugin];
 
   public doughnutChartLabels: string[] = [
     'falsch',
@@ -100,7 +86,10 @@ export class StatsHomeComponent implements OnInit {
       let unanswered = 0;
 
       for (const entry of data) {
-        if (!entry.answeredAt) {
+        if (entry.lastAnsweredCorrectly === null) {
+          unanswered++;
+        }
+        else if(!entry.answeredAt) {
           unanswered++;
         } else if (entry.correctCount === 0) {
           incorrect++;
@@ -120,15 +109,13 @@ export class StatsHomeComponent implements OnInit {
       const colors = ['#FE8B8B', '#309F22', '#3DD32B', '#B7F0B0', '#FFEAA4'];
 
       this.doughnutChartData.datasets[0].data = rawData;
-      
+
       this.legendData = rawData.map((value, index) => ({
         label: labels[index],
         value: total > 0 ? Math.round((value / total) * 100) : 0,
         color: colors[index]
       }));
     });
-
-    this.chartPlugins = [this.getCenterTextPlugin()];
 
   }
 
