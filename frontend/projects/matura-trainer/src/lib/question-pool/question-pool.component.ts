@@ -8,6 +8,7 @@ import {Question} from '../../../../shared/src/lib/interfaces/question';
 import {QuestionPoolService} from '../../../../shared/src/lib/services/question-pool.service';
 import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
 import {QuestionPoolEntry} from '../../../../shared/src/lib/interfaces/question-pool';
+import {QuestionBrowsingViewComponent} from '../question-browsing-view/question-browsing-view.component';
 
 /**
  * Currently just the question browser component copied. TODO: make changes necessary for editing the question pool
@@ -18,7 +19,8 @@ import {QuestionPoolEntry} from '../../../../shared/src/lib/interfaces/question-
   imports: [
     NgForOf,
     NgIf,
-    NgClass
+    NgClass,
+    QuestionBrowsingViewComponent
   ],
   templateUrl: './question-pool.component.html',
   styleUrls: [
@@ -27,136 +29,5 @@ import {QuestionPoolEntry} from '../../../../shared/src/lib/interfaces/question-
   ]
 })
 export class QuestionPoolComponent {
-  router: Router = inject(Router);
 
-  subjectService: SubjectService = inject(SubjectService);
-  subjects: Subject[] = []
-
-  questionPoolService: QuestionPoolService = inject(QuestionPoolService);
-  entries: QuestionPoolEntry[] = []
-
-  openSubjectDropDowns: { [id: number]: boolean } = {};
-  openQuestionDropDowns: { [id: number]: boolean } = {};
-  selectedTopicPool: TopicPool | null = null;
-
-  selecting = false;
-  selectedQuestionIds: number[] = [];
-
-  ngOnInit() {
-    this.subjectService.getAllSubjects().subscribe(subjects => {
-      this.subjects = subjects;
-      this.subjects.forEach(subject => {
-        this.openSubjectDropDowns[subject.id] = false;
-      });
-
-      // restore states from session storage
-      const raw = sessionStorage.getItem('questionPoolBrowserState');
-      if (raw) {
-        const savedState = JSON.parse(raw);
-        this.openSubjectDropDowns = savedState.openSubjectDropDowns || {};
-        this.openQuestionDropDowns = savedState.openQuestionDropDowns || {};
-
-        const topicPoolId = savedState.selectedTopicPoolId;
-        if (topicPoolId) {
-          for (const subject of this.subjects) {
-            const match = subject.topicPools?.find(tp => tp.id === topicPoolId);
-            if (match) {
-              this.selectedTopicPool = match;
-              this.loadQuestionsForTopicPool(match);
-              break;
-            }
-          }
-        }
-      }
-    });
-  }
-
-  toggleSubjectDropdown(id: number): void {
-    this.openSubjectDropDowns[id] = !this.openSubjectDropDowns[id];
-  }
-  toggleQuestionDropdown(id: number): void {
-    this.openQuestionDropDowns[id] = !this.openQuestionDropDowns[id];
-    if(this.openQuestionDropDowns[id]){
-      this.closeAllQuestionDropDowns()
-      this.openQuestionDropDowns[id] = true;
-    }
-  }
-
-  loadQuestionsForUser() {
-    this.questionPoolService.getQuestionPoolForUser(1).subscribe(pool => {
-      this.entries = pool.entries;
-    });
-  }
-
-  loadQuestionsForTopicPool(topicPool: TopicPool) {
-    this.selectedTopicPool = topicPool;
-    this.questionPoolService.getEntriesByTopicPool(1, topicPool).subscribe(entries => {
-      this.entries = entries;
-
-      // save state for later
-      sessionStorage.setItem('questionPoolBrowserState', JSON.stringify({
-        openSubjectDropDowns: this.openSubjectDropDowns,
-        openQuestionDropDowns: this.openQuestionDropDowns,
-        selectedTopicPoolId: topicPool.id
-      }));
-    });
-  }
-
-  closeAllQuestionDropDowns() {
-    for (let curr of this.entries) {
-      this.openQuestionDropDowns[curr.id] = false;
-    }
-  }
-
-
-  toggleSelectionMode() {
-    this.selecting = !this.selecting;
-    if(this.selecting) {
-      this.closeAllQuestionDropDowns()
-    } else {
-      this.selectedQuestionIds = []
-    }
-  }
-
-  toggleQuestionSelected(id: number) {
-    if (!this.selectedQuestionIds.includes(id)) {
-      this.selectedQuestionIds.push(id);
-    } else {
-      this.selectedQuestionIds = this.selectedQuestionIds.filter(includedId => includedId !== id);
-    }
-  }
-
-  selectAllQuestions() {
-    for (let currQuestion of this.entries) {
-      if(!this.selectedQuestionIds.includes(currQuestion.question.id)) {
-        this.selectedQuestionIds.push(currQuestion.question.id);
-      }
-    }
-  }
-  deSelectAllQuestions() {
-    for (let currQuestion of this.entries) {
-      this.selectedQuestionIds = this.selectedQuestionIds.filter(id => id !== currQuestion.question.id);
-    }
-  }
-
-  allQuestionsSelected() :boolean {
-    return this.entries.every(q => this.selectedQuestionIds.includes(q.question.id));
-  }
-
-  addQuestionsToQuestionPool() {
-    // TODO: Make editing question pool functions
-  }
-
-
-  navigateToQuestionRunner(questionId: number) {
-    sessionStorage.setItem('questionBrowserState', JSON.stringify({
-      openSubjectDropDowns: this.openSubjectDropDowns,
-      openQuestionDropDowns: this.openQuestionDropDowns,
-      selectedTopicPoolId: this.selectedTopicPool?.id
-    }));
-
-    this.router.navigate(['/trainer/practice/quiz'], {
-      queryParams: { ids: [questionId] }
-    });
-  }
 }
