@@ -16,6 +16,5 @@ public record AnswerSlimDto(
                 example = "The capital of France is Paris."
         )
         String text
-
 ) {
 }

@@ -26,11 +26,15 @@ public record QuestionCreationRequestDto(
         )
         String explanation,
 
+        /**
         @Schema(
                 description = "Optional media file associated with this question (e.g., image, diagram).",
                 implementation = MediaFile.class
         )
         MediaFile media,
+
+         **/
+        //todo: implement media file
 
         @Schema(
                 description = "Numerical code representing the question type (e.g., multiple choice, freetext).",
@@ -52,20 +56,21 @@ public record QuestionCreationRequestDto(
         Boolean isPublic,
 
         @Schema(
-                description = "ID of user who created the question"
+                description = "ID of user who created the question",
+                example = "1"
         )
         Long userId,
 
         @Schema(
-                description = "ID of the topic pool this question belongs to. Used to categorize questions."
+                description = "ID of the topic pool this question belongs to. Used to categorize questions.",
+                example = "1"
         )
         Long topicPoolId,
 
         @Schema(
                 description = "List of possible answers for this question.",
-                implementation = AnswerSlimDto.class,
+                implementation = AnswerCreationRequestDto.class,
                 type = SchemaType.ARRAY
         )
-        List<AnswerSlimDto> answers //TODO: eigenes DTO für Answers nur mit Text als Attribut
-
+        List<AnswerCreationRequestDto> answers
 ) {}
