@@ -26,7 +26,7 @@ export class FrageCardComponent implements OnInit {
 
   ngOnInit() {
     const topicPool: TopicPool = {
-      id: 5,//todo: ausgewähltes topic pool anzeigen
+      id: 3,//todo: ausgewähltes topic pool anzeigen
       name: '',
       description: '',
     };

@@ -31,21 +31,32 @@ public class QuestionMapper {
      * @return the corresponding SubjectDto
      */
     public static QuestionDto toDto(Question question) {
-        return new QuestionDto(question.getId(), question.getText(), question.getExplanation(),
-                question.getMedia(), question.getType(), question.getDifficulty(),
-                question.getPublic(), UserMapper.toSlimDto(question.getUser()),
+        return new QuestionDto(
+                question.getId(),
+                question.getText(),
+                question.getExplanation(),
+                question.getMedia(),
+                question.getType(),
+                question.getDifficulty(),
+                question.getPublic(),
+                UserMapper.toSlimDto(question.getUser()),
                 TopicPoolMapper.toSlimDto(question.getTopicPool()),
-                question.getType() == QuestionType.FREETEXT ? null :
-                question.getAnswers().stream().map(AnswerMapper::toSlimDto)
-                        .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
-                            Collections.shuffle(list);
-                            return list;
-                        })),
+                question.getAnswers() == null ? null :
+                        question.getAnswers().stream()
+                                .map(AnswerMapper::toSlimDto)
+                                .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
+                                    if (question.getType() != QuestionType.FREETEXT) {
+                                        Collections.shuffle(list);
+                                    }
+                                    return list;
+                                })),
                 question.getSolutions().stream()
                         .map(SolutionMapper::toSlimDto)
                         .sorted(Comparator.comparingLong(SolutionSlimDto::upVotes).reversed())
-                        .toList());
+                        .toList()
+        );
     }
+
 
     /**
      * Maps a Question entity to a slim QuestionSlimDto, excluding relations.

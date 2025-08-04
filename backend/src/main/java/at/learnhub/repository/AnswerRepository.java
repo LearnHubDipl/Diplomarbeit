@@ -12,6 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,5 +51,10 @@ public class AnswerRepository {
                         "WHERE a.question.id = :questionId AND a.isCorrect = true", String.class)
                 .setParameter("questionId", questionId)
                 .getResultList();
+    }
+
+    @Transactional
+    public void persist(Answer answer) {
+        em.persist(answer);
     }
 }

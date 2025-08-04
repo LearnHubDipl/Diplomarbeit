@@ -120,20 +120,13 @@ public class QuestionRepository {
     /**
      * Persitsts a new question (of any type) in the database.
      *
-     * @param questionDto Dto containing full question details
+     * @param question Dto containing full question details
      * @return the saved Question as Dto
      */
     @Transactional
-    public QuestionDto create(QuestionDto questionDto) {
-        Question question = QuestionMapper.toEntity(questionDto);
-
-        if(questionDto.topicPool() != null && questionDto.topicPool().id() != null) {
-            question.setTopicPool(em.getReference(TopicPool.class, questionDto.topicPool().id()));
-        }
-
+    public Question create(Question question) {
         em.persist(question);
-        em.flush();
 
-        return QuestionMapper.toDto(question);
+        return question;
     }
 }
