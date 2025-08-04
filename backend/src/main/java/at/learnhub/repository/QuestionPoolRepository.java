@@ -5,16 +5,14 @@ import at.learnhub.dto.simple.QuestionPoolDto;
 import at.learnhub.dto.simple.QuestionPoolEntrySlimDto;
 import at.learnhub.mapper.QuestionPoolEntryMapper;
 import at.learnhub.mapper.QuestionPoolMapper;
-import at.learnhub.model.QuestionPool;
-import at.learnhub.model.QuestionPoolEntry;
-import at.learnhub.model.StreakTracking;
-import at.learnhub.model.User;
+import at.learnhub.model.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
+import java.util.Objects;
 
 @ApplicationScoped
 public class QuestionPoolRepository {
@@ -40,5 +38,15 @@ public class QuestionPoolRepository {
         return pool.getEntries().stream()
                 .filter(e -> e.getQuestion().getTopicPool().getId().equals(topicPoolId))
                 .map(QuestionPoolEntryMapper::toSlimDto).toList();
+    }
+
+    public List<TopicPool> findTopicPoolsByUserId(Long userId) {
+        QuestionPool pool = findEntityByUserId(userId);
+
+        return pool.getEntries().stream()
+                .map(e -> e.getQuestion().getTopicPool())
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
     }
 }

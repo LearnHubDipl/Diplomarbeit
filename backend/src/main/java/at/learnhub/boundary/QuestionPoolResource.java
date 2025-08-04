@@ -6,10 +6,7 @@ import at.learnhub.dto.response.CheckAnswersResponseDto;
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.dto.simple.QuestionPoolDto;
 import at.learnhub.dto.simple.QuestionPoolEntrySlimDto;
-import at.learnhub.model.QuestionPool;
-import at.learnhub.model.QuestionPoolEntry;
-import at.learnhub.model.StreakTracking;
-import at.learnhub.model.User;
+import at.learnhub.model.*;
 import at.learnhub.repository.QuestionPoolRepository;
 import at.learnhub.repository.StreakTrackingRepository;
 import at.learnhub.service.QuestionPoolService;
@@ -139,4 +136,28 @@ public class QuestionPoolResource {
         return Response.ok(pool).build();
     }
 
+    @GET
+    @Path("/{userId}/topicPools")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Get all topic pools contained in a user's question pool",
+            description = "Returns all distinct topic pools from questions in the user's question pool"
+    )
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "List of topic pools",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(
+                                    implementation = TopicPool.class,
+                                    type = SchemaType.ARRAY
+                            )
+                    )
+            )
+    })
+    public Response getTopicPoolsByUser(@PathParam("userId") Long userId) {
+        List<TopicPool> topicPools = questionPoolRepository.findTopicPoolsByUserId(userId);
+        return Response.ok(topicPools).build();
+    }
 }
