@@ -276,7 +276,7 @@
                     return Response.status(Response.Status.BAD_REQUEST)
                             .entity("Missing required fields").build();
                 }
-                QuestionDto created = questionService.create(request); // TODO: repository class für das erstellen einer Question mit Request DTP
+                QuestionDto created = questionService.create(request);
                 return Response.status(Response.Status.CREATED).entity(created).build();
             }
         }

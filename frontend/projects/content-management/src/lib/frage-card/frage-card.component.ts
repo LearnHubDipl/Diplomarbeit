@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {CommonModule} from '@angular/common';
-import {QuestionService} from '../../../../shared/src/lib/services/question.service'; // Pfad ggf. anpassen
+import {QuestionService} from '../../../../shared/src/lib/services/question.service';
 import {Question} from '../../../../shared/src/lib/interfaces/question';
 import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
 
@@ -21,12 +21,14 @@ export class FrageCardComponent implements OnInit {
   constructor(
     private router: Router,
     private questionService: QuestionService,
+    private route: ActivatedRoute,
   ) {
   }
 
   ngOnInit() {
+    const topicPoolId = Number(this.route.snapshot.queryParamMap.get('topicPoolId'));
     const topicPool: TopicPool = {
-      id: 3,//todo: ausgewähltes topic pool anzeigen
+      id: topicPoolId,//todo: ausgewähltes topic pool anzeigen
       name: '',
       description: '',
     };
