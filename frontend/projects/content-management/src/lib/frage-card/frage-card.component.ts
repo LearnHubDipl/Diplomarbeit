@@ -4,12 +4,13 @@ import {CommonModule} from '@angular/common';
 import {QuestionService} from '../../../../shared/src/lib/services/question.service';
 import {Question} from '../../../../shared/src/lib/interfaces/question';
 import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
+import {ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'lib-frage-card',
   templateUrl: './frage-card.component.html',
   styleUrls: ['./frage-card.component.css'],
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   standalone: true
 })
 
@@ -28,7 +29,7 @@ export class FrageCardComponent implements OnInit {
   ngOnInit() {
     const topicPoolId = Number(this.route.snapshot.queryParamMap.get('topicPoolId'));
     const topicPool: TopicPool = {
-      id: topicPoolId,//todo: ausgewähltes topic pool anzeigen
+      id: topicPoolId, //todo: ausgewähltes topic pool anzeigen
       name: '',
       description: '',
     };
@@ -40,7 +41,7 @@ export class FrageCardComponent implements OnInit {
     });
   }
 
-  toggleAnswer(): void {
+  toggleAnswer(): void { //auf und zu decken von Fragen/Antworten
     this.showAnswer = !this.showAnswer;
   }
 
@@ -62,7 +63,7 @@ export class FrageCardComponent implements OnInit {
     this.next();
   }
 
-  finishLearning(): void {
+  finishedLearning(): void {
     this.router.navigate(['/finished']);
   }
 }

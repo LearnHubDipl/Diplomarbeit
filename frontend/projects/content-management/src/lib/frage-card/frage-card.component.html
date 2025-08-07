@@ -11,7 +11,7 @@
              [src]="questions[currentIndex].media.path"
              class="img-fluid mb-3"
              alt="Bild zur Frage"
-        style="max-height: 40vh"/>
+             style="max-height: 40vh"/>
 
         <ul *ngIf="questions[currentIndex].answers?.length">
           <li *ngFor="let a of questions[currentIndex].answers">{{ a.text }}</li>
@@ -45,7 +45,7 @@
 
       <button *ngIf="showAnswer && currentIndex === questions.length - 1"
               class="btn btn-primary rounded-pill ms-auto"
-              (click)="finishLearning()">
+              (click)="finishedLearning()">
         beenden
       </button>
     </div>
