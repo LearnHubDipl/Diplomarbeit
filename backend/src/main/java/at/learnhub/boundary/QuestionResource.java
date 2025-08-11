@@ -12,7 +12,6 @@ import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.ExampleObject;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
@@ -23,8 +22,10 @@ import java.util.List;
 
 @Path("/api/questions")
 public class QuestionResource {
+
     @Inject
     QuestionRepository questionRepository;
+
     @Inject
     QuestionService questionService;
 
@@ -123,7 +124,7 @@ public class QuestionResource {
     @Path("/user/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(
-            summary = "Get question from a specific user by their user id",
+            summary = "Get questions from a specific user by their user id",
             description = "Returns a list of all questions created by a user"
     )
     @APIResponses({
@@ -139,7 +140,9 @@ public class QuestionResource {
                     )
             )
     })
-    public Response getQuestionByUserId(@Parameter(description = "id of the user whose questions are searched", required = true) @PathParam("userId") Long userId) {
+    public Response getQuestionByUserId(
+            @Parameter(description = "id of the user whose questions are searched", required = true)
+            @PathParam("userId") Long userId) {
         List<QuestionDto> questions = questionRepository.findByUserId(userId);
         return Response.ok(questions).build();
     }
@@ -200,7 +203,6 @@ public class QuestionResource {
         try {
             QuestionType questionType = QuestionType.valueOf(type.toUpperCase());
             List<QuestionDto> questions = questionRepository.findByType(questionType);
-
             return Response.ok(questions).build();
         } catch (IllegalArgumentException e) {
             throw new BadRequestException(e.getMessage());
@@ -239,7 +241,6 @@ public class QuestionResource {
         return Response.ok(questions).build();
     }
 
-
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -276,12 +277,7 @@ public class QuestionResource {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Missing required fields").build();
         }
-<<<<<<< Updated upstream
         QuestionDto created = questionService.create(request);
-=======
-        QuestionDto created = questionService.create(request); // TODO: repository class für das erstellen einer Question mit Request DTP
->>>>>>> Stashed changes
         return Response.status(Response.Status.CREATED).entity(created).build();
     }
 }
-
