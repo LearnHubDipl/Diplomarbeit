@@ -276,7 +276,11 @@ public class QuestionResource {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Missing required fields").build();
         }
+<<<<<<< Updated upstream
         QuestionDto created = questionService.create(request);
+=======
+        QuestionDto created = questionService.create(request); // TODO: repository class für das erstellen einer Question mit Request DTP
+>>>>>>> Stashed changes
         return Response.status(Response.Status.CREATED).entity(created).build();
     }
 }

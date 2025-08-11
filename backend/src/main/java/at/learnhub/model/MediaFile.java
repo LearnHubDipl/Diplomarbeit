@@ -86,4 +86,15 @@ public class MediaFile {
     public void setUploadedAt(LocalDateTime uploadedAt) {
         this.uploadedAt = uploadedAt;
     }
+
+    /**
+     * Automatically sets the current timestamp before persisting if not already set.
+     */
+    @PrePersist
+    public void prePersist() {
+        if (uploadedAt == null) {
+            uploadedAt = LocalDateTime.now();
+        }
+    }
+
 }

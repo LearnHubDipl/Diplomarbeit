@@ -23,6 +23,7 @@ public class Subject {
     /**
      * The name of the subject.
      */
+    @Column(nullable = false, unique = true)
     private String name;
 
     /**
@@ -40,7 +41,7 @@ public class Subject {
     /**
      * The list of topic pools related to this subject.
      */
-    @OneToMany(mappedBy = "subject")
+    @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties({"subject"})
     private List<TopicPool> topicPools;
 

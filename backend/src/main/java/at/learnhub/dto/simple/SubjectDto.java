@@ -32,7 +32,7 @@ public record SubjectDto(
                 description = "Optional image representing the subject.",
                 implementation = MediaFile.class
         )
-        MediaFile img,
+        MediaFileSlimDto img,
 
         @Schema(
                 description = "List of topic pools related to this subject.",

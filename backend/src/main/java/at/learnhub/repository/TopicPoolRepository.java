@@ -1,49 +1,54 @@
 package at.learnhub.repository;
 
-import at.learnhub.dto.simple.QuestionDto;
-import at.learnhub.dto.simple.SubjectDto;
-import at.learnhub.dto.simple.TopicPoolDto;
-import at.learnhub.mapper.QuestionMapper;
-import at.learnhub.mapper.SubjectMapper;
+import at.learnhub.dto.simple.TopicPoolSlimDto;
 import at.learnhub.mapper.TopicPoolMapper;
-import at.learnhub.model.Question;
 import at.learnhub.model.TopicPool;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Repository class for accessing {@link TopicPool} data from the database.
- * Handles fetching and converting TopicPool entities to DTOs.
- */
 @ApplicationScoped
-public class TopicPoolRepository {
+public class TopicPoolRepository{
+
     @Inject
     EntityManager em;
 
-    /**
-     * Retrieves all {@link TopicPool} entities from the database and maps them to {@link TopicPoolDto} objects.
-     *
-     * @return a list of all topic pools as DTOs, including their relations
-     */
-    public List<TopicPoolDto> findAll() {
-        return em.createQuery("select t from TopicPool t", TopicPool.class).getResultList()
-                .stream().map(TopicPoolMapper::toDto).toList();
-    }
-
-    public TopicPoolDto getTopicPoolDtoById(Long id) {
-        TopicPool topicPool = getTopicPoolById(id);
-        return TopicPoolMapper.toDto(topicPool);
+    public List<TopicPoolSlimDto> findBySubjectId(Long subjectId) {
+        return em.createQuery("SELECT tp FROM TopicPool tp WHERE tp.subject.id = :subjectId", TopicPool.class)
+                .setParameter("subjectId", subjectId)
+                .getResultList()
+                .stream()
+                .map(TopicPoolMapper::toSlimDto)
+                .collect(Collectors.toList());
     }
 
     public TopicPool getTopicPoolById(Long id) {
-        TopicPool topicPool = em.find(TopicPool.class, id);
-        if (topicPool == null) {
-            throw new EntityNotFoundException("Topic pool with id " + id + " not found.");
+        TopicPool tp = em.find(TopicPool.class, id);
+        if (tp == null) {
+            throw new EntityNotFoundException("TopicPool with id " + id + " not found.");
         }
-        return topicPool;
+        return tp;
+    }
+
+    @Transactional
+    public TopicPool create(TopicPool tp) {
+        em.persist(tp);
+        return tp;
+    }
+
+    @Transactional
+    public TopicPool update(TopicPool tp) {
+        return em.merge(tp);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        TopicPool tp = getTopicPoolById(id);
+        em.remove(tp);
     }
 }

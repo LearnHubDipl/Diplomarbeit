@@ -1,11 +1,17 @@
 import { Component } from '@angular/core';
+import { NgForOf } from '@angular/common';
+import {RevealOnScrollDirective} from './reveal-on-scroll.directive';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'lib-home',
-  imports: [],
+  standalone: true,
+  imports: [
+    NgForOf,
+    RevealOnScrollDirective,
+    RouterLink
+  ],
   templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+  styleUrls: ['./home.component.css']
 })
-export class HomeComponent {
-
-}
+export class HomeComponent {}

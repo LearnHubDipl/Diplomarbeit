@@ -10,6 +10,7 @@ import at.learnhub.model.QuestionType;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.stream.Collectors;
+import at.learnhub.mapper.TopicPoolMapper;
 
 /**
  * Utility class responsible for converting between {@link Question} entities and their DTO representations.

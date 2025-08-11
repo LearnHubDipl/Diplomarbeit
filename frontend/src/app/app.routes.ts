@@ -21,6 +21,7 @@ import {
 import {
   FragenKonfiguratorComponent
 } from '../../projects/content-management/src/lib/fragen-konfigurator/fragen-konfigurator.component';
+<<<<<<< Updated upstream
 import {
   PersonalPlaceComponent
 } from '../../projects/content-management/src/lib/personal-place/personal-place.component';
@@ -29,6 +30,9 @@ import {FinishedCardComponent} from '../../projects/content-management/src/lib/f
 import {
   ChooseStudyTopicComponent
 } from '../../projects/content-management/src/lib/choose-study-topic/choose-study-topic.component';
+=======
+import {SubjectsComponent} from '../../projects/content-management/src/lib/subjects/subjects.component';
+>>>>>>> Stashed changes
 
 export const routes: Routes = [
   {
@@ -41,10 +45,14 @@ export const routes: Routes = [
       {path: 'startCreate', component: StartCreateComponent},
       {path: 'startStudy', component: StartLearningComponent},
       {path: 'fragenkonfigurator', component: FragenKonfiguratorComponent},
+<<<<<<< Updated upstream
       {path: 'personalPlace', component: PersonalPlaceComponent},
       {path: 'questionCard/:id', component: FrageCardComponent},
       {path: 'finished', component: FinishedCardComponent},
       {path: 'chooseStudyTopic', component: ChooseStudyTopicComponent}
+=======
+      {path: 'subjects', component: SubjectsComponent },
+>>>>>>> Stashed changes
     ]
   },
   {
