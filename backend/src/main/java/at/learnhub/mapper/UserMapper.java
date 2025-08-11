@@ -1,6 +1,7 @@
 package at.learnhub.mapper;
 
 import at.learnhub.dto.simple.UserSlimDto;
+import at.learnhub.model.MediaFile;
 import at.learnhub.model.User;
 
 /**
@@ -23,5 +24,8 @@ public class UserMapper {
                 user.getAdmin(),
                 user.getProfilePicture()
         );
+    }
+    public static Long mediaId(MediaFile m) {
+        return m != null ? m.getId() : null;
     }
 }

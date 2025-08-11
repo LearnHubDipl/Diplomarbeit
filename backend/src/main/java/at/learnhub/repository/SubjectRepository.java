@@ -6,25 +6,59 @@ import at.learnhub.model.Subject;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Repository class for accessing {@link Subject} data from the database.
- * Handles fetching and converting Subject entities to DTOs.
- */
 @ApplicationScoped
 public class SubjectRepository {
+
     @Inject
     EntityManager em;
 
-    /**
-     * Retrieves all {@link Subject} entities from the database and maps them to {@link SubjectDto} objects.
-     *
-     * @return a list of all subjects as DTOs, including their related topic pools
-     */
-    public List<SubjectDto> findAll() {
-        return em.createQuery("select s from Subject s", Subject.class).getResultList()
-                .stream().map(SubjectMapper::toDto).toList();
+    public List<SubjectDto> findAllOrderedByName() {
+        return em.createQuery("SELECT s FROM Subject s ORDER BY LOWER(s.name)", Subject.class)
+                .getResultList()
+                .stream()
+                .map(SubjectMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public SubjectDto getDtoById(Long id) {
+        return SubjectMapper.toDto(getById(id));
+    }
+
+    public Subject getById(Long id) {
+        Subject subject = em.find(Subject.class, id);
+        if (subject == null) {
+            throw new EntityNotFoundException("Subject with id " + id + " not found.");
+        }
+        return subject;
+    }
+
+    public boolean existsByNameIgnoreCase(String name) {
+        Long count = em.createQuery(
+                        "SELECT COUNT(s) FROM Subject s WHERE LOWER(s.name) = LOWER(:name)", Long.class)
+                .setParameter("name", name)
+                .getSingleResult();
+        return count != null && count > 0;
+    }
+
+    @Transactional
+    public Subject create(Subject subject) {
+        em.persist(subject);
+        return subject;
+    }
+
+    @Transactional
+    public Subject update(Subject subject) {
+        return em.merge(subject);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        em.remove(getById(id));
     }
 }

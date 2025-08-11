@@ -25,6 +25,7 @@ public class TopicPool {
      * Name of the topic pool.
      * Example: Algebra Basics
      */
+    @Column(nullable = false)
     private String name;
 
     /**
@@ -44,14 +45,14 @@ public class TopicPool {
     /**
      * List of topic contents belonging to this topic pool.
      */
-    @OneToMany(mappedBy = "topicPool")
+    @OneToMany(mappedBy = "topicPool", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties({"topicPool"})
     private List<TopicContent> topicContents;
 
     /**
      * List of questions belonging to this topic pool.
      */
-    @OneToMany(mappedBy = "topicPool")
+    @OneToMany(mappedBy = "topicPool", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties({"topicPool"})
     private List<Question> questions;
 

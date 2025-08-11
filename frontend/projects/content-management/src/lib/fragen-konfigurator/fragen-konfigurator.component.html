@@ -1,82 +1,139 @@
 <div class="container py-5">
-  <h1 class="fw-bold mb-1">
-    Fragenkonfigurator
-  </h1>
+  <h1 class="fw-bold mb-1">Fragenkonfigurator</h1>
   <p class="mb-4">Individuelle Fragen erstellen &amp; Themen gezielt abdecken</p>
-
-  <form>
-
+  <form [formGroup]="questionForm" (ngSubmit)="onSubmit()">
     <div class="mb-3">
       <label for="fragentyp" class="form-label">Fragentyp *</label>
-      <select id="fragentyp" class="form-select border-warning" required>
-        <option value="" disabled selected>Bitte wählen</option>
-        <option>Multiple Choice</option>
-        <option>Wahr/Falsch</option>
-        <option>Offene Frage</option>
+      <select id="fragentyp" class="form-select border-warning" formControlName="type"
+              [class.is-invalid]="questionForm.get('type')?.invalid && questionForm.get('type')?.touched">
+        <option value="" disabled>Bitte wählen</option>
+        <option *ngFor="let type of questionTypes" [value]="type">{{ getQuestionTypeDisplayName(type) }}</option>
       </select>
+      <div class="invalid-feedback" *ngIf="questionForm.get('type')?.invalid && questionForm.get('type')?.touched">
+        Bitte wählen Sie einen Fragentyp aus.
+      </div>
     </div>
-
+    <!-- form selects: https://getbootstrap.com/docs/5.3/forms/select/-->
     <div class="mb-3">
       <label for="fach" class="form-label">Schulfach *</label>
-      <select id="fach" class="form-select border-warning" required>
-        <option value="" disabled selected>Bitte wählen</option>
-        <option>Mathematik</option>
-        <option>Deutsch</option>
-        <option>Biologie</option>
+      <select id="fach" class="form-select border-warning" formControlName="subjectId"
+              [class.is-invalid]="questionForm.get('subjectId')?.invalid && questionForm.get('subjectId')?.touched">
+        <option value="" disabled>Bitte wählen</option>
+        <option *ngFor="let subject of subjects" [value]="subject.id">{{ subject.name }}</option>
       </select>
+      <div class="invalid-feedback"
+           *ngIf="questionForm.get('subjectId')?.invalid && questionForm.get('subjectId')?.touched">
+        Bitte wählen Sie ein Schulfach aus.
+      </div>
     </div>
-
     <div class="mb-3">
       <label for="themenpool" class="form-label">Themenpool *</label>
-      <select id="themenpool" class="form-select border-warning" required>
-        <option value="" disabled selected>Bitte wählen</option>
-        <option>Thema 1</option>
-        <option>Thema 2</option>
-        <option>Thema 3</option>
+      <select id="themenpool" class="form-select border-warning" formControlName="topicPoolId"
+              [disabled]="!questionForm.get('subjectId')?.value"
+              [class.is-invalid]="questionForm.get('topicPoolId')?.invalid && questionForm.get('topicPoolId')?.touched">
+        <option value="" disabled>
+          {{ questionForm.get('subjectId')?.value ? 'Bitte wählen' : 'Erst Schulfach auswählen' }}
+        </option>
+        <option
+          *ngFor="let topicPool of topicPools"
+          [value]="topicPool.id">
+          {{ topicPool.name }}
+        </option>
       </select>
+      <div class="invalid-feedback"
+           *ngIf="questionForm.get('topicPoolId')?.invalid && questionForm.get('topicPoolId')?.touched">
+        Bitte wählen Sie einen Themenpool aus.
+      </div>
     </div>
-
     <div class="mb-3">
-      <label for="frage" class="form-label">Frage</label>
-      <textarea id="frage" class="form-control border-warning" rows="2"></textarea>
+      <label for="frage" class="form-label">Frage *</label>
+      <textarea id="frage" class="form-control border-warning" rows="3" formControlName="text"
+                [class.is-invalid]="questionForm.get('text')?.invalid && questionForm.get('text')?.touched"
+                placeholder="Geben Sie hier Ihre Frage ein...">
+      </textarea>
+      <div class="invalid-feedback" *ngIf="questionForm.get('text')?.invalid && questionForm.get('text')?.touched">
+        Bitte geben Sie eine Frage ein.
+      </div>
     </div>
 
     <div class="row mb-3">
       <div class="col-md-6">
-        <label class="form-label">Antwortmöglichkeiten *</label>
-        <input type="text" class="form-control mb-2" placeholder="Richtige Antwort" required>
+        <div *ngIf="questionForm.get('type')?.value === QuestionType.MULTIPLE_CHOICE">
+          <label class="form-label">Antwortmöglichkeiten *</label>
+          <div formArrayName="answers">
+            <div *ngFor="let answerGroup of answersArray.controls; let i = index" [formGroupName]="i"
+                 class="mb-3 p-3 border rounded">
+              <div class="row align-items-center">
+                <div class="col-9">
+                  <input type="text" class="form-control" formControlName="text" [placeholder]="'Antwort ' + (i + 1)"
+                         [class.is-invalid]="answerGroup.get('text')?.invalid && answerGroup.get('text')?.touched">
+                  <div class="invalid-feedback"
+                       *ngIf="answerGroup.get('text')?.invalid && answerGroup.get('text')?.touched">
+                    Bitte geben Sie eine Antwort ein.
+                  </div>
+                </div>
+                <!-- https://getbootstrap.com/docs/5.1/forms/checks-radios/#switches -->
+                <div class="col-3">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" formControlName="isCorrect" [id]="'correct-' + i">
+                    <label class="form-check-label" [for]="'correct-' + i">
+                      {{ answerGroup.get('isCorrect')?.value ? 'Richtig' : 'Falsch' }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <input type="text" class="form-control mb-2" placeholder="Falsche Antwort" required>
-        <input type="text" class="form-control mb-2" placeholder="Falsche Antwort" required>
-        <input type="text" class="form-control" placeholder="Falsche Antwort">
+        <div *ngIf="questionForm.get('type')?.value === QuestionType.FREETEXT">
+          <label for="freitext-erklaerung" class="form-label">Musterlösung/Erklärung *</label>
+          <textarea id="freitext-erklaerung" class="form-control border-warning" rows="4" formControlName="explanation"
+                    placeholder="Geben Sie hier die Musterlösung oder Erklärung ein..."
+                    [class.is-invalid]="questionForm.get('type')?.value === QuestionType.FREETEXT && questionForm.get('explanation')?.invalid && questionForm.get('explanation')?.touched">
+          </textarea>
+          <div class="invalid-feedback"
+               *ngIf="questionForm.get('type')?.value === QuestionType.FREETEXT && questionForm.get('explanation')?.invalid && questionForm.get('explanation')?.touched">
+            Bitte geben Sie eine Musterlösung ein.
+          </div>
+        </div>
       </div>
 
+      <!-- https://getbootstrap.com/docs/5.1/forms/checks-radios/#radios -->
       <div class="col-md-6">
-        <label class="form-label d-block">Schwierigkeitsgrad *</label>
+        <label class="form-label d-block">Schwierigkeitsgrad</label>
         <div class="form-check">
-          <input class="form-check-input" type="radio" id="leicht" name="schwierigkeit" value="Leicht" required>
+          <input class="form-check-input" type="radio" id="leicht" formControlName="difficulty" [value]="1">
           <label class="form-check-label" for="leicht">Leicht</label>
         </div>
         <div class="form-check">
-          <input class="form-check-input" type="radio" id="mittel" name="schwierigkeit" value="Mittel" checked>
+          <input class="form-check-input" type="radio" id="mittel" formControlName="difficulty" [value]="2">
           <label class="form-check-label" for="mittel">Mittel</label>
         </div>
         <div class="form-check">
-          <input class="form-check-input" type="radio" id="schwer" name="schwierigkeit" value="Schwer">
+          <input class="form-check-input" type="radio" id="schwer" formControlName="difficulty" [value]="3">
           <label class="form-check-label" for="schwer">Schwer</label>
         </div>
 
-        <label for="bild" class="form-label mt-3">Bild Upload (optional)</label>
-        <input id="bild" type="file" class="form-control">
+        <div *ngIf="questionForm.get('type')?.value === QuestionType.MULTIPLE_CHOICE" class="mt-3">
+          <label for="erklaerung" class="form-label">Erklärung (optional)</label>
+          <textarea id="erklaerung" class="form-control border-warning" rows="3" formControlName="explanation"
+                    placeholder="Optionale Erklärung zur richtigen Antwort..."></textarea>
+        </div>
 
-        <label for="erklaerung" class="form-label mt-3">Erklärung (optional)</label>
-        <textarea id="erklaerung" class="form-control" rows="2"></textarea>
+        <!-- https://getbootstrap.com/docs/5.1/forms/checks-radios/#switches -->
+        <div class="form-check form-switch mt-3">
+          <input class="form-check-input" type="checkbox" id="isPublic" formControlName="isPublic">
+          <label class="form-check-label" for="isPublic">
+            Öffentlich verfügbar
+          </label>
+        </div>
       </div>
     </div>
 
-    <button type="submit" class="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm text-white">
+    <button type="submit" class="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm text-white"
+            [disabled]="questionForm.invalid">
       Veröffentlichen
     </button>
-
   </form>
 </div>

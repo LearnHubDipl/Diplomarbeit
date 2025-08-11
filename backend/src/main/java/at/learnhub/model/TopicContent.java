@@ -2,7 +2,7 @@ package at.learnhub.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
+import at.learnhub.model.User;
 import java.time.LocalDate;
 
 /**
@@ -71,6 +71,10 @@ public class TopicContent {
     @JoinColumn(name = "teacher")
     @JsonIgnoreProperties({"ownedTopicContents", "approvedTopicContents", "teacherOfTopicContents"})
     private User taughtBy;
+
+    private String title;
+
+    private String description;
 
     // Getter und Setter
 
