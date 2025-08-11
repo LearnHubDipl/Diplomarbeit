@@ -9,6 +9,7 @@ import at.learnhub.model.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class QuestionPoolRepository {
                         "WHERE q.user.id = :id", QuestionPool.class)
                 .setParameter("id", userId)
                 .getSingleResult();
-        if (pool == null) throw new NotFoundException("Question pool of user with id " + userId + " not found");
+        if (pool == null) throw new EntityNotFoundException("Question pool of user with id " + userId + " not found");
         return pool;
     }
 
