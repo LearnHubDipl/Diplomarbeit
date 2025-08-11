@@ -1,0 +1,107 @@
+.progress-container {
+  width: 100%;
+  padding: 1rem;
+}
+
+.progress-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.progress-level {
+  margin-bottom: 2rem;
+}
+
+.progress-bar-wrapper {
+  display: flex;
+  height: 12px;
+  background: #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-description {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  display: inline-block;
+}
+
+
+
+
+
+
+
+.dropdown-container {
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: Arial, sans-serif;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-top: 30%;
+
+}
+
+.dropdown {
+  padding: 10px 14px;
+  margin: 0.5rem 0 2rem 0 ;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+  width: 250px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: border 0.2s ease;
+}
+
+.dropdown:focus {
+  outline: none;
+  border-color: #F2BC2A;
+}
+.action-button {
+  background-color: #F2BC2A;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 50%;
+}
+
+.action-button a {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+}
+
+.action-button:hover {
+  background-color: #e1ab1e;
+}
+

@@ -1,17 +1,46 @@
-<p>home works!</p>
 
 <!-- this will be the wrapper as a grid -->
-<div>
+<div class="stats-layout">
 
   <!-- progress bars -->
-  <div>
+  <div class="widget-wrapper">
+    <div class="header">Fortschritt</div>
+    <div class="progress-wrapper">
+      <div class="progress-container">
+        <div *ngFor="let level of progressLevels" class="progress-level">
+          <h3>{{ level.title }}</h3>
+          <div class="progress-bar-wrapper">
+            <div *ngFor="let entry of level.entries"
+                 class="progress-segment"
+                 [style.background]="entry.color"
+                 [style.width.%]="entry.value > 0 ? entry.value * 10 : 0">
+            </div>
+          </div>
+          <div *ngFor="let entry of level.entries" class="progress-description">
+            <span class="dot" [style.background]="entry.color"></span>
+            {{ entry.description }}
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="thempool-container">
+          <label class="label">Thempools:</label>
+          <div class="dropdown-wrapper">
+            <select class="dropdown" (change)="onTopicPoolChange($event)" [value]="selectedTopicPoolId ?? 0">
+              <option [value]="0">Alle Fragen</option>
+              <option *ngFor="let pool of topicPools" [value]="pool.id">{{ pool.name }}</option>
+            </select>
+          </div>
+
+          <button class="action-button"><a routerLink="/trainer/practice/quiz" [queryParams]="{ ids: [1, 2, 3] }">Üben</a></button>
+        </div>
+        <!-- topic pool selection and button for the practice mode -->
+      </div>
+    </div>
+
 
   </div>
 
-  <!-- topic pool selection and button for the practice mode -->
-  <div>
 
-    <a routerLink="/trainer/practice/quiz" [queryParams]="{ ids: [1, 2, 3] }">Üben</a>
-  </div>
 
 </div>

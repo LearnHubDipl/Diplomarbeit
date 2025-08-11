@@ -1,7 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {Question} from '../interfaces/question';
 import {API_BASE_URL} from './globals';
 import {Subject} from '../interfaces/subject';
 
@@ -13,7 +12,7 @@ export class SubjectService {
 
   constructor() { }
 
-  getAllSubject(): Observable<Subject[]> {
+  getAllSubjects(): Observable<Subject[]> {
     return this.httpClient.get<Subject[]>(API_BASE_URL + '/subjects/');
   }
 }

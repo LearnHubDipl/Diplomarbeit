@@ -21,6 +21,7 @@ import {
 import {
   FragenKonfiguratorComponent
 } from '../../projects/content-management/src/lib/fragen-konfigurator/fragen-konfigurator.component';
+import {QuestionPoolComponent} from '../../projects/matura-trainer/src/lib/question-pool/question-pool.component';
 
 export const routes: Routes = [
   {
@@ -48,6 +49,7 @@ export const routes: Routes = [
           { path: '', component: TrainerHomeComponent, data: { breadcrumb: null } },
           { path: 'quiz', component: QuestionRunnerComponent, data: { breadcrumb: 'Fragen beantworten' } },
           { path: 'fragen', component: QuestionBrowserComponent, data: { breadcrumb: 'Fragen browsen' } },
+          { path: 'question-pool', component: QuestionPoolComponent, data: { breadcrumb: 'Fragenpool bearbeiten' } },
           { path: 'pruefungsmodus', component: QuestionRunnerComponent, data: { breadcrumb: 'Prüfungsmodus' } }
         ]
       },

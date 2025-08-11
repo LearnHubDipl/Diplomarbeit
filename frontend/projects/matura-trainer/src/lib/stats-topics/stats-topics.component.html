@@ -1,1 +1,41 @@
-<p>stats-topics works!</p>
+<div class="stats-layout">
+  <div class="left-side">
+    <div class="widget-wrapper">
+      <div class="header">
+        <select
+          [(ngModel)]="selectedTopicPoolId"
+          (ngModelChange)="onTopicPoolChange($event)"
+          (focus)="isDropdownOpen = true"
+          (blur)="isDropdownOpen = false"
+          [ngClass]="{ 'open': isDropdownOpen }"
+        >
+          <option *ngFor="let pool of topicPools" [value]="pool.id">
+            {{ pool.name }}
+          </option>
+        </select>
+      </div>
+      <div style="display: block; width: 100%;">
+        <canvas baseChart
+                [data]="doughnutChartData"
+                [type]="doughnutChartType"
+                [options]="chartOptions"
+                [plugins]="chartPlugins">
+        </canvas>
+      </div>
+    </div>
+  </div>
+
+   <div class="widget-wrapper">
+      <div class="header question-header">Legende</div>
+     <div class="stats-content" *ngFor="let entry of legendData">
+       <div class="legend-info">
+         <span class="legend-dot" [ngStyle]="{'background-color': entry.color}"></span>
+         <span class="legend-label">{{ entry.label }}</span>
+          <span class="legend-percent">{{ entry.value }}%</span>
+        </div>
+        <div class="legend-bar">
+         <div class="legend-bar-fill" [ngStyle]="{'width.%': entry.value, 'background-color': entry.color}"></div>
+        </div>
+      </div>
+    </div>
+</div>
