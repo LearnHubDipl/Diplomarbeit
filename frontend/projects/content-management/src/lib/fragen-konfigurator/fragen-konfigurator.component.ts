@@ -109,7 +109,7 @@ export class FragenKonfiguratorComponent implements OnInit {
   }
 
   private loadSubjects() {
-    this.subjectService.getAllSubject().subscribe({
+    this.subjectService.getAllSubjects().subscribe({
       next: (subjects) => {
         this.subjects = subjects;
         console.log('Subjects geladen:', this.subjects);

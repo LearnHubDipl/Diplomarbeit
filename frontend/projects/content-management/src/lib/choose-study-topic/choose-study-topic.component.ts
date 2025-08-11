@@ -20,7 +20,7 @@ export class ChooseStudyTopicComponent implements OnInit {
   openSubjectId: number | null = null;
 
   ngOnInit(): void {
-    this.subjectService.getAllSubject().subscribe({
+    this.subjectService.getAllSubjects().subscribe({
       next: (data) => this.subjects = data,
       error: (err) => console.error('Fehler beim Laden der Fächer:', err)
     });
