@@ -1,12 +1,16 @@
 package at.learnhub.service;
 
+import at.learnhub.dto.request.CheckAnswersRequestDto;
 import at.learnhub.dto.request.CreateExamRequestDto;
+import at.learnhub.dto.request.SubmitExamRequestDto;
+import at.learnhub.dto.response.CheckAnswersResponseDto;
 import at.learnhub.dto.response.CreatedExamResponseDto;
+import at.learnhub.dto.response.SubmittedExamResponseDto;
+import at.learnhub.dto.simple.ExamQuestionSlimDto;
+import at.learnhub.mapper.ExamQuestionMapper;
 import at.learnhub.mapper.QuestionMapper;
 import at.learnhub.model.*;
-import at.learnhub.repository.QuestionPoolRepository;
-import at.learnhub.repository.TopicPoolRepository;
-import at.learnhub.repository.UserRepository;
+import at.learnhub.repository.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -27,7 +31,17 @@ public class ExamService {
     @Inject
     QuestionPoolRepository questionPoolRepository;
     @Inject
+    ExamRepository examRepository;
+    @Inject
+    ExamQuestionRepository examQuestionRepository;
+    @Inject
+    AnswerRepository answerRepository;
+
+    @Inject
+    AnswerService answerService;
+    @Inject
     EntityManager entityManager;
+
 
     @Transactional
     public CreatedExamResponseDto createExam(CreateExamRequestDto request) {
@@ -84,12 +98,13 @@ public class ExamService {
             ExamQuestion eq = new ExamQuestion();
             eq.setExam(exam);
             eq.setEntry(entry);
+            eq.setCorrect(false);
             return eq;
         }).toList();
 
         exam.setQuestions(examQuestions);
-
         entityManager.persist(exam);
+
         return new CreatedExamResponseDto(exam.getId(), exam.getTimeLimit(), exam.getStartedAt(),
                 exam.getQuestionCount(), exam.getQuestions().stream().map(eq -> {
                     Question q = eq.getEntry().getQuestion();
@@ -97,4 +112,62 @@ public class ExamService {
                 }).toList()
         );
     }
+
+
+
+
+    @Transactional
+    public SubmittedExamResponseDto submitExam(SubmitExamRequestDto request) {
+        Exam exam = examRepository.getEntityById(request.examId());
+
+        // Prevent multiple submissions
+        if (exam.isSubmitted()) {
+            throw new BadRequestException("Exam has already been submitted.");
+        }
+
+        // Iterate over submitted answers
+        for (CheckAnswersRequestDto answerDto : request.answers()) {
+            // Find the ExamQuestion in this exam corresponding to the original Question ID
+            ExamQuestion examQuestion = exam.getQuestions().stream()
+                    .filter(eq -> eq.getEntry().getQuestion().getId().equals(answerDto.questionId()))
+                    .findFirst()
+                    .orElseThrow(() -> new BadRequestException(
+                            "Question ID " + answerDto.questionId() + " is not part of this exam."));
+
+            // grading answers in the answer service
+            CheckAnswersResponseDto result = answerService.checkAnswers(answerDto);
+
+            // Persist selected answers if any
+            if (answerDto.selectedAnswerIds() != null && !answerDto.selectedAnswerIds().isEmpty()) {
+                List<Answer> selectedAnswers = answerDto.selectedAnswerIds().stream()
+                        .map(answerRepository::getAnswerById)
+                        .toList();
+                examQuestion.setSelectedAnswers(selectedAnswers);
+            }
+            examQuestion.setFreeTextAnswer(answerDto.freeTextAnswer());
+            examQuestion.setCorrect(result.correct());
+
+            entityManager.persist(examQuestion);
+        }
+
+        // Compute total score
+        long totalCorrect = exam.getQuestions().stream()
+                .filter(ExamQuestion::getCorrect)
+                .count();
+        double score = (double) totalCorrect / exam.getQuestions().size() * 100;
+
+        // Update exam with final score and finished timestamp
+        exam.setScore(score);
+        exam.setFinishedAt(LocalDateTime.now());
+
+        entityManager.persist(exam);
+
+        // Map ExamQuestions to SlimDtos for response
+        List<ExamQuestionSlimDto> questionDtos = exam.getQuestions().stream()
+                .map(ExamQuestionMapper::toSlimDto)
+                .toList();
+
+        return new SubmittedExamResponseDto(exam.getId(), score, questionDtos);
+    }
+
 }

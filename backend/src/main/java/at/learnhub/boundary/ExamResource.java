@@ -1,7 +1,9 @@
 package at.learnhub.boundary;
 
 import at.learnhub.dto.request.CreateExamRequestDto;
+import at.learnhub.dto.request.SubmitExamRequestDto;
 import at.learnhub.dto.response.CreatedExamResponseDto;
+import at.learnhub.dto.response.SubmittedExamResponseDto;
 import at.learnhub.dto.simple.ExamDto;
 import at.learnhub.service.ExamService;
 import at.learnhub.repository.ExamRepository;
@@ -119,5 +121,38 @@ public class ExamResource {
     ) {
         CreatedExamResponseDto response = examService.createExam(request);
         return Response.status(Response.Status.CREATED).entity(response).build();
+    }
+
+    @POST
+    @Path("/submit")
+    @Operation(
+            summary = "Submit answers for an exam",
+            description = "Evaluates the submitted answers, persists results, and returns the grading outcome."
+    )
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "Exam submitted and graded successfully",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = SubmittedExamResponseDto.class)
+                    )
+            ),
+            @APIResponse(responseCode = "404", description = "Exam or question not found"),
+            @APIResponse(responseCode = "400", description = "Invalid submission data")
+    })
+    public Response submitExam(
+            @RequestBody(
+                    description = "Answers to submit for the exam",
+                    required = true,
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = SubmitExamRequestDto.class)
+                    )
+            )
+            SubmitExamRequestDto request
+    ) {
+        SubmittedExamResponseDto response = examService.submitExam(request);
+        return Response.ok(response).build();
     }
 }
