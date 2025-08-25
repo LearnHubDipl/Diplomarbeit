@@ -9,6 +9,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,14 @@ public class TopicPoolRepository{
             throw new EntityNotFoundException("TopicPool with id " + id + " not found.");
         }
         return tp;
+    }
+
+    public List<TopicPool> getTopicPoolListByIds(List<Long> ids) {
+        List<TopicPool> topicPools = new LinkedList<>();
+        for (Long id : ids) {
+            topicPools.add(getTopicPoolById(id));
+        }
+        return topicPools;
     }
 
     @Transactional
