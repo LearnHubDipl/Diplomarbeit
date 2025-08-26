@@ -1,0 +1,13 @@
+<div *ngIf="!isLoading && exam">
+  <lib-question-runner
+    mode="exam"
+    [questionIdList]="this.questionIds"
+    (answered)="storeAnswer($event)">
+  </lib-question-runner>
+
+  <button (click)="submitExam()">Prüfung abgeben</button>
+</div>
+
+<div *ngIf="isLoading">
+  <p>Prüfung wird erstellt...</p>
+</div>

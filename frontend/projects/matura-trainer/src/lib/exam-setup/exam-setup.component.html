@@ -1,0 +1,24 @@
+<h2>Exam Setup</h2>
+
+<form [formGroup]="form" (ngSubmit)="startExam()">
+  <label>User ID:
+    <input formControlName="userId" type="number">
+  </label>
+
+  <label>Topic Pools:</label>
+  <select formControlName="topicPoolIds" multiple>
+    <option *ngFor="let pool of topicPools" [value]="pool.id">
+      {{ pool.name }}
+    </option>
+  </select>
+
+  <label>Number of Questions:
+    <input formControlName="numberOfQuestions" type="number">
+  </label>
+
+  <label>Time Limit (minutes):
+    <input formControlName="timeLimitMinutes" type="number">
+  </label>
+
+  <button type="submit">Start Exam</button>
+</form>

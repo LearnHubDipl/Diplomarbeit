@@ -4,11 +4,12 @@
 
   <form [formGroup]="form" class="widget-content question-content" (ngSubmit)="submit()">
     <div class="widget-content-top">
-      <div *ngIf="submitted" class="result-badge" [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
-        <span class="icon">
-          <ng-container *ngIf="answerResult?.correct">✔️</ng-container>
-          <ng-container *ngIf="!answerResult?.correct">❌</ng-container>
-        </span>
+      <div *ngIf="mode === 'practice' && submitted" class="result-badge"
+           [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
+          <span class="icon">
+            <ng-container *ngIf="answerResult?.correct">✔️</ng-container>
+            <ng-container *ngIf="!answerResult?.correct">❌</ng-container>
+          </span>
         {{ answerResult?.correct ? 'Richtig!' : 'Falsch!' }}
       </div>
       <div class="widget-content-left" [ngStyle]="{ width: question?.media ? '60%' : '100%' }">
@@ -37,13 +38,8 @@
             placeholder="Bitte Antwort eingeben..."
           ></textarea>
 
-          <!-- Reserved feedback container -->
-          <div class="feedback-wrapper">
-            <div
-              *ngIf="submitted"
-              class="feedback"
-              [ngClass]="{ 'correct': answerResult?.correct, 'incorrect': !answerResult?.correct }"
-            >
+          <div *ngIf="mode === 'practice' && submitted" class="feedback-wrapper">
+            <div class="feedback" [ngClass]="{ 'correct': answerResult?.correct, 'incorrect': !answerResult?.correct }">
               <p *ngIf="answerResult?.correct">Richtig!</p>
               <div *ngIf="!answerResult?.correct">
                 Falsche Antwort.<br>
@@ -80,7 +76,7 @@
   </form>
 </div>
 
-<div *ngIf="hasSolutions && submitted" style="margin-top: 3rem;" class="widget-wrapper">
+<div *ngIf="hasSolutions && submitted && mode == 'practice'" style="margin-top: 3rem;" class="widget-wrapper">
   <div class="header">TOP Lösungsweg</div>
 
   <div class="widget-content">

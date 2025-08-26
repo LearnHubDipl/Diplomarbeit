@@ -1,4 +1,4 @@
-import {Component, inject, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
 import { Question } from '../../../../shared/src/lib/interfaces/question';
 import { QuestionService } from '../../../../shared/src/lib/services/question.service';
 import {NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
@@ -25,7 +25,10 @@ import {Location} from '@angular/common';
   ]
 })
 export class QuestionRunnerComponent implements OnInit {
-  questionIdList: number[] = [];
+  @Input() mode: 'practice' | 'exam' = 'practice';
+  @Output() answered = new EventEmitter<CheckAnswerRequest>();
+  @Input() questionIdList: number[] = [];
+
   currentQuestionIndex: number = 0;
   isFinished = false;
 
@@ -50,11 +53,6 @@ export class QuestionRunnerComponent implements OnInit {
   submitted = false;
 
   ngOnInit() {
-    this.route.queryParamMap.subscribe(params => {
-      const raw = params.getAll('ids');
-      this.questionIdList = raw.map(id => +id);
-    });
-
     if (this.questionIdList.length > 0) {
       this.loadQuestion(this.questionIdList[this.currentQuestionIndex]);
     } else {
@@ -97,7 +95,6 @@ export class QuestionRunnerComponent implements OnInit {
     if (!this.question) return;
 
     let payload: CheckAnswerRequest;
-
     if (this.question.type === 'MULTIPLE_CHOICE') {
       const selectedAnswerIds = this.answersArray.controls
         .map((ctrl, index) => ctrl.value ? this.question!.answers[index].id : null)
@@ -105,7 +102,7 @@ export class QuestionRunnerComponent implements OnInit {
 
       payload = {
         questionId: this.question.id,
-        selectedAnswerIds: selectedAnswerIds,
+        selectedAnswerIds,
         freeTextAnswer: null
       };
     } else {
@@ -116,26 +113,41 @@ export class QuestionRunnerComponent implements OnInit {
       };
     }
 
-    this.answerService.checkAnswers(payload).subscribe(result => {
-      this.answerResult = {
-        correct: result.correct,
-        correctAnswerIds: result.correctAnswerIds ?? null,
-        correctFreeTextAnswers: result.correctFreeTextAnswers ?? null
-      };
+    if (this.mode === 'practice') {
+      // practice mode: give instant feedback
+      this.answerService.checkAnswers(payload).subscribe(result => {
+        this.answerResult = {
+          correct: result.correct,
+          correctAnswerIds: result.correctAnswerIds ?? null,
+          correctFreeTextAnswers: result.correctFreeTextAnswers ?? null
+        };
 
-      // lock inputs
-      if (this.question?.type === 'MULTIPLE_CHOICE') {
-        this.answersArray.controls.forEach(ctrl => ctrl.disable());
-      } else if (this.question?.type === 'FREETEXT') {
-        this.form.get('freeTextAnswer')?.disable();
-      }
-
+        this.lockInputs();
+        this.submitted = true;
+        this.advance();
+      });
+    } else {
+      // exam mode: just emit to parent
+      this.answered.emit(payload);
+      this.lockInputs();
       this.submitted = true;
-      this.currentQuestionIndex++;
-      if(this.currentQuestionIndex >= this.questionIdList.length) {
-        this.isFinished = true;
-      }
-    });
+      this.advance();
+    }
+  }
+
+  private lockInputs() {
+    if (this.question?.type === 'MULTIPLE_CHOICE') {
+      this.answersArray.controls.forEach(ctrl => ctrl.disable());
+    } else if (this.question?.type === 'FREETEXT') {
+      this.form.get('freeTextAnswer')?.disable();
+    }
+  }
+
+  private advance() {
+    this.currentQuestionIndex++;
+    if (this.currentQuestionIndex >= this.questionIdList.length) {
+      this.isFinished = true;
+    }
   }
 
   loadNextQuestion(): void {
