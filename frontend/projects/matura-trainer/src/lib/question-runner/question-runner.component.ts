@@ -53,6 +53,11 @@ export class QuestionRunnerComponent implements OnInit {
   submitted = false;
 
   ngOnInit() {
+    let state = history.state;
+    if (state?.questionIds) {
+      this.questionIdList = state.questionIds;
+    }
+
     if (this.questionIdList.length > 0) {
       this.loadQuestion(this.questionIdList[this.currentQuestionIndex]);
     } else {

@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import {Component, inject, OnInit} from '@angular/core';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import { StatsService } from '../stats.service';
 import { NgForOf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -15,6 +15,9 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./home.component.css', '../styles/shared-styles.css']
 })
 export class HomeComponent implements OnInit {
+  router: Router = inject(Router);
+  activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+
   userId = 1; // statisch
 
   topicPools: { id: number; name: string }[] = [];
@@ -116,5 +119,12 @@ export class HomeComponent implements OnInit {
         ]
       }
     ];
+  }
+
+  startPractice() {
+    this.router.navigate(
+      ['quiz'],
+      { relativeTo: this.activatedRoute, state: { questionIds: [1, 2, 3] } } // pass IDs via state
+    );
   }
 }

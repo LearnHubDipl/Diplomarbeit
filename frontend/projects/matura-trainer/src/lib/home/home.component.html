@@ -32,7 +32,7 @@
             </select>
           </div>
 
-          <button class="action-button"><a routerLink="/trainer/practice/quiz" [queryParams]="{ ids: [1, 2, 3] }">Üben</a></button>
+          <button class="action-button" (click)="startPractice()">Üben</button>
         </div>
         <!-- topic pool selection and button for the practice mode -->
       </div>
