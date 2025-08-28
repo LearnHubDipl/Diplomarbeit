@@ -1,24 +1,72 @@
-<h2>Exam Setup</h2>
+<div class="widget-wrapper">
+  <div class="header">Prüfung konfigurieren</div>
 
-<form [formGroup]="form" (ngSubmit)="startExam()">
-  <label>User ID:
-    <input formControlName="userId" type="number">
-  </label>
+  <div class="widget-content">
+    <form [formGroup]="form" (ngSubmit)="startExam()">
+      <!-- Topic Pools -->
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Wähle Fächer und Themenpools</mat-label>
+        <mat-select
+          formControlName="topicPoolIds"
+          multiple
+        >
+          <!-- Custom display in the trigger -->
+          <mat-select-trigger>
+            {{ getSelectedSubjects().join(', ') }}
+          </mat-select-trigger>
 
-  <label>Topic Pools:</label>
-  <select formControlName="topicPoolIds" multiple>
-    <option *ngFor="let pool of topicPools" [value]="pool.id">
-      {{ pool.name }}
-    </option>
-  </select>
+          <!-- Options grouped by subject -->
+          <mat-optgroup *ngFor="let subject of subjects" [label]="''">
+            <!-- Subject header with checkbox -->
+            <div class="subject-header">
+              <span class="subject-label">{{ subject.name }}</span>
+              <mat-checkbox
+                class="subject-checkbox"
+                [checked]="isSubjectSelected(subject)"
+                (change)="toggleSubject(subject, $event.checked)">
+              </mat-checkbox>
+            </div>
 
-  <label>Number of Questions:
-    <input formControlName="numberOfQuestions" type="number">
-  </label>
+            <!-- Topic pools -->
+            <mat-option style="margin-left: 4%" *ngFor="let pool of subject.topicPools" [value]="pool.id">
+              <span class="topic-pool-name">{{ pool.name }}</span>
+            </mat-option>
+          </mat-optgroup>
 
-  <label>Time Limit (minutes):
-    <input formControlName="timeLimitMinutes" type="number">
-  </label>
+        </mat-select>
+      </mat-form-field>
 
-  <button type="submit">Start Exam</button>
-</form>
+
+
+
+      <!-- Number of Questions -->
+      <div class="form-group">
+        <label for="numberOfQuestions">Anzahl der Fragen:</label>
+        <input
+          id="numberOfQuestions"
+          formControlName="numberOfQuestions"
+          type="number"
+          min="1"
+        />
+      </div>
+
+      <!-- Time Limit -->
+      <div class="form-group">
+        <label for="timeLimit">Zeitlimit (Minuten):</label>
+        <input
+          id="timeLimit"
+          formControlName="timeLimitMinutes"
+          type="number"
+          min="1"
+        />
+      </div>
+
+      <!-- Submit button -->
+      <div class="button-container">
+        <button type="submit" class="submit-btn" [disabled]="form.invalid">
+          Starten
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
