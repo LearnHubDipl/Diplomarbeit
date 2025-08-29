@@ -94,6 +94,8 @@ public class ExamService {
         exam.setQuestionCount(chosen.size());
         exam.setStartedAt(LocalDateTime.now());
 
+        Collections.shuffle(chosen);
+
         List<ExamQuestion> examQuestions = chosen.stream().map(entry -> {
             ExamQuestion eq = new ExamQuestion();
             eq.setExam(exam);

@@ -1,10 +1,8 @@
 package at.learnhub.repository;
 
 import at.learnhub.dto.request.AddQuestionToQuestionPoolRequestDto;
-import at.learnhub.dto.simple.QuestionPoolDto;
-import at.learnhub.dto.simple.QuestionPoolEntrySlimDto;
-import at.learnhub.mapper.QuestionPoolEntryMapper;
-import at.learnhub.mapper.QuestionPoolMapper;
+import at.learnhub.dto.simple.*;
+import at.learnhub.mapper.*;
 import at.learnhub.model.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -12,6 +10,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.ws.rs.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,4 +49,35 @@ public class QuestionPoolRepository {
                 .distinct()
                 .toList();
     }
+
+    public List<SubjectDto> findSubjectsAndTopicPoolsByUserId(Long userId) {
+        QuestionPool pool = findEntityByUserId(userId);
+
+        List<TopicPool> topicPools = findTopicPoolsByUserId(userId);
+
+        List<Subject> subjects = topicPools.stream()
+                .map(tp -> tp.getSubject())
+                .distinct()
+                .toList();
+
+        List<SubjectDto> result = new ArrayList<>();
+        for (Subject subject : subjects) {
+            List<TopicPool> pools = topicPools.stream()
+                    .filter(tp -> tp.getSubject().equals(subject))
+                    .toList();
+
+            SubjectDto dto = new SubjectDto(
+                    subject.getId(),
+                    subject.getName(),
+                    subject.getDescription(),
+                    MediaFileMapper.toSlimDto(subject.getImg()),
+                    pools.stream().map(TopicPoolMapper::toSlimDto).toList()
+            );
+
+            result.add(dto);
+        }
+
+        return result;
+    }
+
 }

@@ -44,6 +44,8 @@ export class QuestionRunnerComponent implements OnInit {
     freeTextAnswer: ['']
   });
 
+  previousAnswers: { [questionId: number]: CheckAnswerRequest } = {};
+
   answerResult: {
     correct: boolean;
     correctAnswerIds: number[] | null;
@@ -68,17 +70,19 @@ export class QuestionRunnerComponent implements OnInit {
   loadQuestion(id: number) {
     this.questionService.getQuestionById(id).subscribe(q => {
       this.question = q;
-      this.answerResult = null;
-      this.submitted = false;
+
+      let previous = this.previousAnswers[q.id];
 
       if (q.type === 'MULTIPLE_CHOICE') {
-        const answerControls = this.fb.array(q.answers.map(() => false));
+        let answerControls = this.fb.array(
+          q.answers.map((a, i) => previous?.selectedAnswerIds?.includes(a.id) ?? false)
+        );
         this.form.setControl('answers', answerControls);
         this.form.get('freeTextAnswer')?.disable();
       } else if (q.type === 'FREETEXT') {
-        this.form.setControl('answers', this.fb.array([])); // clear answers array
+        this.form.setControl('answers', this.fb.array([]));
         this.form.get('freeTextAnswer')?.enable();
-        this.form.get('freeTextAnswer')?.setValue('');
+        this.form.get('freeTextAnswer')?.setValue(previous?.freeTextAnswer ?? '');
       }
     });
   }
@@ -97,7 +101,29 @@ export class QuestionRunnerComponent implements OnInit {
   }
 
   submit(): void {
-    if (!this.question) return;
+    let payload = this.buildPayLoad();
+    if (this.mode === 'practice') {
+      // practice mode: give instant feedback
+      this.answerService.checkAnswers(payload).subscribe(result => {
+        this.answerResult = {
+          correct: result.correct,
+          correctAnswerIds: result.correctAnswerIds ?? null,
+          correctFreeTextAnswers: result.correctFreeTextAnswers ?? null
+        };
+
+        this.lockInputs();
+        this.submitted = true;
+        this.advance();
+      });
+    } else {
+      // exam mode: just emit to parent
+      this.previousAnswers[this.question!.id] = payload;
+      this.answered.emit(payload);
+    }
+  }
+
+  buildPayLoad() : CheckAnswerRequest {
+    if (!this.question) throw new Error("There is no Question selected");
 
     let payload: CheckAnswerRequest;
     if (this.question.type === 'MULTIPLE_CHOICE') {
@@ -117,27 +143,7 @@ export class QuestionRunnerComponent implements OnInit {
         freeTextAnswer: this.form.get('freeTextAnswer')?.value.trim() ?? null
       };
     }
-
-    if (this.mode === 'practice') {
-      // practice mode: give instant feedback
-      this.answerService.checkAnswers(payload).subscribe(result => {
-        this.answerResult = {
-          correct: result.correct,
-          correctAnswerIds: result.correctAnswerIds ?? null,
-          correctFreeTextAnswers: result.correctFreeTextAnswers ?? null
-        };
-
-        this.lockInputs();
-        this.submitted = true;
-        this.advance();
-      });
-    } else {
-      // exam mode: just emit to parent
-      this.answered.emit(payload);
-      this.lockInputs();
-      this.submitted = true;
-      this.advance();
-    }
+    return payload;
   }
 
   private lockInputs() {
@@ -157,10 +163,31 @@ export class QuestionRunnerComponent implements OnInit {
 
   loadNextQuestion(): void {
     if (!this.isFinished) {
+      this.answerResult = null;
+      this.submitted = false;
       let nextIndex = this.questionIdList![this.currentQuestionIndex];
       this.loadQuestion(nextIndex);
     }
   }
+
+  navigateExam(direction: 'next' | 'prev') {
+    this.submit(); // always emit current answer
+
+    if (direction === 'next') {
+      if (this.currentQuestionIndex < this.questionIdList.length - 1) {
+        this.currentQuestionIndex++;
+        this.loadQuestion(this.questionIdList[this.currentQuestionIndex]);
+      } else {
+        this.isFinished = true;
+      }
+    } else if (direction === 'prev') {
+      if (this.currentQuestionIndex > 0) {
+        this.currentQuestionIndex--;
+        this.loadQuestion(this.questionIdList[this.currentQuestionIndex]);
+      }
+    }
+  }
+
 
   get hasSolutions(): boolean {
     return (this.question?.solutions?.length ?? 0) > 0;
@@ -180,6 +207,7 @@ export class QuestionRunnerComponent implements OnInit {
   }
 
   finish() {
+    this.submit()
     this.location.back()
   }
 }

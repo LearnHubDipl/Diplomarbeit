@@ -7,6 +7,7 @@ import {MatSelectModule} from '@angular/material/select';
 import { Subject } from '../../../../shared/src/lib/interfaces/subject';
 import {SubjectService} from '../../../../shared/src/lib/services/subject.service';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import {QuestionPoolService} from '../../../../shared/src/lib/services/question-pool.service';
 
 
 @Component({
@@ -30,6 +31,7 @@ export class ExamSetupComponent implements OnInit {
   fb = inject(FormBuilder);
   router = inject(Router);
   activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+  questionPoolService: QuestionPoolService = inject(QuestionPoolService);
   subjectService: SubjectService = inject(SubjectService);
   subjects: Subject[] = []
 
@@ -41,7 +43,8 @@ export class ExamSetupComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.subjectService.getAllSubjects().subscribe(subjects => {this.subjects = subjects;});
+    // this.subjectService.getAllSubjects().subscribe(subjects => {this.subjects = subjects;});
+    this.questionPoolService.getSubjectsForUser(1).subscribe(subjects => this.subjects = subjects);
   }
 
   startExam() {

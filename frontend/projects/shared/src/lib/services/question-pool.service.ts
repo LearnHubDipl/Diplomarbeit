@@ -4,6 +4,7 @@ import {Observable} from 'rxjs';
 import {QuestionPool, QuestionPoolEntry, QuestionPoolEntryRequest} from '../interfaces/question-pool';
 import {API_BASE_URL} from './globals';
 import {TopicPool} from '../interfaces/topic-pool';
+import {Subject} from '../interfaces/subject';
 
 @Injectable({
   providedIn: 'root'
@@ -23,5 +24,13 @@ export class QuestionPoolService {
 
   postQuestionsToQuestionPool(request: QuestionPoolEntryRequest) : Observable<QuestionPool> {
     return this.httpClient.post<QuestionPool>(API_BASE_URL + '/questionPools/addQuestions', request);
+  }
+
+  getTopicPoolsForUser(userId: number): Observable<TopicPool[]> {
+    return this.httpClient.get<TopicPool[]>(API_BASE_URL + `/questionPools/${userId}/topicPools`);
+  }
+
+  getSubjectsForUser(userId: number): Observable<Subject[]> {
+    return this.httpClient.get<Subject[]>(API_BASE_URL + `/questionPools/${userId}/subjects`);
   }
 }

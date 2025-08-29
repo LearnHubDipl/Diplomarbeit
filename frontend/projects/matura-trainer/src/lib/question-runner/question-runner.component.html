@@ -58,7 +58,7 @@
       </div>
     </div>
 
-    <div class="button-container">
+    <div class="button-container" *ngIf="mode == 'practice'">
       <button
         class="submit-btn"
         type="button"
@@ -71,6 +71,23 @@
             ? 'Abschließen'
             : (submitted ? 'Nächste Frage' : 'Prüfen')
         }}
+      </button>
+    </div>
+
+    <div class="button-container" *ngIf="mode === 'exam'">
+      <button
+        type="button"
+        class="submit-btn"
+        [disabled]="currentQuestionIndex === 0"
+        (click)="navigateExam('prev')">
+        ← Zurück
+      </button>
+
+      <button
+        type="button"
+        class="submit-btn"
+        (click)="navigateExam('next')">
+        {{ currentQuestionIndex < questionIdList.length - 1 ? 'Weiter →' : 'Fertigstellen' }}
       </button>
     </div>
   </form>
