@@ -30,6 +30,8 @@ export class FragenKonfiguratorComponent implements OnInit {
   questionTypes = Object.values(QuestionType);
 
   readonly QuestionType = QuestionType;
+  readonly maxAnswers = 7; //maximale Anzahl der Antwormöglichkeiten (bei Multiple choice)
+  readonly automaticAnswersLoaded = 2;
 
   ngOnInit() {
     this.initForm();
@@ -79,8 +81,7 @@ export class FragenKonfiguratorComponent implements OnInit {
     answersArray.clear();
 
     if (type === QuestionType.MULTIPLE_CHOICE) {
-      // 4 Antwortmöglichkeiten für Multiple Choice
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < this.automaticAnswersLoaded; i++) {
         answersArray.push(this.fb.group({
           text: ['', Validators.required],
           isCorrect: [i === 0] // Erste Antwort standardmäßig richtig
@@ -187,6 +188,16 @@ export class FragenKonfiguratorComponent implements OnInit {
         return 'Freitext';
       default:
         return type;
+    }
+  }
+  addAnswer() {
+    const answersArray = this.answersArray;
+
+    if (answersArray.length < this.maxAnswers) {
+      answersArray.push(this.fb.group({
+        text: ['', Validators.required],
+        isCorrect: [false]
+      }));
     }
   }
 }
