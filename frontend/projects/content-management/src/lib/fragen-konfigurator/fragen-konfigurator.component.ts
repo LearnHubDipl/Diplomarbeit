@@ -136,6 +136,7 @@ export class FragenKonfiguratorComponent implements OnInit {
     }
   }
 
+
   onSubmit() {
     if (this.questionForm.valid) {
       const formValue = this.questionForm.value;
@@ -147,16 +148,14 @@ export class FragenKonfiguratorComponent implements OnInit {
         difficulty: formValue.difficulty,
         isPublic: formValue.isPublic,
         userId: 1, // TODO: Aktuelle User-ID aus Authentication Service holen
-        topicPoolId: Number(formValue.topicPoolId), // Explizite Konvertierung zu number
+        topicPoolId: Number(formValue.topicPoolId),
         answers: formValue.answers || []
       };
 
       this.questionService.createQuestion(questionRequest).subscribe({
-        next: (createdQuestion) => {
-          console.log('Frage erfolgreich erstellt:', createdQuestion);
+        next: () => {
           alert('Frage wurde erfolgreich veröffentlicht!');
-          this.questionForm.reset();
-          this.initForm();
+          this.reinitForm();
         },
         error: (error) => {
           console.error('Fehler beim Erstellen der Frage:', error);
@@ -166,6 +165,23 @@ export class FragenKonfiguratorComponent implements OnInit {
     } else {
       this.markAllFieldsAsTouched();
       alert('Bitte füllen Sie alle Pflichtfelder aus.');
+    }
+  }
+
+  private reinitForm(){
+    const prevSubjectId = this.questionForm.get('subjectId')?.value;
+    const prevTopicPoolId = this.questionForm.get('topicPoolId')?.value;
+
+    this.initForm();
+    this.setupFormSubscriptions();
+
+    if(prevSubjectId){
+      this.questionForm.get('subjectId')?.setValue(prevSubjectId);
+      this.loadTopicPoolsForSubject(Number(prevTopicPoolId));
+      if(prevSubjectId ){
+        this.questionForm.get('topicPoolId')?.setValue(prevTopicPoolId);
+        this.questionForm.get('topicPoolId')?.enable();
+      }
     }
   }
 
@@ -200,4 +216,6 @@ export class FragenKonfiguratorComponent implements OnInit {
       }));
     }
   }
+
+
 }
