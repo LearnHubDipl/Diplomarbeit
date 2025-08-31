@@ -7,6 +7,7 @@ import {CheckAnswerRequest} from '../../../../shared/src/lib/interfaces/answer';
 import {AnswerService} from '../../../../shared/src/lib/services/answer.service';
 import {ActivatedRoute} from '@angular/router';
 import {Location} from '@angular/common';
+import {Exam} from '../../../../shared/src/lib/interfaces/exam';
 
 
 @Component({
@@ -25,8 +26,10 @@ import {Location} from '@angular/common';
   ]
 })
 export class QuestionRunnerComponent implements OnInit {
-  @Input() mode: 'practice' | 'exam' = 'practice';
+  @Input() mode: 'practice' | 'exam' | 'review' = 'practice';
+  @Input() exam?: Exam;   // only needed for review mode
   @Output() answered = new EventEmitter<CheckAnswerRequest>();
+  @Output() finishedExam = new EventEmitter<CheckAnswerRequest[]>(); // emit all answers at the end of exam
   @Input() questionIdList: number[] = [];
 
   currentQuestionIndex: number = 0;
@@ -56,18 +59,56 @@ export class QuestionRunnerComponent implements OnInit {
 
   ngOnInit() {
     let state = history.state;
-    if (state?.questionIds) {
-      this.questionIdList = state.questionIds;
-    }
+    if (this.mode !== 'review') {
+      if (state?.questionIds) {
+        this.questionIdList = state.questionIds;
+      }
 
-    if (this.questionIdList.length > 0) {
-      this.loadQuestion(this.questionIdList[this.currentQuestionIndex]);
+      if (this.questionIdList.length > 0) {
+        this.loadQuestion(this.currentQuestionIndex);
+      } else {
+        // TODO: Screen that states that there are no question that could be loaded
+      }
     } else {
-      // TODO: Screen that states that there are no question that could be loaded
+      this.loadQuestion(this.currentQuestionIndex)
     }
   }
 
-  loadQuestion(id: number) {
+  loadQuestion(index: number) {
+    if (this.mode === 'review' && this.exam) {
+      let reviewed = this.exam.questions[index]
+      if (reviewed) {
+        this.question = reviewed.question;
+
+        // Restore user’s answer
+        if (this.question.type === 'MULTIPLE_CHOICE') {
+          let answerControls = this.fb.array(
+            this.question.answers.map(a => reviewed.selectedAnswers?.some(sa => sa.id === a.id) ?? false)
+          );
+          this.form.setControl('answers', answerControls);
+          this.form.get('freeTextAnswer')?.disable();
+        } else if (this.question.type === 'FREETEXT') {
+          this.form.setControl('answers', this.fb.array([]));
+          this.form.get('freeTextAnswer')?.setValue(reviewed.freeTextAnswer ?? '');
+          this.form.get('freeTextAnswer')?.disable();
+        }
+
+        // Lock and set evaluation
+        this.answerResult = {
+          correct: reviewed.isCorrect,
+          correctAnswerIds: reviewed.correctAnswerIds ?? null,
+          correctFreeTextAnswers: reviewed.correctFreeTextAnswers ?? null
+        };
+
+        this.lockInputs();
+        this.submitted = true;
+        return;
+      }
+    }
+
+    let id = this.questionIdList[index]
+    if(!id) return;
+
     this.questionService.getQuestionById(id).subscribe(q => {
       this.question = q;
 
@@ -116,9 +157,8 @@ export class QuestionRunnerComponent implements OnInit {
         this.advance();
       });
     } else {
-      // exam mode: just emit to parent
+      // save answers
       this.previousAnswers[this.question!.id] = payload;
-      this.answered.emit(payload);
     }
   }
 
@@ -156,8 +196,21 @@ export class QuestionRunnerComponent implements OnInit {
 
   private advance() {
     this.currentQuestionIndex++;
-    if (this.currentQuestionIndex >= this.questionIdList.length) {
+    if (this.currentQuestionIndex >= this.currentQuestions.length) {
       this.isFinished = true;
+    }
+  }
+
+  navigateExam(direction: 'next' | 'prev') {
+    if (direction === 'next' && this.currentQuestionIndex < this.currentQuestions.length - 1) {
+      this.submit();
+      this.currentQuestionIndex++;
+      this.loadQuestion(this.currentQuestionIndex);
+    } else if (direction === 'prev' && this.currentQuestionIndex > 0) {
+      this.currentQuestionIndex--;
+      this.loadQuestion(this.currentQuestionIndex);
+    } else if (direction === 'next' && this.currentQuestionIndex === this.currentQuestions.length - 1) {
+      this.finish();
     }
   }
 
@@ -165,29 +218,15 @@ export class QuestionRunnerComponent implements OnInit {
     if (!this.isFinished) {
       this.answerResult = null;
       this.submitted = false;
-      let nextIndex = this.questionIdList![this.currentQuestionIndex];
-      this.loadQuestion(nextIndex);
+      this.loadQuestion(this.currentQuestionIndex);
     }
   }
 
-  navigateExam(direction: 'next' | 'prev') {
-    this.submit(); // always emit current answer
-
-    if (direction === 'next') {
-      if (this.currentQuestionIndex < this.questionIdList.length - 1) {
-        this.currentQuestionIndex++;
-        this.loadQuestion(this.questionIdList[this.currentQuestionIndex]);
-      } else {
-        this.isFinished = true;
-      }
-    } else if (direction === 'prev') {
-      if (this.currentQuestionIndex > 0) {
-        this.currentQuestionIndex--;
-        this.loadQuestion(this.questionIdList[this.currentQuestionIndex]);
-      }
-    }
+  get currentQuestions(): { id: number; question: Question; selectedAnswers?: any; freetextAnswer?: string }[] | number[] {
+    return this.mode === 'review'
+      ? this.exam?.questions ?? []
+      : this.questionIdList;
   }
-
 
   get hasSolutions(): boolean {
     return (this.question?.solutions?.length ?? 0) > 0;
@@ -208,7 +247,13 @@ export class QuestionRunnerComponent implements OnInit {
 
   finish() {
     this.submit()
-    this.location.back()
+
+    if (this.mode !== 'exam') {
+      this.location.back()
+    } else {
+      let allAnswers = Object.values(this.previousAnswers);
+      this.finishedExam.emit(allAnswers);
+    }
   }
 }
 

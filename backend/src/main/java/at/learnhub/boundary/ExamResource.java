@@ -147,12 +147,12 @@ public class ExamResource {
                     required = true,
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = SubmitExamRequestDto.class)
+                            schema = @Schema(implementation = ExamDto.class)
                     )
             )
             SubmitExamRequestDto request
     ) {
-        SubmittedExamResponseDto response = examService.submitExam(request);
+        ExamDto response = examService.submitExam(request);
         return Response.ok(response).build();
     }
 }

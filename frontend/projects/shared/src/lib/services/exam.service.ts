@@ -4,6 +4,7 @@ import {CheckAnswerRequest} from '../interfaces/answer';
 import {Question} from '../interfaces/question';
 import {Observable} from 'rxjs';
 import {API_BASE_URL} from './globals';
+import {Exam} from '../interfaces/exam';
 
 export interface CreateExamRequest {
   userId: number;
@@ -49,8 +50,8 @@ export class ExamService {
     return this.httpClient.post<CreatedExamResponse>(`${API_BASE_URL}/exams/create`, request);
   }
 
-  submitExam(request: SubmitExamRequest): Observable<SubmittedExamResponse> {
-    return this.httpClient.post<SubmittedExamResponse>(`${API_BASE_URL}/exams/submit`, request);
+  submitExam(request: SubmitExamRequest): Observable<Exam> {
+    return this.httpClient.post<Exam>(`${API_BASE_URL}/exams/submit`, request);
   }
 
   /*

@@ -6,7 +6,9 @@ import at.learnhub.dto.request.SubmitExamRequestDto;
 import at.learnhub.dto.response.CheckAnswersResponseDto;
 import at.learnhub.dto.response.CreatedExamResponseDto;
 import at.learnhub.dto.response.SubmittedExamResponseDto;
+import at.learnhub.dto.simple.ExamDto;
 import at.learnhub.dto.simple.ExamQuestionSlimDto;
+import at.learnhub.mapper.ExamMapper;
 import at.learnhub.mapper.ExamQuestionMapper;
 import at.learnhub.mapper.QuestionMapper;
 import at.learnhub.model.*;
@@ -119,7 +121,7 @@ public class ExamService {
 
 
     @Transactional
-    public SubmittedExamResponseDto submitExam(SubmitExamRequestDto request) {
+    public ExamDto submitExam(SubmitExamRequestDto request) {
         Exam exam = examRepository.getEntityById(request.examId());
 
         // Prevent multiple submissions
@@ -164,12 +166,8 @@ public class ExamService {
 
         entityManager.persist(exam);
 
-        // Map ExamQuestions to SlimDtos for response
-        List<ExamQuestionSlimDto> questionDtos = exam.getQuestions().stream()
-                .map(ExamQuestionMapper::toSlimDto)
-                .toList();
 
-        return new SubmittedExamResponseDto(exam.getId(), score, questionDtos);
+        return ExamMapper.toDto(exam);
     }
 
 }

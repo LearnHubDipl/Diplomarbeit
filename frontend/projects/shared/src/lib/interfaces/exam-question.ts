@@ -3,10 +3,12 @@ import {Question} from './question';
 export interface ExamQuestion {
   id: number;
   question: Question;
-  freetextAnswer?: string;
+  freeTextAnswer?: string;
   isCorrect: boolean;
   selectedAnswers?: {
     id: number;
     text: string;
-  }[]
+  }[],
+  correctAnswerIds?: number[];
+  correctFreeTextAnswers?: string[];
 }

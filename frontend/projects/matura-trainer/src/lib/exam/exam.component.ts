@@ -22,8 +22,12 @@ export class ExamComponent implements OnInit{
   activatedRoute: ActivatedRoute = inject(ActivatedRoute);
 
   exam: CreatedExamResponse | null = null;
-  questionIds : number[] = []
+  submittedExam?: Exam;
+  questionIds : number[] = [];
   isLoading = true;
+
+  examSubmitted = false;
+
 
   ngOnInit() {
     // Grab the settings passed via router state
@@ -51,16 +55,20 @@ export class ExamComponent implements OnInit{
     this.answers.push(answer);
   }
 
-  submitExam() {
+  submitExam(answers: CheckAnswerRequest[]) {
     if (!this.exam) return;
 
     this.examService.submitExam({
       examId: this.exam.examId,
-      answers: this.answers
+      answers: answers
     }).subscribe(result => {
+      this.submittedExam = result;
+      this.examSubmitted = true;
+
       console.log('Exam submitted:', result);
     });
   }
 
   protected readonly query = query;
+  protected readonly Math = Math;
 }

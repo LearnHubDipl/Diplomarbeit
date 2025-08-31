@@ -19,7 +19,7 @@ public record ExamQuestionSlimDto(
                 description = "The original question associated with this exam question.",
                 implementation = QuestionSlimDto.class
         )
-        QuestionSlimDto question,
+        QuestionDto question,
 
         @Schema(
                 description = "Free text answer provided by the user (if applicable).",
@@ -38,5 +38,16 @@ public record ExamQuestionSlimDto(
                 implementation = AnswerSlimDto.class,
                 type = SchemaType.ARRAY
         )
-        List<AnswerSlimDto> selectedAnswers
+        List<AnswerSlimDto> selectedAnswers,
+
+        @Schema(
+                description = "Ids of all correct answers of this question",
+                type = SchemaType.ARRAY
+        )
+        List<Long> correctAnswerIds,
+
+        @Schema(
+                description = "Value of the freetext answers that would be accepted as correct"
+        )
+        List<String> correctFreeTextAnswers
 ) {}
