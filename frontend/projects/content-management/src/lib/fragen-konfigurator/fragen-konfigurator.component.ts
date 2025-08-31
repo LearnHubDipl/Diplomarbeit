@@ -42,8 +42,8 @@ export class FragenKonfiguratorComponent implements OnInit {
   private initForm() {
     this.questionForm = this.fb.group({
       type: ['', Validators.required],
-      subjectId: [null, Validators.required], // null statt leerer String für number
-      topicPoolId: [{value: null, disabled: true}, Validators.required], // Disabled per default
+      subjectId: [null, Validators.required],
+      topicPoolId: [{value: null, disabled: true}, Validators.required],
       text: ['', Validators.required],
       difficulty: [2], // Default: mittel
       explanation: [''],
@@ -53,19 +53,16 @@ export class FragenKonfiguratorComponent implements OnInit {
   }
 
   private setupFormSubscriptions() {
-    // Überwache Änderungen am Fragentyp
     this.questionForm.get('type')?.valueChanges.subscribe(type => {
       this.updateAnswersArray(type);
       this.updateExplanationValidation(type);
     });
 
-    // Überwache Änderungen am Schulfach
     this.questionForm.get('subjectId')?.valueChanges.subscribe(subjectId => {
       const topicPoolControl = this.questionForm.get('topicPoolId');
 
       if (subjectId) {
         this.loadTopicPoolsForSubject(Number(subjectId));
-        // Reset TopicPool Auswahl und aktiviere das Feld
         topicPoolControl?.setValue(null);
         topicPoolControl?.enable();
       } else {
@@ -95,10 +92,8 @@ export class FragenKonfiguratorComponent implements OnInit {
     const explanationControl = this.questionForm.get('explanation');
 
     if (type === QuestionType.FREETEXT) {
-      // Für FREETEXT ist Erklärung Pflicht
       explanationControl?.setValidators([Validators.required]);
     } else {
-      // Für MULTIPLE_CHOICE ist Erklärung optional
       explanationControl?.clearValidators();
     }
 
