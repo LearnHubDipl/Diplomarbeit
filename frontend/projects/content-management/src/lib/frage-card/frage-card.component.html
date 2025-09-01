@@ -4,7 +4,7 @@
 
   <div class="bg-warning-subtle rounded p-4 flex-grow-1 d-flex flex-column justify-content-between">
     <div>
-      <div *ngIf="!showAnswer">
+      <div>
         <h5 class="mb-3">{{ questions[currentIndex].text }}</h5>
 
         <img *ngIf="questions[currentIndex].media?.path"
@@ -18,9 +18,9 @@
         </ul>
       </div>
 
-      <div *ngIf="showAnswer">
-        <h5>Die Richtige Antwort lautet:</h5>
-        <p>{{ questions[currentIndex].explanation }}</p>
+      <div *ngIf="showAnswer" class="bg-success-subtle border border-success rounded p-3 mt-3">
+        <h6>Die Richtige Antwort lautet:</h6>
+        <p class="mb-0">{{ questions[currentIndex].explanation }}</p>
       </div>
     </div>
 
@@ -37,13 +37,13 @@
         aufdecken
       </button>
 
-      <button *ngIf="showAnswer && currentIndex < questions.length - 1"
+      <button *ngIf="currentIndex < questions.length - 1"
               class="btn btn-success rounded-pill ms-auto"
               (click)="goToNext()">
         weiter
       </button>
 
-      <button *ngIf="showAnswer && currentIndex === questions.length - 1"
+      <button *ngIf="currentIndex === questions.length - 1"
               class="btn btn-primary rounded-pill ms-auto"
               (click)="finishedLearning()">
         beenden
