@@ -8,6 +8,7 @@ import { QuestionType } from '../../../../shared/src/lib/interfaces/question';
 import { QuestionRequest, AnswerCreationRequest } from '../../../../shared/src/lib/interfaces/question-creation-request';
 import { Subject } from '../../../../shared/src/lib/interfaces/subject';
 import { TopicPool } from '../../../../shared/src/lib/interfaces/topic-pool';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'lib-fragen-konfigurator',
@@ -23,6 +24,7 @@ export class FragenKonfiguratorComponent implements OnInit {
   private questionService = inject(QuestionService);
   private subjectService = inject(SubjectService);
   private topicPoolService = inject(TopicPoolService);
+  private route = inject(ActivatedRoute);
 
   questionForm!: FormGroup;
   subjects: Subject[] = [];
@@ -33,11 +35,37 @@ export class FragenKonfiguratorComponent implements OnInit {
   readonly maxAnswers = 7; //maximale Anzahl der Antwormöglichkeiten (bei Multiple choice)
   readonly automaticAnswersLoaded = 2;
 
+  private subjectId?: number;
+  private topicPoolId?: number;
+
   ngOnInit() {
     this.initForm();
-    this.loadSubjects();
+
     this.setupFormSubscriptions();
+
+    this.route.queryParams.subscribe(params => {
+      this.subjectId = params['subjectId'] ? Number(params['subjectId']) : undefined;
+      this.topicPoolId = params['topicPoolId'] ? Number(params['topicPoolId']) : undefined;
+    });
+    /**
+    this.route.queryParams.subscribe(params => {
+      const subjectId = params['subjectId'];
+      const topicId = params['topicId'];
+
+      if (subjectId) {
+        this.questionForm.get('subjectId')?.setValue(subjectId);
+      }
+
+      if (topicId) {
+        this.questionForm.get('topicId')?.setValue(Number(topicId));
+        this.questionForm.get('topicId')?.enable();
+      }
+    })
+**/
+    this.loadSubjects();
   }
+
+
 
   private initForm() {
     this.questionForm = this.fb.group({
@@ -109,6 +137,18 @@ export class FragenKonfiguratorComponent implements OnInit {
       next: (subjects) => {
         this.subjects = subjects;
         console.log('Subjects geladen:', this.subjects);
+
+        if(this.subjectId){
+          this.questionForm.get('subjectId')?.setValue(this.subjectId);
+
+          this.loadTopicPoolsForSubject(this.subjectId);
+
+          if(this.topicPoolId){
+              this.questionForm.get('topicPoolId')?.setValue(this.topicPoolId);
+              this.questionForm.get('topicPoolId')?.enable();
+
+          }
+        }
       },
       error: (error) => {
         console.error('Fehler beim Laden der Schulfächer:', error);

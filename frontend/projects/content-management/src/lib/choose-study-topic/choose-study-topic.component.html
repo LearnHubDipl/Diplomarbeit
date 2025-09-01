@@ -22,6 +22,16 @@
         [ngClass]="{ show: openSubjectId === subject.id }">
 
         <ul class="list-group rounded-0 border-top border-warning">
+          <li *ngFor="let pool of subject.topicPools" class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <span> {{pool.name}} </span>
+            </div>
+            <div class="d-flex gap-3 align-items-center">
+              <i class="bi bi-plus-circle-fill text-success fs-5" style="cursor: pointer" (click)="navigateToFragenkonfigurator(subject,pool)"></i>
+              <i class="bi bi-play-circle-fill text-warning fs-5" style="cursor: pointer" (click)="navigateToTopicPool(pool)"></i>
+            </div>
+          </li>
+          <!--
           <li *ngFor="let pool of subject.topicPools"
               class="list-group-item d-flex justify-content-between align-items-center"
               style="cursor: pointer;"
@@ -33,6 +43,7 @@
 
             <i class="bi bi-play-circle-fill text-warning fs-5"></i>
           </li>
+          -->
         </ul>
       </div>
     </div>

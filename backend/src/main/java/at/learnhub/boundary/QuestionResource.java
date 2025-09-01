@@ -40,11 +40,11 @@ public class QuestionResource {
                     responseCode = "200",
                     description = "List of questions",
                     content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(
-                                    type = SchemaType.ARRAY,
-                                    implementation = QuestionDto.class
-                            )
+            mediaType = MediaType.APPLICATION_JSON,
+    schema = @Schema(
+            type = SchemaType.ARRAY,
+            implementation = QuestionDto.class
+    )
                     )
             )
     })
