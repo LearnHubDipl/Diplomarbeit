@@ -23,4 +23,8 @@ export class QuestionService {
   createQuestion(questionRequest: QuestionRequest): Observable<Question> {
     return this.httpClient.post<Question>(API_BASE_URL + '/questions', questionRequest);
   }
+  deleteQuestion(id: number) {
+    return this.httpClient.delete(API_BASE_URL + '/questions/' + id);
+  }
+
 }

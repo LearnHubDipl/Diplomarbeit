@@ -27,6 +27,9 @@ import { FrageCardComponent } from '../../projects/content-management/src/lib/fr
 import { FinishedCardComponent } from '../../projects/content-management/src/lib/finished-card/finished-card.component';
 import { ChooseStudyTopicComponent } from '../../projects/content-management/src/lib/choose-study-topic/choose-study-topic.component';
 import { SubjectsComponent } from '../../projects/content-management/src/lib/subjects/subjects.component';
+import {
+  QuestionManagerComponent
+} from '../../projects/content-management/src/lib/question-manager/question-manager.component';
 
 export const routes: Routes = [
   {
@@ -40,7 +43,7 @@ export const routes: Routes = [
       { path: 'startCreate', component: StartCreateComponent },
       { path: 'startStudy', component: StartLearningComponent },
       { path: 'fragenkonfigurator', component: FragenKonfiguratorComponent },
-
+      { path: 'manageQuestions', component: QuestionManagerComponent },
       // content-management neue Seiten:
       { path: 'personalPlace', component: PersonalPlaceComponent },
       { path: 'questionCard/:id', component: FrageCardComponent },
