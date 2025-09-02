@@ -1,10 +1,9 @@
 package at.learnhub.repository;
 
 import at.learnhub.dto.simple.QuestionDto;
+import at.learnhub.dto.simple.QuestionPoolDto;
 import at.learnhub.mapper.QuestionMapper;
-import at.learnhub.model.Question;
-import at.learnhub.model.QuestionType;
-import at.learnhub.model.TopicPool;
+import at.learnhub.model.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -12,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.BadRequestException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -128,5 +128,41 @@ public class QuestionRepository {
         em.persist(question);
 
         return question;
+    }
+
+    /**
+     * Updates a question
+     *
+     * @param updatedQuestion
+     * @return
+     */
+    @Transactional
+    public Question updateQuestion(Question updatedQuestion) {
+        Question existingQuestion = em.find(Question.class, updatedQuestion.getId());
+        if (existingQuestion == null) {
+            throw new EntityNotFoundException("Question with id " + updatedQuestion.getId() + " not found.");
+        }
+
+
+
+        em.merge(existingQuestion);
+        return existingQuestion;
+    }
+
+    @Transactional
+    public void deleteQuestion(Long id){
+        Question question = em.find(Question.class,id);
+        if (question == null) {
+            throw new EntityNotFoundException("Question with id " + id + " not found.");
+        }
+
+        /**
+        for (QuestionPoolEntry entry: question.getEntries()){
+            for(ExamQuestion eq: entry.getExamQuestions()){
+                eq.getSelectedAnswers().clear();
+            }
+        } **/
+
+        em.remove(question);
     }
 }

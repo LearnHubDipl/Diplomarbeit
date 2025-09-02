@@ -1,11 +1,16 @@
 package at.learnhub.boundary;
 
 import at.learnhub.dto.request.QuestionCreationRequestDto;
+import at.learnhub.mapper.QuestionMapper;
+import at.learnhub.model.Question;
 import at.learnhub.model.QuestionType;
+import at.learnhub.model.TopicPool;
 import at.learnhub.repository.QuestionRepository;
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.service.QuestionService;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -25,6 +30,8 @@ public class QuestionResource {
 
     @Inject
     QuestionRepository questionRepository;
+
+
 
     @Inject
     QuestionService questionService;
@@ -280,4 +287,51 @@ public class QuestionResource {
         QuestionDto created = questionService.create(request);
         return Response.status(Response.Status.CREATED).entity(created).build();
     }
+
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Delete a question by ID",
+            description = "Deletes a question including all associated answers (cascade delete in DB)"
+    )
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "204",
+                    description = "Question deleted successfully"
+            ),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Question not found"
+            )
+    })
+    @Transactional
+    public Response deleteQuestion(
+            @Parameter(
+                    description = "ID of the question to delete",
+                    required = true,
+                    example = "123"
+            )
+            @PathParam("id") Long id
+    ) {
+            questionRepository.deleteQuestion(id);
+            return Response.status(Response.Status.OK).build();
+    }
+
+/*
+    @PUT
+    @Path("/{id}")
+    @Transactional
+    @Operation(summary = "Update an existing question", description = "Updates a question and its answers.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Question updated",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Question.class))),
+            @APIResponse(responseCode = "404", description = "Question not found")
+    })
+    public Response updateQuestion(@PathParam("id") Long id, Question request) {
+        Question updated = questionRepository.updateQuestion(request);
+        return Response.ok(updated).build();
+    }
+    */
 }
