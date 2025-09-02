@@ -2,6 +2,8 @@ package at.learnhub.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -42,14 +44,16 @@ public class Solution {
     /**
      * List of detailed steps that make up this solution.
      */
-    @OneToMany(mappedBy = "solution")
+    @OneToMany(mappedBy = "solution", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnoreProperties({"solution"})
     private List<SolutionStep> steps;
 
     /**
      * List of votes (e.g., upvotes/downvotes) associated with this solution.
      */
-    @OneToMany(mappedBy = "solution")
+    @OneToMany(mappedBy = "solution", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnoreProperties({"solution"})
     private List<SolutionVote> votes;
 

@@ -2,6 +2,7 @@ package at.learnhub.repository;
 
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.dto.simple.QuestionPoolDto;
+import at.learnhub.dto.simple.QuestionUpdateRequestDto;
 import at.learnhub.mapper.QuestionMapper;
 import at.learnhub.model.*;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -131,22 +132,42 @@ public class QuestionRepository {
     }
 
     /**
-     * Updates a question
-     *
-     * @param updatedQuestion
+     * Question gets updated
+     * @param id
+     * @param dto
      * @return
      */
     @Transactional
-    public Question updateQuestion(Question updatedQuestion) {
-        Question existingQuestion = em.find(Question.class, updatedQuestion.getId());
-        if (existingQuestion == null) {
-            throw new EntityNotFoundException("Question with id " + updatedQuestion.getId() + " not found.");
+    public Question updateQuestion(Long id, QuestionUpdateRequestDto dto) {
+        Question existing = em.find(Question.class, id);
+        if (existing == null) {
+            throw new EntityNotFoundException("Question with id " + id + " not found.");
         }
 
+        if (dto.text() != null) {
+            existing.setText(dto.text());
+        }
+        if (dto.explanation() != null) {
+            existing.setExplanation(dto.explanation());
+        }
+        if (dto.type() != null) {
+            existing.setType(dto.type());
+        }
+
+        if (dto.answers() != null) {
+            existing.getAnswers().clear();
+            dto.answers().forEach(answerDto -> {
+                Answer answer = new Answer();
+                answer.setText(answerDto.text());
+                answer.setCorrect(answerDto.isCorrect());
+                answer.setQuestion(existing);
+                existing.getAnswers().add(answer);
+            });
 
 
-        em.merge(existingQuestion);
-        return existingQuestion;
+    }
+
+        return em.merge(existing);
     }
 
     @Transactional
@@ -155,14 +176,6 @@ public class QuestionRepository {
         if (question == null) {
             throw new EntityNotFoundException("Question with id " + id + " not found.");
         }
-
-        /**
-        for (QuestionPoolEntry entry: question.getEntries()){
-            for(ExamQuestion eq: entry.getExamQuestions()){
-                eq.getSelectedAnswers().clear();
-            }
-        } **/
-
         em.remove(question);
     }
 }

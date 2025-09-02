@@ -68,6 +68,7 @@ public class Question {
     @ManyToOne
     @JoinColumn(name = "media_id")
     private MediaFile media;
+    //Todo: media upload von Lien einbauen
 
     /**
      * The user who created this question.

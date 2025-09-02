@@ -1,6 +1,7 @@
 package at.learnhub.boundary;
 
 import at.learnhub.dto.request.QuestionCreationRequestDto;
+import at.learnhub.dto.simple.QuestionUpdateRequestDto;
 import at.learnhub.mapper.QuestionMapper;
 import at.learnhub.model.Question;
 import at.learnhub.model.QuestionType;
@@ -317,21 +318,23 @@ public class QuestionResource {
             questionRepository.deleteQuestion(id);
             return Response.status(Response.Status.OK).build();
     }
-
-/*
-    @PUT
+    @PATCH
     @Path("/{id}")
-    @Transactional
-    @Operation(summary = "Update an existing question", description = "Updates a question and its answers.")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update an existing question", description = "Updates only provided fields of a question")
     @APIResponses({
             @APIResponse(responseCode = "200", description = "Question updated",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Question.class))),
+                            schema = @Schema(implementation = QuestionDto.class))),
             @APIResponse(responseCode = "404", description = "Question not found")
     })
-    public Response updateQuestion(@PathParam("id") Long id, Question request) {
-        Question updated = questionRepository.updateQuestion(request);
-        return Response.ok(updated).build();
+    @Transactional
+    public Response updateQuestion(
+            @PathParam("id") Long id,
+            QuestionUpdateRequestDto request
+    ) {
+        Question updated = questionRepository.updateQuestion(id, request);
+        return Response.ok(QuestionMapper.toDto(updated)).build();
     }
-    */
 }
