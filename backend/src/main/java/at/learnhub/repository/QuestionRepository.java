@@ -153,6 +153,9 @@ public class QuestionRepository {
         if (dto.type() != null) {
             existing.setType(dto.type());
         }
+        if (dto.isPublic() != null) {
+            existing.setPublic(dto.isPublic());
+        }
 
         if (dto.answers() != null) {
             existing.getAnswers().clear();
@@ -165,14 +168,14 @@ public class QuestionRepository {
             });
 
 
-    }
+        }
 
         return em.merge(existing);
     }
 
     @Transactional
-    public void deleteQuestion(Long id){
-        Question question = em.find(Question.class,id);
+    public void deleteQuestion(Long id) {
+        Question question = em.find(Question.class, id);
         if (question == null) {
             throw new EntityNotFoundException("Question with id " + id + " not found.");
         }

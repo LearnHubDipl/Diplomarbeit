@@ -30,6 +30,7 @@ import { SubjectsComponent } from '../../projects/content-management/src/lib/sub
 import {
   QuestionManagerComponent
 } from '../../projects/content-management/src/lib/question-manager/question-manager.component';
+import {EditQuestionComponent} from '../../projects/content-management/src/lib/edit-question/edit-question.component';
 
 export const routes: Routes = [
   {
@@ -44,6 +45,7 @@ export const routes: Routes = [
       { path: 'startStudy', component: StartLearningComponent },
       { path: 'fragenkonfigurator', component: FragenKonfiguratorComponent },
       { path: 'manageQuestions', component: QuestionManagerComponent },
+      { path: 'edit-question/:id', component: EditQuestionComponent },
       // content-management neue Seiten:
       { path: 'personalPlace', component: PersonalPlaceComponent },
       { path: 'questionCard/:id', component: FrageCardComponent },

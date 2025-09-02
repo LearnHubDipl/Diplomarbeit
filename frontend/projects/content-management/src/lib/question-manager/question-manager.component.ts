@@ -21,6 +21,7 @@ import {Subject} from '../../../../shared/src/lib/interfaces/subject';
 export class QuestionManagerComponent implements OnInit {
   private subjectService = inject(SubjectService);
   private questionService = inject(QuestionService);
+  private router = inject(Router);
 
   subjects?: Subject[];
   openSubjectId?: number | null;
@@ -61,6 +62,21 @@ export class QuestionManagerComponent implements OnInit {
     let characterLength = 30;
     if (!text) return '';
     return text.length > characterLength ? text.slice(0, characterLength) + '...' : text;
+  }
+
+  deleteQuestion(question: Question, poolId:number) {
+    if(confirm('Wirklich löschen?')){
+      this.questionService.deleteQuestion(question.id).subscribe({
+        next: () => {
+          this.questionsByPool[poolId] = this.questionsByPool[poolId].filter(q => q.id !== question.id);
+        },
+        error: err => console.error("Fehler beim löschen" + err)
+      })
+    }
+  }
+
+  editQuestion(question: Question) {
+    this.router.navigate(['/edit-question', question.id]);
   }
 
 }

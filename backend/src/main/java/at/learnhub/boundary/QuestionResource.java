@@ -32,8 +32,6 @@ public class QuestionResource {
     @Inject
     QuestionRepository questionRepository;
 
-
-
     @Inject
     QuestionService questionService;
 
@@ -48,11 +46,11 @@ public class QuestionResource {
                     responseCode = "200",
                     description = "List of questions",
                     content = @Content(
-            mediaType = MediaType.APPLICATION_JSON,
-    schema = @Schema(
-            type = SchemaType.ARRAY,
-            implementation = QuestionDto.class
-    )
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(
+                                    type = SchemaType.ARRAY,
+                                    implementation = QuestionDto.class
+                            )
                     )
             )
     })
@@ -315,9 +313,10 @@ public class QuestionResource {
             )
             @PathParam("id") Long id
     ) {
-            questionRepository.deleteQuestion(id);
-            return Response.status(Response.Status.OK).build();
+        questionRepository.deleteQuestion(id);
+        return Response.status(Response.Status.OK).build();
     }
+
     @PATCH
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)

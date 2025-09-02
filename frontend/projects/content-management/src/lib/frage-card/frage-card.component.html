@@ -2,69 +2,68 @@
   <h2 class="fw-bold">Lernen</h2>
   <p class="text-muted">Einfach und fokussiert lernen</p>
 
-  <div class="bg-warning-subtle rounded p-4 flex-grow-1 d-flex flex-column justify-content-between">
-    <div>
-      <div>
-        <h5 class="mb-3">{{ questions[currentIndex].text }}</h5>
+  <div class="bg-warning-subtle rounded p-4 flex-grow-1 position-relative d-flex flex-column">
 
-        <img *ngIf="questions[currentIndex].media?.path"
-             [src]="questions[currentIndex].media.path"
-             class="img-fluid mb-3"
-             alt="Bild zur Frage"
-             style="max-height: 40vh"/>
+    <div class="d-flex justify-content-between align-items-start mb-3">
+      <h5 class="mb-0">{{ questions[currentIndex].text }}</h5>
+      <span class="ms-2" style="font-size: 1.2rem;">
+        {{ getDifficultyEmoji(questions[currentIndex].difficulty) }}
+        {{ getDifficultyLabel(questions[currentIndex].difficulty) }}
+      </span>
+    </div>
 
-        <ul *ngIf="questions[currentIndex].answers?.length">
-          <li *ngFor="let a of questions[currentIndex].answers">{{ a.text }}</li>
-        </ul>
+    <img *ngIf="questions[currentIndex].media?.path"
+         [src]="questions[currentIndex].media.path"
+         class="img-fluid mb-3"
+         alt="Bild zur Frage"
+         style="max-height: 25vh; width: auto; display: block; margin: 0 auto;"/>
+
+    <div *ngIf="showAnswer" class="bg-success-subtle border border-success rounded p-3 mb-3">
+      <!-- Multiple Choice -->
+      <div *ngIf="questions[currentIndex].type === QuestionType.MULTIPLE_CHOICE">
+        <div *ngIf="questions[currentIndex].explanation">
+          <h6>Erklärung:</h6>
+          <p>{{ questions[currentIndex].explanation }}</p>
+        </div>
+        <div *ngIf="getCorrectAnswers(questions[currentIndex]).length">
+          <h6>Richtige Antwort(en):</h6>
+          <ul>
+            <li *ngFor="let a of getCorrectAnswers(questions[currentIndex])">{{ a }}</li>
+          </ul>
+        </div>
       </div>
 
-      <div *ngIf="showAnswer" class="bg-success-subtle border border-success rounded p-3 mt-3">
-        <h6>Die Richtige Antwort lautet:</h6>
-        <p class="mb-0">{{ questions[currentIndex].explanation }}</p>
+      <div *ngIf="questions[currentIndex].type === QuestionType.FREETEXT && questions[currentIndex].explanation">
+        <h6>Erklärung:</h6>
+        <p>{{ questions[currentIndex].explanation }}</p>
       </div>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mt-3">
+    <div class="position-absolute" style="bottom: 1rem; left: 1rem;">
       <button *ngIf="showAnswer"
               class="btn btn-outline-secondary rounded-pill"
               (click)="toggleAnswer()">
-        zudecken
+        Zudecken
       </button>
 
       <button *ngIf="!showAnswer"
               class="btn btn-warning rounded-pill"
               (click)="toggleAnswer()">
-        aufdecken
-      </button>
-
-      <button *ngIf="currentIndex < questions.length - 1"
-              class="btn btn-success rounded-pill ms-auto"
-              (click)="goToNext()">
-        weiter
-      </button>
-
-      <button *ngIf="currentIndex === questions.length - 1"
-              class="btn btn-primary rounded-pill ms-auto"
-              (click)="finishedLearning()">
-        beenden
+        Aufdecken
       </button>
     </div>
   </div>
 
-  <div class="d-flex justify-content-center align-items-center mt-3">
-    <button class="btn btn-light rounded-pill me-3"
-            (click)="prev()"
-            [disabled]="currentIndex === 0">
+  <div class="d-flex justify-content-center align-items-center mt-3 mb-4 gap-3">
+    <button class="btn btn-light rounded-pill" (click)="prev()" [disabled]="currentIndex === 0">
       <i class="bi bi-chevron-left"></i>
     </button>
-    <button class="btn btn-light rounded-pill"
-            (click)="next()"
-            [disabled]="currentIndex >= questions.length - 1">
+    <button class="btn btn-light rounded-pill" (click)="next()" [disabled]="currentIndex >= questions.length - 1">
       <i class="bi bi-chevron-right"></i>
     </button>
   </div>
 
-  <div class="text-center mt-2 mb-5">
+  <div class="text-center mb-5">
     {{ currentIndex + 1 }}/{{ questions.length }}
   </div>
 </div>
