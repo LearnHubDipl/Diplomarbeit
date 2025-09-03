@@ -7,7 +7,6 @@ import {RouterLink} from '@angular/router';
   selector: 'lib-home',
   standalone: true,
   imports: [
-    NgForOf,
     RevealOnScrollDirective,
     RouterLink
   ],

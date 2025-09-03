@@ -9,7 +9,10 @@ import at.learnhub.model.Subject;
 import at.learnhub.repository.MediaFileRepository;
 import at.learnhub.repository.SubjectRepository;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -72,8 +75,15 @@ public class SubjectResource {
 
     @DELETE
     @Path("/{id}")
-    public Response deleteSubject(@PathParam("id") Long id) {
-        subjectRepo.delete(id);
-        return Response.noContent().build();
+    public Response delete(@PathParam("id") Long id) {
+        try {
+            subjectRepo.delete(id);
+            return Response.noContent().build();
+        } catch (PersistenceException | ConstraintViolationException ex) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity("Subject kann nicht gelöscht werden, solange Themenpools/Mitschriften existieren.")
+                    .build();
+        }
     }
+
 }

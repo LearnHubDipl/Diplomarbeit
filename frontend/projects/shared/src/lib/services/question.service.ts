@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {Question} from '../interfaces/question';
+import {Question, QuestionUpdateRequest} from '../interfaces/question';
 import {QuestionRequest} from '../interfaces/question-creation-request';
 import {API_BASE_URL} from './globals';
 import {TopicPool} from '../interfaces/topic-pool';
@@ -23,4 +23,13 @@ export class QuestionService {
   createQuestion(questionRequest: QuestionRequest): Observable<Question> {
     return this.httpClient.post<Question>(API_BASE_URL + '/questions', questionRequest);
   }
+
+  deleteQuestion(id: number) {
+    return this.httpClient.delete(API_BASE_URL + '/questions/' + id);
+  }
+
+  updateQuestion(id: number, updateRequest: QuestionUpdateRequest){
+    return this.httpClient.patch<Question>(API_BASE_URL + '/questions/' + id, updateRequest);
+  }
+
 }

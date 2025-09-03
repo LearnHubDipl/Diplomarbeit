@@ -1,4 +1,4 @@
-import {Answer} from './answer';
+import {Answer, AnswerUpdateRequest} from './answer';
 import {TopicPool} from './topic-pool';
 import {Media} from './media';
 import {Solution} from './solution';
@@ -19,4 +19,12 @@ export interface Question {
   topicPool: TopicPool;
   media: Media;
   solutions: Solution[];
+}
+
+export interface QuestionUpdateRequest{
+  text?: string;
+  explanation?: string;
+  type?: QuestionType;
+  answers?: AnswerUpdateRequest[];
+  isPublic?: boolean;
 }

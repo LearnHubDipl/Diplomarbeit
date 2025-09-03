@@ -30,6 +30,10 @@ import { SubjectsComponent } from '../../projects/content-management/src/lib/sub
 import {PracticeComponent} from '../../projects/matura-trainer/src/lib/practice/practice.component';
 import {ExamComponent} from '../../projects/matura-trainer/src/lib/exam/exam.component';
 import {ExamSetupComponent} from '../../projects/matura-trainer/src/lib/exam-setup/exam-setup.component';
+import {
+  QuestionManagerComponent
+} from '../../projects/content-management/src/lib/question-manager/question-manager.component';
+import {EditQuestionComponent} from '../../projects/content-management/src/lib/edit-question/edit-question.component';
 
 export const routes: Routes = [
   {
@@ -64,17 +68,11 @@ export const routes: Routes = [
         data: { breadcrumb: 'Üben' },
         children: [
           { path: '', component: TrainerHomeComponent, data: { breadcrumb: null } },
-          { path: 'quiz', component: PracticeComponent, data: { breadcrumb: 'Fragen beantworten' } },
+          { path: 'quiz', component: QuestionRunnerComponent, data: { breadcrumb: 'Fragen beantworten' } },
           { path: 'fragen', component: QuestionBrowserComponent, data: { breadcrumb: 'Fragen browsen' } },
           { path: 'question-pool', component: QuestionPoolComponent, data: { breadcrumb: 'Fragenpool bearbeiten' } },
-          {
-            path: 'setup-exam',
-            data: { breadcrumb: 'Prüfung konfigurieren' },
-            children: [
-              { path: '', component: ExamSetupComponent, data: { breadcrumb: null } },
-              { path: 'exam', component: ExamComponent, data: { breadcrumb: 'Prüfungsmodus' } }
-            ]
-          }        ]
+          { path: 'pruefungsmodus', component: QuestionRunnerComponent, data: { breadcrumb: 'Prüfungsmodus' } }
+        ]
       },
 
       {
