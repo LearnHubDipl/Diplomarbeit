@@ -192,8 +192,6 @@ export class QuestionBrowsingViewComponent implements OnInit {
       selectedTopicPoolId: this.selectedTopicPool?.id
     }));
 
-    this.router.navigate(['/trainer/practice/quiz'], {
-      queryParams: { ids: [questionId] }
-    });
+    this.router.navigate(['/trainer/practice/quiz']); // TODO: right navigation
   }
 }

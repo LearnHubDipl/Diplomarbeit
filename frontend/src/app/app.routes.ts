@@ -47,6 +47,8 @@ export const routes: Routes = [
       { path: 'startCreate', component: StartCreateComponent },
       { path: 'startStudy', component: StartLearningComponent },
       { path: 'fragenkonfigurator', component: FragenKonfiguratorComponent },
+      { path: 'edit-question/:id', component: EditQuestionComponent },
+      { path: 'manageQuestions', component: QuestionManagerComponent },
 
       // content-management neue Seiten:
       { path: 'personalPlace', component: PersonalPlaceComponent },
