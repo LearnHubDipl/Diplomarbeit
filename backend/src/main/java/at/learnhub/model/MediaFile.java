@@ -87,6 +87,17 @@ public class MediaFile {
         this.uploadedAt = uploadedAt;
     }
 
+    public static class FileCleanup {
+        @PreRemove
+        public void preRemove(MediaFile mf) {
+            if (mf.getPath() != null) {
+                try {
+                    java.nio.file.Files.deleteIfExists(java.nio.file.Path.of(mf.getPath()));
+                } catch (Exception ignore) {}
+            }
+        }
+    }
+
     /**
      * Automatically sets the current timestamp before persisting if not already set.
      */

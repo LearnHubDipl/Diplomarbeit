@@ -1,10 +1,10 @@
 package at.learnhub.repository;
 
 import at.learnhub.dto.simple.QuestionDto;
+import at.learnhub.dto.simple.QuestionPoolDto;
+import at.learnhub.dto.simple.QuestionUpdateRequestDto;
 import at.learnhub.mapper.QuestionMapper;
-import at.learnhub.model.Question;
-import at.learnhub.model.QuestionType;
-import at.learnhub.model.TopicPool;
+import at.learnhub.model.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -12,6 +12,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.BadRequestException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -128,5 +129,56 @@ public class QuestionRepository {
         em.persist(question);
 
         return question;
+    }
+
+    /**
+     * Question gets updated
+     * @param id
+     * @param dto
+     * @return
+     */
+    @Transactional
+    public Question updateQuestion(Long id, QuestionUpdateRequestDto dto) {
+        Question existing = em.find(Question.class, id);
+        if (existing == null) {
+            throw new EntityNotFoundException("Question with id " + id + " not found.");
+        }
+
+        if (dto.text() != null) {
+            existing.setText(dto.text());
+        }
+        if (dto.explanation() != null) {
+            existing.setExplanation(dto.explanation());
+        }
+        if (dto.type() != null) {
+            existing.setType(dto.type());
+        }
+        if (dto.isPublic() != null) {
+            existing.setPublic(dto.isPublic());
+        }
+
+        if (dto.answers() != null) {
+            existing.getAnswers().clear();
+            dto.answers().forEach(answerDto -> {
+                Answer answer = new Answer();
+                answer.setText(answerDto.text());
+                answer.setCorrect(answerDto.isCorrect());
+                answer.setQuestion(existing);
+                existing.getAnswers().add(answer);
+            });
+
+
+        }
+
+        return em.merge(existing);
+    }
+
+    @Transactional
+    public void deleteQuestion(Long id) {
+        Question question = em.find(Question.class, id);
+        if (question == null) {
+            throw new EntityNotFoundException("Question with id " + id + " not found.");
+        }
+        em.remove(question);
     }
 }

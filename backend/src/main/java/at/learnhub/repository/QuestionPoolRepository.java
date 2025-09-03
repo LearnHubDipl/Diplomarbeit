@@ -40,20 +40,25 @@ public class QuestionPoolRepository {
                 .map(QuestionPoolEntryMapper::toSlimDto).toList();
     }
 
-    public List<TopicPool> findTopicPoolsByUserId(Long userId) {
+    public List<TopicPoolSlimDto> findTopicPoolsByUserId(Long userId) {
         QuestionPool pool = findEntityByUserId(userId);
 
         return pool.getEntries().stream()
                 .map(e -> e.getQuestion().getTopicPool())
                 .filter(Objects::nonNull)
                 .distinct()
+                .map(TopicPoolMapper::toSlimDto)
                 .toList();
     }
 
     public List<SubjectDto> findSubjectsAndTopicPoolsByUserId(Long userId) {
         QuestionPool pool = findEntityByUserId(userId);
 
-        List<TopicPool> topicPools = findTopicPoolsByUserId(userId);
+        List<TopicPool> topicPools = pool.getEntries().stream()
+                .map(e -> e.getQuestion().getTopicPool())
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
 
         List<Subject> subjects = topicPools.stream()
                 .map(tp -> tp.getSubject())

@@ -8,6 +8,7 @@ import { QuestionType } from '../../../../shared/src/lib/interfaces/question';
 import { QuestionRequest, AnswerCreationRequest } from '../../../../shared/src/lib/interfaces/question-creation-request';
 import { Subject } from '../../../../shared/src/lib/interfaces/subject';
 import { TopicPool } from '../../../../shared/src/lib/interfaces/topic-pool';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
   selector: 'lib-fragen-konfigurator',
@@ -23,6 +24,7 @@ export class FragenKonfiguratorComponent implements OnInit {
   private questionService = inject(QuestionService);
   private subjectService = inject(SubjectService);
   private topicPoolService = inject(TopicPoolService);
+  private route = inject(ActivatedRoute);
 
   questionForm!: FormGroup;
   subjects: Subject[] = [];
@@ -30,18 +32,46 @@ export class FragenKonfiguratorComponent implements OnInit {
   questionTypes = Object.values(QuestionType);
 
   readonly QuestionType = QuestionType;
+  readonly maxAnswers = 7; //maximale Anzahl der Antwormöglichkeiten (bei Multiple choice)
+  readonly automaticAnswersLoaded = 2;
+
+  private subjectId?: number;
+  private topicPoolId?: number;
 
   ngOnInit() {
     this.initForm();
-    this.loadSubjects();
+
     this.setupFormSubscriptions();
+
+    this.route.queryParams.subscribe(params => {
+      this.subjectId = params['subjectId'] ? Number(params['subjectId']) : undefined;
+      this.topicPoolId = params['topicPoolId'] ? Number(params['topicPoolId']) : undefined;
+    });
+    /**
+    this.route.queryParams.subscribe(params => {
+      const subjectId = params['subjectId'];
+      const topicId = params['topicId'];
+
+      if (subjectId) {
+        this.questionForm.get('subjectId')?.setValue(subjectId);
+      }
+
+      if (topicId) {
+        this.questionForm.get('topicId')?.setValue(Number(topicId));
+        this.questionForm.get('topicId')?.enable();
+      }
+    })
+**/
+    this.loadSubjects();
   }
+
+
 
   private initForm() {
     this.questionForm = this.fb.group({
       type: ['', Validators.required],
-      subjectId: [null, Validators.required], // null statt leerer String für number
-      topicPoolId: [{value: null, disabled: true}, Validators.required], // Disabled per default
+      subjectId: [null, Validators.required],
+      topicPoolId: [{value: null, disabled: true}, Validators.required],
       text: ['', Validators.required],
       difficulty: [2], // Default: mittel
       explanation: [''],
@@ -51,19 +81,16 @@ export class FragenKonfiguratorComponent implements OnInit {
   }
 
   private setupFormSubscriptions() {
-    // Überwache Änderungen am Fragentyp
     this.questionForm.get('type')?.valueChanges.subscribe(type => {
       this.updateAnswersArray(type);
       this.updateExplanationValidation(type);
     });
 
-    // Überwache Änderungen am Schulfach
     this.questionForm.get('subjectId')?.valueChanges.subscribe(subjectId => {
       const topicPoolControl = this.questionForm.get('topicPoolId');
 
       if (subjectId) {
         this.loadTopicPoolsForSubject(Number(subjectId));
-        // Reset TopicPool Auswahl und aktiviere das Feld
         topicPoolControl?.setValue(null);
         topicPoolControl?.enable();
       } else {
@@ -79,8 +106,7 @@ export class FragenKonfiguratorComponent implements OnInit {
     answersArray.clear();
 
     if (type === QuestionType.MULTIPLE_CHOICE) {
-      // 4 Antwortmöglichkeiten für Multiple Choice
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < this.automaticAnswersLoaded; i++) {
         answersArray.push(this.fb.group({
           text: ['', Validators.required],
           isCorrect: [i === 0] // Erste Antwort standardmäßig richtig
@@ -94,10 +120,8 @@ export class FragenKonfiguratorComponent implements OnInit {
     const explanationControl = this.questionForm.get('explanation');
 
     if (type === QuestionType.FREETEXT) {
-      // Für FREETEXT ist Erklärung Pflicht
       explanationControl?.setValidators([Validators.required]);
     } else {
-      // Für MULTIPLE_CHOICE ist Erklärung optional
       explanationControl?.clearValidators();
     }
 
@@ -113,6 +137,18 @@ export class FragenKonfiguratorComponent implements OnInit {
       next: (subjects) => {
         this.subjects = subjects;
         console.log('Subjects geladen:', this.subjects);
+
+        if(this.subjectId){
+          this.questionForm.get('subjectId')?.setValue(this.subjectId);
+
+          this.loadTopicPoolsForSubject(this.subjectId);
+
+          if(this.topicPoolId){
+              this.questionForm.get('topicPoolId')?.setValue(this.topicPoolId);
+              this.questionForm.get('topicPoolId')?.enable();
+
+          }
+        }
       },
       error: (error) => {
         console.error('Fehler beim Laden der Schulfächer:', error);
@@ -135,6 +171,7 @@ export class FragenKonfiguratorComponent implements OnInit {
     }
   }
 
+
   onSubmit() {
     if (this.questionForm.valid) {
       const formValue = this.questionForm.value;
@@ -146,16 +183,14 @@ export class FragenKonfiguratorComponent implements OnInit {
         difficulty: formValue.difficulty,
         isPublic: formValue.isPublic,
         userId: 1, // TODO: Aktuelle User-ID aus Authentication Service holen
-        topicPoolId: Number(formValue.topicPoolId), // Explizite Konvertierung zu number
+        topicPoolId: Number(formValue.topicPoolId),
         answers: formValue.answers || []
       };
 
       this.questionService.createQuestion(questionRequest).subscribe({
-        next: (createdQuestion) => {
-          console.log('Frage erfolgreich erstellt:', createdQuestion);
+        next: () => {
           alert('Frage wurde erfolgreich veröffentlicht!');
-          this.questionForm.reset();
-          this.initForm();
+          this.reinitForm();
         },
         error: (error) => {
           console.error('Fehler beim Erstellen der Frage:', error);
@@ -165,6 +200,23 @@ export class FragenKonfiguratorComponent implements OnInit {
     } else {
       this.markAllFieldsAsTouched();
       alert('Bitte füllen Sie alle Pflichtfelder aus.');
+    }
+  }
+
+  private reinitForm(){
+    const prevSubjectId = this.questionForm.get('subjectId')?.value;
+    const prevTopicPoolId = this.questionForm.get('topicPoolId')?.value;
+
+    this.initForm();
+    this.setupFormSubscriptions();
+
+    if(prevSubjectId){
+      this.questionForm.get('subjectId')?.setValue(prevSubjectId);
+      this.loadTopicPoolsForSubject(Number(prevTopicPoolId));
+      if(prevSubjectId ){
+        this.questionForm.get('topicPoolId')?.setValue(prevTopicPoolId);
+        this.questionForm.get('topicPoolId')?.enable();
+      }
     }
   }
 
@@ -189,4 +241,16 @@ export class FragenKonfiguratorComponent implements OnInit {
         return type;
     }
   }
+  addAnswer() {
+    const answersArray = this.answersArray;
+
+    if (answersArray.length < this.maxAnswers) {
+      answersArray.push(this.fb.group({
+        text: ['', Validators.required],
+        isCorrect: [false]
+      }));
+    }
+  }
+
+
 }

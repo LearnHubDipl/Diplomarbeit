@@ -30,6 +30,10 @@ import { SubjectsComponent } from '../../projects/content-management/src/lib/sub
 import {PracticeComponent} from '../../projects/matura-trainer/src/lib/practice/practice.component';
 import {ExamComponent} from '../../projects/matura-trainer/src/lib/exam/exam.component';
 import {ExamSetupComponent} from '../../projects/matura-trainer/src/lib/exam-setup/exam-setup.component';
+import {
+  QuestionManagerComponent
+} from '../../projects/content-management/src/lib/question-manager/question-manager.component';
+import {EditQuestionComponent} from '../../projects/content-management/src/lib/edit-question/edit-question.component';
 
 export const routes: Routes = [
   {
@@ -43,6 +47,8 @@ export const routes: Routes = [
       { path: 'startCreate', component: StartCreateComponent },
       { path: 'startStudy', component: StartLearningComponent },
       { path: 'fragenkonfigurator', component: FragenKonfiguratorComponent },
+      { path: 'edit-question/:id', component: EditQuestionComponent },
+      { path: 'manageQuestions', component: QuestionManagerComponent },
 
       // content-management neue Seiten:
       { path: 'personalPlace', component: PersonalPlaceComponent },
@@ -74,7 +80,8 @@ export const routes: Routes = [
               { path: '', component: ExamSetupComponent, data: { breadcrumb: null } },
               { path: 'exam', component: ExamComponent, data: { breadcrumb: 'Prüfungsmodus' } }
             ]
-          }        ]
+          }
+        ]
       },
 
       {

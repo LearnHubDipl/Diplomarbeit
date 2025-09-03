@@ -15,6 +15,12 @@ public record AnswerSlimDto(
                 description = "The text content of the answer that is shown to the user.",
                 example = "The capital of France is Paris."
         )
-        String text
+        String text,
+
+        @Schema(
+                description = "shows whether the answer ist correct or not",
+                example = "false"
+        )
+        Boolean isCorrect
 ) {
 }

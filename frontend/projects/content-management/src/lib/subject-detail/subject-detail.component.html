@@ -1,0 +1,121 @@
+<div class="container py-3">
+  <div class="d-flex align-items-center mb-3">
+    <h2 class="m-0" *ngIf="subject; else loadingSubj">{{ subject.name }}</h2>
+    <ng-template #loadingSubj><h2 class="m-0">Fach wird geladen…</h2></ng-template>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    {{ error }}
+  </div>
+
+  <div class="row g-2 align-items-end mb-3">
+    <div class="col-sm-6 col-md-4">
+      <label class="form-label">Themenpool</label>
+      <select class="form-select" [ngModel]="selectedPoolId" (ngModelChange)="applyFilter($event)">
+        <option [ngValue]="undefined">Alle</option>
+        <option *ngFor="let p of pools; trackBy: trackPool" [ngValue]="p?.id">
+          {{ p?.name || 'Unbenannt' }}
+        </option>
+      </select>
+    </div>
+    <div class="col-sm-6 col-md-4">
+      <button type="button" class="btn btn-primary w-100" (click)="openUpload()">
+        <i class="bi bi-file-earmark-arrow-up me-1"></i> PDF hochladen
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="uploadOpen" class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title mb-3">PDF hochladen</h5>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Titel*</label>
+          <input type="text" class="form-control" [(ngModel)]="title" placeholder="Titel der Mitschrift" />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Uploader-Name</label>
+          <input type="text" class="form-control" [(ngModel)]="uploaderName" placeholder="Optional" />
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Themenpool</label>
+          <select class="form-select" [(ngModel)]="poolForUpload">
+            <option *ngFor="let p of pools; trackBy: trackPool" [ngValue]="p?.id">
+              {{ p?.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Neuen Themenpool anlegen</label>
+          <div class="input-group">
+            <input type="text" class="form-control" [(ngModel)]="newPoolName" placeholder="Name…" />
+            <button type="button" class="btn btn-outline-secondary" (click)="quickCreatePool()">
+              Anlegen
+            </button>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">PDF-Datei*</label>
+          <input type="file" class="form-control" accept="application/pdf" (change)="onFile($event)" />
+          <div class="form-text">Erlaubt: PDF</div>
+        </div>
+
+        <div class="col-12" *ngIf="previewSrc">
+          <div class="ratio ratio-16x9 border rounded">
+            <iframe [src]="previewSrc" title="PDF Vorschau"></iframe>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button type="button" class="btn btn-outline-secondary" (click)="cancelUpload()" [disabled]="uploading">
+          Abbrechen
+        </button>
+        <button type="button" class="btn btn-primary" (click)="submitUpload()" [disabled]="uploading || !file || !title">
+          <span *ngIf="!uploading">Hochladen</span>
+          <span *ngIf="uploading" class="d-inline-flex align-items-center">
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Lädt…
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="mb-2" *ngIf="items?.length; else noItems">
+    <h5 class="mb-3">Mitschriften</h5>
+
+    <div class="row g-3">
+      <div class="col-md-6 col-lg-4" *ngFor="let c of items; trackBy: trackContent">
+        <div class="card h-100">
+          <div class="card-body">
+            <h6 class="card-title mb-1">{{ c?.title || 'Ohne Titel' }}</h6>
+            <p class="text-muted small mb-3">
+              <span *ngIf="c?.uploaderName">von {{ c?.uploaderName }}</span>
+            </p>
+
+            <div class="ratio ratio-4x3 mb-2" *ngIf="c?.pdfUrl">
+              <iframe [src]="toSafePdfUrl(c?.pdfUrl)" title="{{ c?.title }}"></iframe>
+            </div>
+
+            <a *ngIf="c?.pdfUrl" class="btn btn-sm btn-outline-primary"
+               [href]="c?.pdfUrl" target="_blank" rel="noopener">
+              Im neuen Tab öffnen
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noItems>
+    <div class="alert alert-light border">Keine Mitschriften gefunden.</div>
+  </ng-template>
+</div>

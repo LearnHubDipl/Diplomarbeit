@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {QuestionService} from '../../../../shared/src/lib/services/question.service';
-import {Question} from '../../../../shared/src/lib/interfaces/question';
+import {Question, QuestionType} from '../../../../shared/src/lib/interfaces/question';
 import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
 import {ReactiveFormsModule} from '@angular/forms';
 
@@ -19,29 +19,35 @@ export class FrageCardComponent implements OnInit {
   currentIndex = 0;
   showAnswer = false;
 
+  QuestionType = QuestionType;
+
   constructor(
     private router: Router,
     private questionService: QuestionService,
     private route: ActivatedRoute,
-  ) {
-  }
+  ) {}
 
   ngOnInit() {
     const topicPoolId = Number(this.route.snapshot.queryParamMap.get('topicPoolId'));
     const topicPool: TopicPool = {
-      id: topicPoolId, //todo: ausgewähltes topic pool anzeigen
+      id: topicPoolId,
       name: '',
       description: '',
     };
 
     this.questionService.getQuestionsByTopicPool(topicPool).subscribe({
       next: (data) => {
+        console.log('Fragen vom Backend:', data); // <-- Logging
         this.questions = data;
+      },
+      error: (err) => {
+        console.error('Fehler beim Laden der Fragen:', err);
       }
     });
   }
 
-  toggleAnswer(): void { //auf und zu decken von Fragen/Antworten
+
+  toggleAnswer(): void {
     this.showAnswer = !this.showAnswer;
   }
 
@@ -59,11 +65,36 @@ export class FrageCardComponent implements OnInit {
     }
   }
 
-  goToNext(): void {
-    this.next();
-  }
-
   finishedLearning(): void {
     this.router.navigate(['/finished']);
   }
+
+  getCorrectAnswers(question: Question): string[] {
+    if (question.type !== QuestionType.MULTIPLE_CHOICE) return [];
+
+    const correctAnswers = question.answers.filter(a => a.isCorrect).map(a => a.text);
+    console.log(`Korrekte Antworten für Frage "${question.text}":`, correctAnswers);
+    return correctAnswers;
+  }
+
+  getDifficultyEmoji(difficulty: number): string {
+    switch (difficulty) {
+      case 1: return '😃';
+      case 2: return '😐';
+      case 3: return '😓';
+      default: return '';
+    }
+  }
+
+  getDifficultyLabel(difficulty: number): string {
+    switch (difficulty) {
+      case 1: return 'Leicht';
+      case 2: return 'Mittel';
+      case 3: return 'Schwer';
+      default: return '';
+    }
+  }
+
+
+
 }

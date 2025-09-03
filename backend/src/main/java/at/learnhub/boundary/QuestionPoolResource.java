@@ -3,10 +3,7 @@ package at.learnhub.boundary;
 import at.learnhub.dto.request.AddQuestionToQuestionPoolRequestDto;
 import at.learnhub.dto.request.CheckAnswersRequestDto;
 import at.learnhub.dto.response.CheckAnswersResponseDto;
-import at.learnhub.dto.simple.QuestionDto;
-import at.learnhub.dto.simple.QuestionPoolDto;
-import at.learnhub.dto.simple.QuestionPoolEntrySlimDto;
-import at.learnhub.dto.simple.SubjectDto;
+import at.learnhub.dto.simple.*;
 import at.learnhub.model.*;
 import at.learnhub.repository.QuestionPoolRepository;
 import at.learnhub.repository.StreakTrackingRepository;
@@ -151,14 +148,14 @@ public class QuestionPoolResource {
                     content = @Content(
                             mediaType = MediaType.APPLICATION_JSON,
                             schema = @Schema(
-                                    implementation = TopicPool.class,
+                                    implementation = TopicPoolSlimDto.class,
                                     type = SchemaType.ARRAY
                             )
                     )
             )
     })
     public Response getTopicPoolsByUser(@PathParam("userId") Long userId) {
-        List<TopicPool> topicPools = questionPoolRepository.findTopicPoolsByUserId(userId);
+        List<TopicPoolSlimDto> topicPools = questionPoolRepository.findTopicPoolsByUserId(userId);
         return Response.ok(topicPools).build();
     }
 

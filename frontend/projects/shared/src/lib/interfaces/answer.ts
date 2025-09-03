@@ -17,3 +17,9 @@ export interface CheckAnswerResponse {
   correctFreeTextAnswers: string[] | null;
   explanation: string;
 }
+
+export interface AnswerUpdateRequest {
+  id: number;
+  text: string;
+  isCorrect: boolean;
+}

@@ -81,4 +81,5 @@ public record QuestionDto(
         )
         List<SolutionSlimDto> solutions
 
-) {}
+) {
+}

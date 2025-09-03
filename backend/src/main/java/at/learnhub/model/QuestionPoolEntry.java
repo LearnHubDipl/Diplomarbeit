@@ -2,6 +2,8 @@ package at.learnhub.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -63,7 +65,8 @@ public class QuestionPoolEntry {
     /**
      * A list of exam questions that reference this pool entry.
      */
-    @OneToMany(mappedBy = "entry")
+    @OneToMany(mappedBy = "entry", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnoreProperties({"entry"})
     private List<ExamQuestion> examQuestions;
 
