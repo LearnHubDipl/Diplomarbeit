@@ -68,10 +68,17 @@ export const routes: Routes = [
         data: { breadcrumb: 'Üben' },
         children: [
           { path: '', component: TrainerHomeComponent, data: { breadcrumb: null } },
-          { path: 'quiz', component: QuestionRunnerComponent, data: { breadcrumb: 'Fragen beantworten' } },
+          { path: 'quiz', component: PracticeComponent, data: { breadcrumb: 'Fragen beantworten' } },
           { path: 'fragen', component: QuestionBrowserComponent, data: { breadcrumb: 'Fragen browsen' } },
           { path: 'question-pool', component: QuestionPoolComponent, data: { breadcrumb: 'Fragenpool bearbeiten' } },
-          { path: 'pruefungsmodus', component: QuestionRunnerComponent, data: { breadcrumb: 'Prüfungsmodus' } }
+          {
+            path: 'setup-exam',
+            data: { breadcrumb: 'Prüfung konfigurieren' },
+            children: [
+              { path: '', component: ExamSetupComponent, data: { breadcrumb: null } },
+              { path: 'exam', component: ExamComponent, data: { breadcrumb: 'Prüfungsmodus' } }
+            ]
+          }
         ]
       },
 
