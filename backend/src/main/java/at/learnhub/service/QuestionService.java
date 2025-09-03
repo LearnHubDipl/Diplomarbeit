@@ -59,9 +59,9 @@ public class QuestionService {
             Answer answer = new Answer();
             answer.setText(request.answers().get(i).text());
             answer.setCorrect(request.answers().get(i).isCorrect());
-            answer.setQuestion(question); // Verknüpfung zur Frage
-            answerRepository.persist(answer); // Persistiere die Antwort
-            answers.add(answer); // Zur Liste hinzufügen
+            answer.setQuestion(question);
+            answerRepository.persist(answer);
+            answers.add(answer);
         }
         question.setAnswers(answers);
 

@@ -67,7 +67,8 @@ public class QuestionMapper {
      */
     public static QuestionSlimDto toSlimDto(Question question) {
         return new QuestionSlimDto(question.getId(), question.getText(), question.getExplanation(),
-                question.getMedia(), question.getType(), question.getDifficulty(), question.getPublic());
+                question.getMedia(), question.getType(), question.getDifficulty(), question.getPublic(),
+                question.getAnswers().stream().map(AnswerMapper::toSlimDto).toList());
     }
 
     /**

@@ -42,6 +42,10 @@ public class Exam {
     @Column(name = "finished_at")
     private LocalDateTime finishedAt;
 
+    public boolean isSubmitted() {
+        return finishedAt != null;
+    }
+
     /**
      * Total number of questions included in this exam.
      * Example: 20
@@ -77,7 +81,7 @@ public class Exam {
     /**
      * The list of exam-specific questions that were presented to the user.
      */
-    @OneToMany(mappedBy = "exam")
+    @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties({"exam"})
     private List<ExamQuestion> questions;
 

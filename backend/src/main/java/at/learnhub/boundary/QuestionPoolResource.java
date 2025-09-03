@@ -6,6 +6,7 @@ import at.learnhub.dto.response.CheckAnswersResponseDto;
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.dto.simple.QuestionPoolDto;
 import at.learnhub.dto.simple.QuestionPoolEntrySlimDto;
+import at.learnhub.dto.simple.SubjectDto;
 import at.learnhub.model.*;
 import at.learnhub.repository.QuestionPoolRepository;
 import at.learnhub.repository.StreakTrackingRepository;
@@ -159,5 +160,36 @@ public class QuestionPoolResource {
     public Response getTopicPoolsByUser(@PathParam("userId") Long userId) {
         List<TopicPool> topicPools = questionPoolRepository.findTopicPoolsByUserId(userId);
         return Response.ok(topicPools).build();
+    }
+
+    @GET
+    @Path("/{userId}/subjects")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Get all subjects and topic pools contained in a user's question pool",
+            description = "Returns all distinct subjects and saved topic pools from questions in the user's question pool"
+    )
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "List of subjects with the topic pools contained in the user's question pool",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(
+                                    implementation = Subject.class,
+                                    type = SchemaType.ARRAY
+                            )
+                    )
+            )
+    })
+    public Response getSubjectsByUser(
+            @Parameter(
+                    description = "The id of the user owning the question pool.",
+                    required = true
+            )
+            @PathParam("userId") Long userId
+    ) {
+        List<SubjectDto> subjects = questionPoolRepository.findSubjectsAndTopicPoolsByUserId(userId);
+        return Response.ok(subjects).build();
     }
 }

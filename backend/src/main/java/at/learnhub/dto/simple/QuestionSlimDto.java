@@ -2,6 +2,7 @@ package at.learnhub.dto.simple;
 
 import at.learnhub.model.MediaFile;
 import at.learnhub.model.QuestionType;
+import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import java.util.List;
@@ -51,6 +52,13 @@ public record QuestionSlimDto(
                 description = "Whether this question is publicly available to all users.",
                 example = "true"
         )
-        Boolean isPublic
+        Boolean isPublic,
+
+        @Schema(
+                description = "List of possible answers for this question.",
+                implementation = AnswerSlimDto.class,
+                type = SchemaType.ARRAY
+        )
+        List<AnswerSlimDto> answers
 
 ) {}

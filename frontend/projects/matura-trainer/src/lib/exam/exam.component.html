@@ -1,0 +1,30 @@
+<div *ngIf="!isLoading && exam && !examSubmitted">
+  <lib-question-runner
+    mode="exam"
+    [questionIdList]="this.questionIds"
+    (answered)="storeAnswer($event)"
+    (finishedExam)="submitExam($event)">
+  </lib-question-runner>
+</div>
+
+<div *ngIf="!isLoading && submittedExam && examSubmitted">
+  <!-- Score Box -->
+  <div class="widget-wrapper score-box">
+    <div class="header">Dein Ergebnis</div>
+    <div class="widget-content score-content">
+      <p class="score-text">Score: <strong>{{ Math.floor(submittedExam.score) }}%</strong></p>
+      <div class="score-bar-container">
+        <div class="score-bar" [style.width.%]="submittedExam.score"></div>
+      </div>
+    </div>
+  </div>
+
+  <lib-question-runner
+    mode="review"
+    [exam]="this.submittedExam">
+  </lib-question-runner>
+</div>
+
+<div *ngIf="isLoading">
+  <p>Prüfung wird erstellt...</p>
+</div>
