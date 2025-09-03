@@ -35,4 +35,13 @@ export class ChooseStudyTopicComponent implements OnInit {
       queryParams: { topicPoolId: pool.id }
     });
   }
+
+  navigateToFragenkonfigurator(subject: Subject, pool: TopicPool) {
+    this.router.navigate(['/fragenkonfigurator'], {
+      queryParams: {
+        subjectId: subject.id,
+        topicPoolId: pool.id
+      }
+    });
+  }
 }

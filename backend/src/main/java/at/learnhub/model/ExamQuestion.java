@@ -2,6 +2,8 @@ package at.learnhub.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class ExamQuestion {
     @ManyToOne
     @JoinColumn(name = "exam_id", nullable = false)
     @JsonIgnoreProperties({"questions", "user"})
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Exam exam;
 
     /**
@@ -36,6 +39,7 @@ public class ExamQuestion {
     @ManyToOne
     @JoinColumn(name = "entry_id", nullable = false)
     @JsonIgnoreProperties("examQuestions")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private QuestionPoolEntry entry;
 
     /**
@@ -48,6 +52,7 @@ public class ExamQuestion {
             inverseJoinColumns = @JoinColumn(name = "answer_id")
     )
     @JsonIgnoreProperties({"examQuestions", "question"})
+    @org.hibernate.annotations.OnDelete(action = org.hibernate.annotations.OnDeleteAction.CASCADE)
     private List<Answer> selectedAnswers;
 
     /**

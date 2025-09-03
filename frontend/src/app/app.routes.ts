@@ -26,12 +26,14 @@ import { PersonalPlaceComponent } from '../../projects/content-management/src/li
 import { FrageCardComponent } from '../../projects/content-management/src/lib/frage-card/frage-card.component';
 import { FinishedCardComponent } from '../../projects/content-management/src/lib/finished-card/finished-card.component';
 import { ChooseStudyTopicComponent } from '../../projects/content-management/src/lib/choose-study-topic/choose-study-topic.component';
-import {SubjectDetailComponent} from '../../projects/content-management/src/lib/subject-detail/subject-detail.component';
-
 import { SubjectsComponent } from '../../projects/content-management/src/lib/subjects/subjects.component';
 import {PracticeComponent} from '../../projects/matura-trainer/src/lib/practice/practice.component';
 import {ExamComponent} from '../../projects/matura-trainer/src/lib/exam/exam.component';
 import {ExamSetupComponent} from '../../projects/matura-trainer/src/lib/exam-setup/exam-setup.component';
+import {
+  QuestionManagerComponent
+} from '../../projects/content-management/src/lib/question-manager/question-manager.component';
+import {EditQuestionComponent} from '../../projects/content-management/src/lib/edit-question/edit-question.component';
 
 export const routes: Routes = [
   {
