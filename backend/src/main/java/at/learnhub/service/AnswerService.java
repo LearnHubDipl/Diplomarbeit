@@ -35,12 +35,16 @@ public class AnswerService {
 
 
     private CheckAnswersResponseDto checkMultipleChoiceAnswer(Question question, CheckAnswersRequestDto request) {
-        if (request.selectedAnswerIds() == null || request.selectedAnswerIds().isEmpty()) {
-            throw new BadRequestException("No selected answers provided.");
-        }
-
+        boolean isCorrect = false;
         List<Long> correctIds = answerRepository.getCorrectAnswersIdsForQuestion(question.getId());
-        boolean isCorrect = new HashSet<>(correctIds).equals(new HashSet<>(request.selectedAnswerIds()));
+
+        if (request.selectedAnswerIds() == null || request.selectedAnswerIds().isEmpty()) {
+            // no answers provided
+            isCorrect = false;
+        } else {
+            // check if provided answers are correct
+            isCorrect = new HashSet<>(correctIds).equals(new HashSet<>(request.selectedAnswerIds()));
+        }
 
         return new CheckAnswersResponseDto(
                 question.getId(),
@@ -53,14 +57,16 @@ public class AnswerService {
 
     private CheckAnswersResponseDto checkFreeTextAnswer(Question question, CheckAnswersRequestDto request) {
         String userAnswer = request.freeTextAnswer();
-        if (userAnswer == null || userAnswer.isBlank()) {
-            throw new BadRequestException("Text freeTextAnswer field is required for freetext questions.");
-        }
-
         List<String> correctAnswers = answerRepository.getCorrectAnswersForFreeTextQuestion(question.getId());
+        boolean isCorrect;
 
-        boolean isCorrect = correctAnswers.stream()
-                .anyMatch(correct -> correct.equalsIgnoreCase(userAnswer.trim()));
+        if (userAnswer == null || userAnswer.isBlank()) {
+            // no answer provided
+            isCorrect = false;
+        } else {
+            isCorrect = correctAnswers.stream()
+                    .anyMatch(correct -> correct.equalsIgnoreCase(userAnswer.trim()));
+        }
 
         return new CheckAnswersResponseDto(
                 question.getId(),

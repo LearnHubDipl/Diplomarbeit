@@ -1,1 +1,40 @@
 /* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+:root {
+  --mat-sys-surface-container: #ffffff; /* overlay background */
+  --mat-select-panel-background-color: var(--mat-sys-surface-container);
+
+  --mat-sys-on-surface: #000000;       /* text color */
+  --mat-select-panel-color: var(--mat-sys-on-surface);
+
+  --mat-elevation-shadow-1: 0 4px 10px rgba(0,0,0,0.25);
+}
+
+.mat-select-panel {
+  background-color: var(--mat-select-panel-background-color) !important;
+  color: var(--mat-select-panel-color) !important;
+  box-shadow: var(--mat-elevation-shadow-1) !important;
+}
+
+.mat-mdc-form-field-focus-overlay {
+  background-color: transparent !important; /* remove black hover */
+}
+
+.mat-mdc-text-field-wrapper:hover .mat-mdc-form-field-focus-overlay {
+  background-color: rgba(0, 0, 0, 0.04) !important; /* light grey */
+}
+.mat-mdc-text-field-wrapper.mat-mdc-focused .mat-mdc-form-field-focus-overlay {
+  background-color: rgba(0, 0, 0, 0.08) !important; /* subtle focus */
+}
+
+.mdc-checkbox__ripple {
+  display: none; !important;
+}
+
+
+
+
+

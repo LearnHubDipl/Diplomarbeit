@@ -1,4 +1,4 @@
-import {Component, inject, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
 import { Question } from '../../../../shared/src/lib/interfaces/question';
 import { QuestionService } from '../../../../shared/src/lib/services/question.service';
 import {NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
@@ -7,6 +7,7 @@ import {CheckAnswerRequest} from '../../../../shared/src/lib/interfaces/answer';
 import {AnswerService} from '../../../../shared/src/lib/services/answer.service';
 import {ActivatedRoute} from '@angular/router';
 import {Location} from '@angular/common';
+import {Exam} from '../../../../shared/src/lib/interfaces/exam';
 
 
 @Component({
@@ -25,7 +26,12 @@ import {Location} from '@angular/common';
   ]
 })
 export class QuestionRunnerComponent implements OnInit {
-  questionIdList: number[] = [];
+  @Input() mode: 'practice' | 'exam' | 'review' = 'practice';
+  @Input() exam?: Exam;   // only needed for review mode
+  @Output() answered = new EventEmitter<CheckAnswerRequest>();
+  @Output() finishedExam = new EventEmitter<CheckAnswerRequest[]>(); // emit all answers at the end of exam
+  @Input() questionIdList: number[] = [];
+
   currentQuestionIndex: number = 0;
   isFinished = false;
 
@@ -41,6 +47,8 @@ export class QuestionRunnerComponent implements OnInit {
     freeTextAnswer: ['']
   });
 
+  previousAnswers: { [questionId: number]: CheckAnswerRequest } = {};
+
   answerResult: {
     correct: boolean;
     correctAnswerIds: number[] | null;
@@ -50,32 +58,72 @@ export class QuestionRunnerComponent implements OnInit {
   submitted = false;
 
   ngOnInit() {
-    this.route.queryParamMap.subscribe(params => {
-      const raw = params.getAll('ids');
-      this.questionIdList = raw.map(id => +id);
-    });
+    let state = history.state;
+    if (this.mode !== 'review') {
+      if (state?.questionIds) {
+        this.questionIdList = state.questionIds;
+      }
 
-    if (this.questionIdList.length > 0) {
-      this.loadQuestion(this.questionIdList[this.currentQuestionIndex]);
+      if (this.questionIdList.length > 0) {
+        this.loadQuestion(this.currentQuestionIndex);
+      } else {
+        // TODO: Screen that states that there are no question that could be loaded
+      }
     } else {
-      // TODO: Screen that states that there are no question that could be loaded
+      this.loadQuestion(this.currentQuestionIndex)
     }
   }
 
-  loadQuestion(id: number) {
+  loadQuestion(index: number) {
+    if (this.mode === 'review' && this.exam) {
+      let reviewed = this.exam.questions[index]
+      if (reviewed) {
+        this.question = reviewed.question;
+
+        // Restore user’s answer
+        if (this.question.type === 'MULTIPLE_CHOICE') {
+          let answerControls = this.fb.array(
+            this.question.answers.map(a => reviewed.selectedAnswers?.some(sa => sa.id === a.id) ?? false)
+          );
+          this.form.setControl('answers', answerControls);
+          this.form.get('freeTextAnswer')?.disable();
+        } else if (this.question.type === 'FREETEXT') {
+          this.form.setControl('answers', this.fb.array([]));
+          this.form.get('freeTextAnswer')?.setValue(reviewed.freeTextAnswer ?? '');
+          this.form.get('freeTextAnswer')?.disable();
+        }
+
+        // Lock and set evaluation
+        this.answerResult = {
+          correct: reviewed.isCorrect,
+          correctAnswerIds: reviewed.correctAnswerIds ?? null,
+          correctFreeTextAnswers: reviewed.correctFreeTextAnswers ?? null
+        };
+
+        this.lockInputs();
+        this.submitted = true;
+        return;
+      }
+    }
+
+    let id = this.questionIdList[index]
+    if(!id) return;
+
     this.questionService.getQuestionById(id).subscribe(q => {
       this.question = q;
-      this.answerResult = null;
-      this.submitted = false;
+
+      let previous = this.previousAnswers[q.id];
 
       if (q.type === 'MULTIPLE_CHOICE') {
-        const answerControls = this.fb.array(q.answers.map(() => false));
+        let answerControls = this.fb.array(
+          q.answers.map((a, i) => previous?.selectedAnswerIds?.includes(a.id) ?? false)
+        );
         this.form.setControl('answers', answerControls);
         this.form.get('freeTextAnswer')?.disable();
       } else if (q.type === 'FREETEXT') {
-        this.form.setControl('answers', this.fb.array([])); // clear answers array
+        this.form.setControl('answers', this.fb.array([]));
         this.form.get('freeTextAnswer')?.enable();
-        this.form.get('freeTextAnswer')?.setValue('');
+        this.form.get('freeTextAnswer')?.setValue(previous?.freeTextAnswer ?? '');
       }
     });
   }
@@ -94,10 +142,30 @@ export class QuestionRunnerComponent implements OnInit {
   }
 
   submit(): void {
-    if (!this.question) return;
+    let payload = this.buildPayLoad();
+    if (this.mode === 'practice') {
+      // practice mode: give instant feedback
+      this.answerService.checkAnswers(payload).subscribe(result => {
+        this.answerResult = {
+          correct: result.correct,
+          correctAnswerIds: result.correctAnswerIds ?? null,
+          correctFreeTextAnswers: result.correctFreeTextAnswers ?? null
+        };
+
+        this.lockInputs();
+        this.submitted = true;
+        this.advance();
+      });
+    } else {
+      // save answers
+      this.previousAnswers[this.question!.id] = payload;
+    }
+  }
+
+  buildPayLoad() : CheckAnswerRequest {
+    if (!this.question) throw new Error("There is no Question selected");
 
     let payload: CheckAnswerRequest;
-
     if (this.question.type === 'MULTIPLE_CHOICE') {
       const selectedAnswerIds = this.answersArray.controls
         .map((ctrl, index) => ctrl.value ? this.question!.answers[index].id : null)
@@ -105,7 +173,7 @@ export class QuestionRunnerComponent implements OnInit {
 
       payload = {
         questionId: this.question.id,
-        selectedAnswerIds: selectedAnswerIds,
+        selectedAnswerIds,
         freeTextAnswer: null
       };
     } else {
@@ -115,34 +183,49 @@ export class QuestionRunnerComponent implements OnInit {
         freeTextAnswer: this.form.get('freeTextAnswer')?.value.trim() ?? null
       };
     }
+    return payload;
+  }
 
-    this.answerService.checkAnswers(payload).subscribe(result => {
-      this.answerResult = {
-        correct: result.correct,
-        correctAnswerIds: result.correctAnswerIds ?? null,
-        correctFreeTextAnswers: result.correctFreeTextAnswers ?? null
-      };
+  private lockInputs() {
+    if (this.question?.type === 'MULTIPLE_CHOICE') {
+      this.answersArray.controls.forEach(ctrl => ctrl.disable());
+    } else if (this.question?.type === 'FREETEXT') {
+      this.form.get('freeTextAnswer')?.disable();
+    }
+  }
 
-      // lock inputs
-      if (this.question?.type === 'MULTIPLE_CHOICE') {
-        this.answersArray.controls.forEach(ctrl => ctrl.disable());
-      } else if (this.question?.type === 'FREETEXT') {
-        this.form.get('freeTextAnswer')?.disable();
-      }
+  private advance() {
+    this.currentQuestionIndex++;
+    if (this.currentQuestionIndex >= this.currentQuestions.length) {
+      this.isFinished = true;
+    }
+  }
 
-      this.submitted = true;
+  navigateExam(direction: 'next' | 'prev') {
+    if (direction === 'next' && this.currentQuestionIndex < this.currentQuestions.length - 1) {
+      this.submit();
       this.currentQuestionIndex++;
-      if(this.currentQuestionIndex >= this.questionIdList.length) {
-        this.isFinished = true;
-      }
-    });
+      this.loadQuestion(this.currentQuestionIndex);
+    } else if (direction === 'prev' && this.currentQuestionIndex > 0) {
+      this.currentQuestionIndex--;
+      this.loadQuestion(this.currentQuestionIndex);
+    } else if (direction === 'next' && this.currentQuestionIndex === this.currentQuestions.length - 1) {
+      this.finish();
+    }
   }
 
   loadNextQuestion(): void {
     if (!this.isFinished) {
-      let nextIndex = this.questionIdList![this.currentQuestionIndex];
-      this.loadQuestion(nextIndex);
+      this.answerResult = null;
+      this.submitted = false;
+      this.loadQuestion(this.currentQuestionIndex);
     }
+  }
+
+  get currentQuestions(): { id: number; question: Question; selectedAnswers?: any; freetextAnswer?: string }[] | number[] {
+    return this.mode === 'review'
+      ? this.exam?.questions ?? []
+      : this.questionIdList;
   }
 
   get hasSolutions(): boolean {
@@ -163,7 +246,14 @@ export class QuestionRunnerComponent implements OnInit {
   }
 
   finish() {
-    this.location.back()
+    this.submit()
+
+    if (this.mode !== 'exam') {
+      this.location.back()
+    } else {
+      let allAnswers = Object.values(this.previousAnswers);
+      this.finishedExam.emit(allAnswers);
+    }
   }
 }
 

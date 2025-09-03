@@ -1,16 +1,18 @@
 <div class="widget-wrapper question-wrapper">
   <!-- inner 'bread crumbs' showing the subject and the topic pool -->
-  <div class="header">{{ this.question?.topicPool?.subject?.name }} &gt; {{ this.question?.topicPool?.name }}</div>
+  <div class="header">{{ question?.topicPool?.subject?.name }} &gt; {{ question?.topicPool?.name }}</div>
 
   <form [formGroup]="form" class="widget-content question-content" (ngSubmit)="submit()">
     <div class="widget-content-top">
-      <div *ngIf="submitted" class="result-badge" [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
-        <span class="icon">
-          <ng-container *ngIf="answerResult?.correct">✔️</ng-container>
-          <ng-container *ngIf="!answerResult?.correct">❌</ng-container>
-        </span>
+      <div *ngIf="(mode === 'practice' || mode === 'review') && submitted" class="result-badge"
+           [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
+          <span class="icon">
+            <ng-container *ngIf="answerResult?.correct">✔️</ng-container>
+            <ng-container *ngIf="!answerResult?.correct">❌</ng-container>
+          </span>
         {{ answerResult?.correct ? 'Richtig!' : 'Falsch!' }}
       </div>
+
       <div class="widget-content-left" [ngStyle]="{ width: question?.media ? '60%' : '100%' }">
         <div class="question">{{ question?.text }}</div>
 
@@ -37,13 +39,8 @@
             placeholder="Bitte Antwort eingeben..."
           ></textarea>
 
-          <!-- Reserved feedback container -->
-          <div class="feedback-wrapper">
-            <div
-              *ngIf="submitted"
-              class="feedback"
-              [ngClass]="{ 'correct': answerResult?.correct, 'incorrect': !answerResult?.correct }"
-            >
+          <div *ngIf="(mode === 'practice' || mode === 'review') && submitted" class="feedback-wrapper">
+            <div class="feedback" [ngClass]="{ 'correct': answerResult?.correct, 'incorrect': !answerResult?.correct }">
               <p *ngIf="answerResult?.correct">Richtig!</p>
               <div *ngIf="!answerResult?.correct">
                 Falsche Antwort.<br>
@@ -62,7 +59,7 @@
       </div>
     </div>
 
-    <div class="button-container">
+    <div class="button-container" *ngIf="mode == 'practice'">
       <button
         class="submit-btn"
         type="button"
@@ -77,10 +74,29 @@
         }}
       </button>
     </div>
+
+    <div class="button-container exam-navigation" *ngIf="mode === 'exam' || mode === 'review'">
+      <button
+        type="button"
+        class="submit-btn"
+        [disabled]="currentQuestionIndex === 0"
+        (click)="navigateExam('prev')">
+        ← Zurück
+      </button>
+
+      <button
+        type="button"
+        class="submit-btn"
+        (click)="currentQuestionIndex < currentQuestions.length - 1 ?
+          navigateExam('next') :
+          finish()">
+        {{ currentQuestionIndex < currentQuestions.length - 1 ? 'Weiter →' : 'Fertigstellen' }}
+      </button>
+    </div>
   </form>
 </div>
 
-<div *ngIf="hasSolutions && submitted" style="margin-top: 3rem;" class="widget-wrapper">
+<div *ngIf="hasSolutions && submitted && (mode === 'practice' || mode === 'review')" style="margin-top: 3rem;" class="widget-wrapper">
   <div class="header">TOP Lösungsweg</div>
 
   <div class="widget-content">

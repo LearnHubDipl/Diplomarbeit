@@ -31,7 +31,7 @@ public class AnswerRepository {
     }
 
 
-    private Answer getAnswerById(Long id) {
+    public Answer getAnswerById(Long id) {
         Answer answer = em.find(Answer.class, id);
         if (answer == null) {
             throw new EntityNotFoundException("Answer with id " + id + " not found.");

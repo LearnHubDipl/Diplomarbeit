@@ -1,0 +1,67 @@
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+}
+
+.full-width {
+  width: 50%; !important;
+}
+
+
+/* Subject header styling */
+.subject-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ddd;
+  border-radius: 0.2rem;
+  box-sizing: border-box;
+}
+
+/* Topic pool styling inside dropdown */
+.mat-mdc-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mat-mdc-option .subject-name {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.mat-mdc-option .topic-pool-name {
+  font-weight: 500;
+}
+
+.mat-mdc-select-value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.mat-mdc-select-value span {
+  background-color: #e0e0e0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.3rem;
+  font-size: 0.85rem;
+}

@@ -143,6 +143,12 @@ textarea[formControlName="freeTextAnswer"]:focus {
 }
 
 
+.exam-navigation {
+  justify-content: space-between !important;
+  width: 96%;
+}
+
+
 
 
 

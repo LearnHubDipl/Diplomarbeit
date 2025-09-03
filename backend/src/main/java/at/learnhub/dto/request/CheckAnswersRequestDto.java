@@ -20,14 +20,14 @@ public record CheckAnswersRequestDto(
 
         @Schema(
                 description = "List of answer IDs selected by the user. Required only for multiple choice questions. Must be null for freetext questions.",
-                example = "[101, 102]",
+                example = "[3]",
                 type = SchemaType.ARRAY
         )
         List<Long> selectedAnswerIds,
 
         @Schema(
                 description = "Answer the user provided for a freetext question. Required only for freetext questions. Must be null for multiple choice questions.",
-                example = "The capital city of France is Paris."
+                example = "Druck bleibt konstant"
         )
         String freeTextAnswer
 

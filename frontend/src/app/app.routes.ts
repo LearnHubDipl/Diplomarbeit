@@ -26,9 +26,12 @@ import { PersonalPlaceComponent } from '../../projects/content-management/src/li
 import { FrageCardComponent } from '../../projects/content-management/src/lib/frage-card/frage-card.component';
 import { FinishedCardComponent } from '../../projects/content-management/src/lib/finished-card/finished-card.component';
 import { ChooseStudyTopicComponent } from '../../projects/content-management/src/lib/choose-study-topic/choose-study-topic.component';
-import {SubjectsComponent} from '../../projects/content-management/src/lib/subjects/subjects.component';
 import {SubjectDetailComponent} from '../../projects/content-management/src/lib/subject-detail/subject-detail.component';
 
+import { SubjectsComponent } from '../../projects/content-management/src/lib/subjects/subjects.component';
+import {PracticeComponent} from '../../projects/matura-trainer/src/lib/practice/practice.component';
+import {ExamComponent} from '../../projects/matura-trainer/src/lib/exam/exam.component';
+import {ExamSetupComponent} from '../../projects/matura-trainer/src/lib/exam-setup/exam-setup.component';
 
 export const routes: Routes = [
   {
@@ -48,8 +51,7 @@ export const routes: Routes = [
       { path: 'questionCard/:id', component: FrageCardComponent },
       { path: 'finished', component: FinishedCardComponent },
       { path: 'chooseStudyTopic', component: ChooseStudyTopicComponent },
-      { path: 'subjects', component: SubjectsComponent },
-      { path: 'subjects/:id', component: SubjectDetailComponent }
+      { path: 'subjects', component: SubjectsComponent }
     ]
   },
 

@@ -1,0 +1,72 @@
+<div class="widget-wrapper">
+  <div class="header">Prüfung konfigurieren</div>
+
+  <div class="widget-content">
+    <form [formGroup]="form" (ngSubmit)="startExam()">
+      <!-- Topic Pools -->
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Wähle Fächer und Themenpools</mat-label>
+        <mat-select
+          formControlName="topicPoolIds"
+          multiple
+        >
+          <!-- Custom display in the trigger -->
+          <mat-select-trigger>
+            {{ getSelectedSubjects().join(', ') }}
+          </mat-select-trigger>
+
+          <!-- Options grouped by subject -->
+          <mat-optgroup *ngFor="let subject of subjects" [label]="''">
+            <!-- Subject header with checkbox -->
+            <div class="subject-header">
+              <span class="subject-label">{{ subject.name }}</span>
+              <mat-checkbox
+                class="subject-checkbox"
+                [checked]="isSubjectSelected(subject)"
+                (change)="toggleSubject(subject, $event.checked)">
+              </mat-checkbox>
+            </div>
+
+            <!-- Topic pools -->
+            <mat-option style="margin-left: 4%" *ngFor="let pool of subject.topicPools" [value]="pool.id">
+              <span class="topic-pool-name">{{ pool.name }}</span>
+            </mat-option>
+          </mat-optgroup>
+
+        </mat-select>
+      </mat-form-field>
+
+
+
+
+      <!-- Number of Questions -->
+      <div class="form-group">
+        <label for="numberOfQuestions">Anzahl der Fragen:</label>
+        <input
+          id="numberOfQuestions"
+          formControlName="numberOfQuestions"
+          type="number"
+          min="1"
+        />
+      </div>
+
+      <!-- Time Limit -->
+      <div class="form-group">
+        <label for="timeLimit">Zeitlimit (Minuten):</label>
+        <input
+          id="timeLimit"
+          formControlName="timeLimitMinutes"
+          type="number"
+          min="1"
+        />
+      </div>
+
+      <!-- Submit button -->
+      <div class="button-container">
+        <button type="submit" class="submit-btn" [disabled]="form.invalid">
+          Starten
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
