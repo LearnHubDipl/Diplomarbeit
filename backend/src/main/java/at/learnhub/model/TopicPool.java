@@ -37,9 +37,8 @@ public class TopicPool {
     /**
      * Subject this topic pool belongs to.
      */
-    @ManyToOne
-    @JoinColumn(name = "subject_id")
-    @JsonIgnoreProperties({"topicPools"})
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "subject_id", nullable = false)
     private Subject subject;
 
     /**

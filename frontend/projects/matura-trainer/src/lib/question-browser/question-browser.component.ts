@@ -13,9 +13,6 @@ import {QuestionBrowsingViewComponent} from '../question-browsing-view/question-
 @Component({
   selector: 'lib-question-browser',
   imports: [
-    NgForOf,
-    NgIf,
-    NgClass,
     QuestionBrowsingViewComponent
   ],
   templateUrl: './question-browser.component.html',
