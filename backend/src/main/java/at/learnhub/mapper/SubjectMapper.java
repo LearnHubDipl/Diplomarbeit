@@ -41,7 +41,7 @@ public final class SubjectMapper {
                 s.getId(),
                 s.getName(),
                 s.getDescription(),
-                MediaFileMapper.toSlimDto(s.getImg()), // <- HIER: Slim statt Entity
+                MediaFileMapper.toSlimDto(s.getImg()),
                 topicPools
         );
     }

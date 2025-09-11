@@ -30,26 +30,4 @@ public class UserRepository {
         }
         return user;
     }
-
-    public List<UserSlimDto> findAllTeachers() {
-        return em.createQuery("SELECT u FROM User u WHERE u.isTeacher = true", User.class)
-                .getResultList()
-                .stream()
-                .map(UserMapper::toSlimDto)
-                .toList();
-    }
-
-    public List<UserSlimDto> findActiveTeachers(int limit) {
-        return em.createQuery("""
-                        SELECT u
-                        FROM User u
-                        WHERE u.isTeacher = true
-                        ORDER BY SIZE(u.ownedTopicContents) DESC
-                        """, User.class)
-                .setMaxResults(limit)
-                .getResultList()
-                .stream()
-                .map(UserMapper::toSlimDto)
-                .toList();
-    }
 }
