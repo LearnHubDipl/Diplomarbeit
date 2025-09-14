@@ -7,7 +7,6 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'lib-home',
   imports: [
-    RouterLink,
     NgForOf,
     FormsModule
   ],
