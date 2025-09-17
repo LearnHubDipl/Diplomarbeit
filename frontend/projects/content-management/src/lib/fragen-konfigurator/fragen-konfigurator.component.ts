@@ -1,13 +1,13 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { QuestionService } from '../../../../shared/src/lib/services/question.service';
-import { SubjectService } from '../../../../shared/src/lib/services/subject.service';
-import { TopicPoolService } from '../../../../shared/src/lib/services/topic-pool.service';
-import { QuestionType } from '../../../../shared/src/lib/interfaces/question';
-import { QuestionRequest, AnswerCreationRequest } from '../../../../shared/src/lib/interfaces/question-creation-request';
-import { Subject } from '../../../../shared/src/lib/interfaces/subject';
-import { TopicPool } from '../../../../shared/src/lib/interfaces/topic-pool';
+import {Component, inject, OnInit} from '@angular/core';
+import {FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule} from '@angular/forms';
+import {CommonModule} from '@angular/common';
+import {QuestionService} from '../../../../shared/src/lib/services/question.service';
+import {SubjectService} from '../../../../shared/src/lib/services/subject.service';
+import {TopicPoolService} from '../../../../shared/src/lib/services/topic-pool.service';
+import {QuestionType} from '../../../../shared/src/lib/interfaces/question';
+import {QuestionRequest, AnswerCreationRequest} from '../../../../shared/src/lib/interfaces/question-creation-request';
+import {Subject} from '../../../../shared/src/lib/interfaces/subject';
+import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
 import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
@@ -23,16 +23,17 @@ export class FragenKonfiguratorComponent implements OnInit {
   private fb = inject(FormBuilder);
   private questionService = inject(QuestionService);
   private subjectService = inject(SubjectService);
-  private topicPoolService = inject(TopicPoolService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   questionForm!: FormGroup;
   subjects: Subject[] = [];
   topicPools: TopicPool[] = [];
   questionTypes = Object.values(QuestionType);
+  
 
   readonly QuestionType = QuestionType;
-  readonly maxAnswers = 7; //maximale Anzahl der Antwormöglichkeiten (bei Multiple choice)
+  readonly maxAnswers = 7;
   readonly automaticAnswersLoaded = 2;
 
   private subjectId?: number;
@@ -40,32 +41,20 @@ export class FragenKonfiguratorComponent implements OnInit {
 
   ngOnInit() {
     this.initForm();
-
     this.setupFormSubscriptions();
 
     this.route.queryParams.subscribe(params => {
       this.subjectId = params['subjectId'] ? Number(params['subjectId']) : undefined;
       this.topicPoolId = params['topicPoolId'] ? Number(params['topicPoolId']) : undefined;
+
+      if (this.subjectId) {
+        this.questionForm.get('subjectId')?.setValue(this.subjectId);
+        this.loadSubjects();
+      } else {
+        this.loadSubjects();
+      }
     });
-    /**
-    this.route.queryParams.subscribe(params => {
-      const subjectId = params['subjectId'];
-      const topicId = params['topicId'];
-
-      if (subjectId) {
-        this.questionForm.get('subjectId')?.setValue(subjectId);
-      }
-
-      if (topicId) {
-        this.questionForm.get('topicId')?.setValue(Number(topicId));
-        this.questionForm.get('topicId')?.enable();
-      }
-    })
-**/
-    this.loadSubjects();
   }
-
-
 
   private initForm() {
     this.questionForm = this.fb.group({
@@ -73,7 +62,7 @@ export class FragenKonfiguratorComponent implements OnInit {
       subjectId: [null, Validators.required],
       topicPoolId: [{value: null, disabled: true}, Validators.required],
       text: ['', Validators.required],
-      difficulty: [2], // Default: mittel
+      difficulty: [2],
       explanation: [''],
       isPublic: [true],
       answers: this.fb.array([])
@@ -109,16 +98,14 @@ export class FragenKonfiguratorComponent implements OnInit {
       for (let i = 0; i < this.automaticAnswersLoaded; i++) {
         answersArray.push(this.fb.group({
           text: ['', Validators.required],
-          isCorrect: [i === 0] // Erste Antwort standardmäßig richtig
+          isCorrect: [i === 0]
         }));
       }
     }
-    // Für FREETEXT werden keine Antworten benötigt
   }
 
   private updateExplanationValidation(type: QuestionType) {
     const explanationControl = this.questionForm.get('explanation');
-
     if (type === QuestionType.FREETEXT) {
       explanationControl?.setValidators([Validators.required]);
     } else {
@@ -136,17 +123,14 @@ export class FragenKonfiguratorComponent implements OnInit {
     this.subjectService.getAllSubjects().subscribe({
       next: (subjects) => {
         this.subjects = subjects;
-        console.log('Subjects geladen:', this.subjects);
 
-        if(this.subjectId){
+        if (this.subjectId) {
           this.questionForm.get('subjectId')?.setValue(this.subjectId);
-
           this.loadTopicPoolsForSubject(this.subjectId);
 
-          if(this.topicPoolId){
-              this.questionForm.get('topicPoolId')?.setValue(this.topicPoolId);
-              this.questionForm.get('topicPoolId')?.enable();
-
+          if (this.topicPoolId) {
+            this.questionForm.get('topicPoolId')?.setValue(this.topicPoolId);
+            this.questionForm.get('topicPoolId')?.enable();
           }
         }
       },
@@ -157,20 +141,14 @@ export class FragenKonfiguratorComponent implements OnInit {
   }
 
   private loadTopicPoolsForSubject(subjectId: number) {
-    console.log('Lade TopicPools für Subject ID:', subjectId);
-
-    // Finde das ausgewählte Subject und verwende dessen TopicPools
     const selectedSubject = this.subjects.find(subject => subject.id === subjectId);
 
     if (selectedSubject && selectedSubject.topicPools) {
       this.topicPools = selectedSubject.topicPools;
-      console.log('TopicPools aus Subject geladen:', this.topicPools);
     } else {
-      console.warn('Keine TopicPools für Subject ID gefunden:', subjectId);
       this.topicPools = [];
     }
   }
-
 
   onSubmit() {
     if (this.questionForm.valid) {
@@ -182,7 +160,7 @@ export class FragenKonfiguratorComponent implements OnInit {
         type: formValue.type,
         difficulty: formValue.difficulty,
         isPublic: formValue.isPublic,
-        userId: 1, // TODO: Aktuelle User-ID aus Authentication Service holen
+        userId: 1, // TODO: Aktuelle User-ID aus Authentication Service
         topicPoolId: Number(formValue.topicPoolId),
         answers: formValue.answers || []
       };
@@ -190,7 +168,18 @@ export class FragenKonfiguratorComponent implements OnInit {
       this.questionService.createQuestion(questionRequest).subscribe({
         next: () => {
           alert('Frage wurde erfolgreich veröffentlicht!');
-          this.reinitForm();
+
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+              subjectId: this.questionForm.get('subjectId')?.value,
+              topicPoolId: this.questionForm.get('topicPoolId')?.value
+            },
+            queryParamsHandling: 'merge'
+          });
+
+          this.initForm();
+          this.setupFormSubscriptions();
         },
         error: (error) => {
           console.error('Fehler beim Erstellen der Frage:', error);
@@ -200,23 +189,6 @@ export class FragenKonfiguratorComponent implements OnInit {
     } else {
       this.markAllFieldsAsTouched();
       alert('Bitte füllen Sie alle Pflichtfelder aus.');
-    }
-  }
-
-  private reinitForm(){
-    const prevSubjectId = this.questionForm.get('subjectId')?.value;
-    const prevTopicPoolId = this.questionForm.get('topicPoolId')?.value;
-
-    this.initForm();
-    this.setupFormSubscriptions();
-
-    if(prevSubjectId){
-      this.questionForm.get('subjectId')?.setValue(prevSubjectId);
-      this.loadTopicPoolsForSubject(Number(prevTopicPoolId));
-      if(prevSubjectId ){
-        this.questionForm.get('topicPoolId')?.setValue(prevTopicPoolId);
-        this.questionForm.get('topicPoolId')?.enable();
-      }
     }
   }
 
@@ -251,6 +223,4 @@ export class FragenKonfiguratorComponent implements OnInit {
       }));
     }
   }
-
-
 }

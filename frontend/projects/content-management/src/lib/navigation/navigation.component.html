@@ -1,38 +1,36 @@
 <!-- https://chatgpt.com/share/6885ea14-e304-8009-8502-1190c9565d6d -->
-<nav class="navbar navbar-expand-lg navbar-light bg-warning px-4">
-  <a class="navbar-brand me-auto" [routerLink]="''">
-    <img src="assets/learnHub_Logo.png" alt="Logo" width="45" height="45" class="rounded-circle">
-  </a>
+<div class="d-flex flex-column min-vh-100">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-warning px-4">
+    <a class="navbar-brand me-auto" [routerLink]="''">
+      <img src="assets/learnHub_Logo.png" alt="Logo" width="45" height="45" class="rounded-circle">
+    </a>
 
-  <button
-    class="navbar-toggler"
-    type="button"
-    data-bs-toggle="collapse"
-    data-bs-target="#navbarContent"
-    aria-controls="navbarContent"
-    aria-expanded="false"
-    aria-label="Toggle navigation"
-  >
-    <span class="navbar-toggler-icon"></span>
-  </button>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-  <div class="collapse navbar-collapse" id="navbarContent">
-    <div class="ms-auto d-flex align-items-center flex-column flex-lg-row mt-3 mt-lg-0">
-      <a class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/maturaunderlagen'">Maturaunderlagen</a>
-      <a class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/chooseStudyOrCreate'">Fragenkonfigurator</a>
-      <a class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/trainer'">Maturatrainer</a>
-      <a class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/personalPlace'"><i class="bi bi-person-circle text-white fs-3 me-2"  ></i></a>
-
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <div class="ms-auto d-flex align-items-center flex-column flex-lg-row mt-3 mt-lg-0">
+        <a class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/maturaunderlagen'">Maturaunderlagen</a>
+        <a class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/chooseStudyOrCreate'">Fragenkonfigurator</a>
+        <a class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/trainer'">Maturatrainer</a>
+        <a class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/personalPlace'">
+          <i class="bi bi-person-circle text-white fs-3 me-2"></i>
+        </a>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
-<router-outlet></router-outlet>
+<main class="flex-fill">
+  <router-outlet></router-outlet>
+</main>
 
 <!-- content comes here -->
 
 <!-- https://chatgpt.com/share/6885ec5c-d9ac-8009-8311-e0260e296721 -->
-<footer class="bg-warning text-white py-5">
+<footer class="bg-warning text-white py-5 mt-auto">
   <div class="container">
     <div class="row gy-4">
       <div class="col-12 col-md-4">
@@ -43,7 +41,6 @@
           <li><i class="bi bi-globe"></i> www.learnhub.at</li>
         </ul>
       </div>
-
       <div class="col-12 col-md-4">
         <h5>Quick Links</h5>
         <ul class="list-unstyled">
@@ -52,7 +49,6 @@
           <li><a href="#" class="text-white">FAQ</a></li>
         </ul>
       </div>
-
       <div class="col-12 col-md-4">
         <h5>Join Our <span class="text-dark">Newsletter</span></h5>
         <form class="d-flex flex-column flex-sm-row">
@@ -70,3 +66,4 @@
     </div>
   </div>
 </footer>
+</div>
