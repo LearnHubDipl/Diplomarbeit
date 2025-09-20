@@ -1,19 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { NgChartsModule } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { NgForOf, NgStyle } from '@angular/common';
-import { StatsService } from '../stats.service';
-import { Chart, Plugin } from 'chart.js';
+import { ChartData, ChartType, ChartConfiguration, Plugin } from 'chart.js';
+import { StatsLegendEntry, StatsOverviewDto, StatsService } from '../stats.service';
 import { CenterTextPlugin } from '../plugin/chart-text.plugin';
-
 
 @Component({
   selector: 'lib-stats-home',
-  imports: [
-    NgChartsModule,
-    NgForOf,
-    NgStyle
-  ],
   templateUrl: './stats-home.component.html',
   styleUrls: [
     '../styles/shared-styles.css',
@@ -24,94 +15,49 @@ export class StatsHomeComponent implements OnInit {
 
   chartPlugins: Plugin[] = [CenterTextPlugin];
 
-  public doughnutChartLabels: string[] = [
-    'ausreichend gelernt',
-    '2x richtig beantwortet',
-    '1x richtig beantwortet',
-    'falsch',
-    'nicht beantwortet'
-  ];
+  // Labels werden optional aus Backend übernommen
+  public doughnutChartLabels: string[] = [];
 
   public doughnutChartData: ChartData<'doughnut'> = {
-    labels: this.doughnutChartLabels,
-    datasets: [
-      {
-        data: [],
-        backgroundColor: ['#309F22', '#3DD32B', '#B7F0B0', '#FE8B8B', '#FFEAA4']
-      }
-    ]
+    labels: [],
+    datasets: [{ data: [], backgroundColor: [] }]
   };
+
   public doughnutChartType: ChartType = 'doughnut';
 
   public chartOptions: ChartConfiguration['options'] = {
     plugins: {
-      legend: {
-        display: false
-      },
+      legend: { display: false },
       centerText: { text: '' }
     }
   };
 
-  public legendData: { label: string, value: number, color: string }[] = [];
-
+  public legendData: StatsLegendEntry[] = [];
   streak = 0;
-  userId = 1; //statisch
+  userId = 1; // statisch für Test
 
   constructor(private statsService: StatsService) {}
 
   ngOnInit(): void {
-    // Streak laden
-    this.statsService.getStreak(this.userId).subscribe({
-      next: (s) => this.streak = s,
-      error: () => this.streak = 0
-    });
+    // Backend liefert aggregierte Zahlen inkl. Legend
+    this.statsService.getStatsOverview(this.userId).subscribe((data: StatsOverviewDto) => {
 
-    this.statsService.getAllEntries(this.userId).subscribe(data => {
-
-      //console.log(data);
-
-
-      let incorrect = 0;
-      let sufficient = 0;
-      let correctTwice = 0;
-      let correctOnce = 0;
-      let unanswered = 0;
-
-      for (const entry of data) {
-        if (entry.lastAnsweredCorrectly == null)  {
-          unanswered++;
-        } else if (entry.correctCount === 0) {
-          incorrect++;
-        } else if (entry.correctCount === 1) {
-          correctOnce++;
-        } else if (entry.correctCount === 2) {
-          correctTwice++;
-        } else if (entry.correctCount >= 3) {
-          sufficient++;
-        }
-      }
-
-      const rawData = [incorrect, sufficient, correctTwice, correctOnce, unanswered];
-      const total = rawData.reduce((a, b) => a + b, 0);
-
-      const labels = this.doughnutChartLabels;
-      const colors = [ '#309F22', '#3DD32B', '#B7F0B0', '#FE8B8B','#FFEAA4'];
+      // Labels, Daten und Farben direkt aus Backend-Legende
+      this.doughnutChartLabels = data.legend.map(entry => entry.label);
+      const rawData = data.legend.map(entry => entry.value);
+      const colors = data.legend.map(entry => entry.color);
 
       this.doughnutChartData = {
-        labels: labels,
-        datasets: [{
-          data: rawData,
-          backgroundColor: colors
-        }]
+        labels: this.doughnutChartLabels,
+        datasets: [{ data: rawData, backgroundColor: colors }]
       };
-      this.legendData = rawData.map((value, index) => ({
-        label: labels[index],
-        value: total > 0 ? Math.round((value / total) * 100) : 0,
-        color: colors[index]
-      }));
 
-      this.chartOptions!.plugins!.centerText!.text = `${unanswered} offene Fragen`;
+      // Legend direkt aus Backend übernehmen
+      this.legendData = data.legend;
 
+      // CenterText zeigt offene Fragen
+      const unansweredEntry = data.legend.find(e => e.label.toLowerCase().includes('nicht beantwortet'));
+      this.chartOptions!.plugins!.centerText!.text = unansweredEntry ? `${unansweredEntry.value} offene Fragen` : '';
     });
   }
 }

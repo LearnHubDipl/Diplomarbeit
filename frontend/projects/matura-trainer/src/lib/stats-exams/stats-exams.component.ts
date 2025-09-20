@@ -4,7 +4,10 @@ import { Component } from '@angular/core';
   selector: 'lib-stats-exams',
   imports: [],
   templateUrl: './stats-exams.component.html',
-  styleUrl: './stats-exams.component.css'
+  styleUrls:[
+    '../styles/shared-styles.css',
+    './stats-exams.component.css'
+  ]
 })
 export class StatsExamsComponent {
 

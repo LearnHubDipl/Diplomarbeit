@@ -1,8 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { StatsService } from '../stats.service';
-import { Chart, Plugin } from 'chart.js';
+import { ChartConfiguration, ChartData, ChartType, Plugin } from 'chart.js';
+import { StatsService, StatsOverviewDto, StatsLegendEntry } from '../stats.service';
 import { CenterTextPlugin } from '../plugin/chart-text.plugin';
 import { FormsModule } from '@angular/forms';
 import { NgClass, NgForOf, NgStyle } from '@angular/common';
@@ -28,66 +27,39 @@ export class StatsTopicsComponent implements OnInit {
 
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
-  isDropdownOpen = false;
+  topicPools: TopicPool[] = [];
+  selectedTopicPoolId = 0;
 
   chartPlugins: Plugin[] = [CenterTextPlugin];
 
-  topicPools: TopicPool[] = [];
-  selectedTopicPoolId = 0; // statisch
-
-  public doughnutChartLabels: string[] = [
-
-    'ausreichend gelernt',
-    '2x richtig beantwortet',
-    '1x richtig beantwortet',
-    'falsch',
-    'nicht beantwortet'
-  ];
-
+  doughnutChartLabels: string[] = [];
   doughnutChartData: ChartData<'doughnut'> = {
-    labels: this.doughnutChartLabels,
-    datasets: [{
-      data: [],
-      backgroundColor: [ '#309F22', '#3DD32B', '#B7F0B0','#FE8B8B' ,'#FFEAA4']
-    }]
+    labels: [],
+    datasets: [{ data: [], backgroundColor: [] }]
   };
-
   doughnutChartType: ChartType = 'doughnut';
 
   chartOptions: ChartConfiguration['options'] = {
     plugins: {
-      legend: {
-        display: false
-      },
-      centerText: {
-        text: ''
-      }
+      legend: { display: false },
+      centerText: { text: '' }
     }
   };
 
-  legendData: { label: string; value: number; color: string }[] = [];
-
-  userId = 1;
+  legendData: StatsLegendEntry[] = [];
+  userId = 1; // statisch für Test
 
   constructor(private statsService: StatsService) {}
 
   ngOnInit(): void {
-    this.statsService.getTopicPools(this.userId).subscribe({
-      next: (pools) => {
-        console.log('Pools geladen:', pools);
-        this.topicPools = pools;
-        if (this.topicPools.length > 0) {
-          this.selectedTopicPoolId = this.topicPools[0].id;
-          this.loadChartData();
-        }
-      },
-      error: (err) => {
-        console.error('Fehler beim Laden der TopicPools:', err);
-        this.topicPools = [];
-        this.selectedTopicPoolId = 0;
+    // Alle TopicPools vom Backend laden
+    this.statsService.getTopicPools(this.userId).subscribe(pools => {
+      this.topicPools = pools;
+      if (pools.length > 0) {
+        this.selectedTopicPoolId = pools[0].id;
+        this.loadChartData();
       }
     });
-
   }
 
   onTopicPoolChange(value: any): void {
@@ -97,58 +69,34 @@ export class StatsTopicsComponent implements OnInit {
 
   loadChartData(): void {
     if (!this.selectedTopicPoolId) {
-
       this.doughnutChartData.datasets[0].data = [];
       this.legendData = [];
       this.chart?.update();
       return;
     }
 
-    this.statsService.getEntriesByTopicPool(this.userId, this.selectedTopicPoolId).subscribe(entries => {
-      const safeEntries = entries ?? [];
+    // Backend liefert aggregierte Statistik inkl. Legend
+    this.statsService.getStatsOverviewForTopicPool(this.userId, this.selectedTopicPoolId)
+      .subscribe((data: StatsOverviewDto) => {
 
-      let incorrect = 0;
-      let sufficient = 0;
-      let correctTwice = 0;
-      let correctOnce = 0;
-      let unanswered = 0;
+        // Labels, Daten und Farben direkt aus Backend-Legende
+        this.doughnutChartLabels = data.legend.map(entry => entry.label);
+        const rawData = data.legend.map(entry => entry.value);
+        const colors = data.legend.map(entry => entry.color);
 
-      for (const entry of safeEntries) {
-        if (entry.lastAnsweredCorrectly == null ) {
-          unanswered++;
-        } else if (entry.correctCount === 0) {
-          incorrect++;
-        } else if (entry.correctCount === 1) {
-          correctOnce++;
-        } else if (entry.correctCount === 2) {
-          correctTwice++;
-        } else if (entry.correctCount >= 3) {
-          sufficient++;
-        }
-      }
+        this.doughnutChartData = {
+          labels: this.doughnutChartLabels,
+          datasets: [{ data: rawData, backgroundColor: colors }]
+        };
 
-      const rawData = [incorrect, sufficient, correctTwice, correctOnce, unanswered];
-      const total = rawData.reduce((a, b) => a + b, 0);
-      const colors = [ '#309F22', '#3DD32B', '#B7F0B0','#FE8B8B', '#FFEAA4'];
+        // Legend direkt aus Backend übernehmen
+        this.legendData = data.legend;
 
-      this.doughnutChartData = {
-        labels: this.doughnutChartLabels,
-        datasets: [{
-          data: rawData,
-          backgroundColor: colors
-        }]
-      };
+        // CenterText zeigt offene Fragen (nicht beantwortet)
+        const unansweredEntry = data.legend.find(e => e.label.toLowerCase().includes('nicht beantwortet'));
+        this.chartOptions!.plugins!.centerText!.text = unansweredEntry ? `${unansweredEntry.value} offene Fragen` : '';
 
-      this.legendData = rawData.map((value, index) => ({
-        label: this.doughnutChartLabels[index],
-        value: total > 0 ? Math.round((value / total) * 100) : 0,
-        color: colors[index]
-      }));
-
-      this.chartOptions!.plugins!.centerText!.text = `${unanswered} offene Fragen`;
-
-      this.chart?.update();
-    });
-
+        this.chart?.update();
+      });
   }
 }
