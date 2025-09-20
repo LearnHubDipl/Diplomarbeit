@@ -16,10 +16,19 @@
     <div class="nav-sub"><a routerLink="/trainer/practice/setup-exam" routerLinkActive="active">Prüfungsmodus</a></div>
 
     <!-- Statistik -->
-    <div class="nav-section"><a>Statistik</a></div>
-    <div class="nav-sub"><a routerLink="/trainer/stats/generell" routerLinkActive="active">Generell</a></div>
-    <div class="nav-sub"><a routerLink="/trainer/stats/themenpool" routerLinkActive="active">Themenpool</a></div>
-    <div class="nav-sub"><a routerLink="/trainer/stats/pruefungen" routerLinkActive="active">Prüfungen</a></div>
+    <div class="nav-section">
+      <a routerLink="/trainer/stats"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: false }">
+        Statistiken
+      </a>
+    </div>
+    <div class="nav-sub">
+      <a routerLink="/trainer/stats/themenpool" routerLinkActive="active">Themenpool</a>
+    </div>
+    <div class="nav-sub">
+      <a routerLink="/trainer/stats/pruefungen" routerLinkActive="active">Prüfungen</a>
+    </div>
 
     <div class="nav-back"><a routerLink="">zur Stoffsammlung</a></div>
   </div>

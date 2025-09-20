@@ -36,10 +36,11 @@ export class StatsTopicsComponent implements OnInit {
   selectedTopicPoolId = 0; // statisch
 
   public doughnutChartLabels: string[] = [
-    'falsch',
+
     'ausreichend gelernt',
     '2x richtig beantwortet',
     '1x richtig beantwortet',
+    'falsch',
     'nicht beantwortet'
   ];
 
@@ -47,7 +48,7 @@ export class StatsTopicsComponent implements OnInit {
     labels: this.doughnutChartLabels,
     datasets: [{
       data: [],
-      backgroundColor: ['#FE8B8B', '#309F22', '#3DD32B', '#B7F0B0', '#FFEAA4']
+      backgroundColor: [ '#309F22', '#3DD32B', '#B7F0B0','#FE8B8B' ,'#FFEAA4']
     }]
   };
 
@@ -57,6 +58,9 @@ export class StatsTopicsComponent implements OnInit {
     plugins: {
       legend: {
         display: false
+      },
+      centerText: {
+        text: ''
       }
     }
   };
@@ -125,7 +129,7 @@ export class StatsTopicsComponent implements OnInit {
 
       const rawData = [incorrect, sufficient, correctTwice, correctOnce, unanswered];
       const total = rawData.reduce((a, b) => a + b, 0);
-      const colors = ['#FE8B8B', '#309F22', '#3DD32B', '#B7F0B0', '#FFEAA4'];
+      const colors = [ '#309F22', '#3DD32B', '#B7F0B0','#FE8B8B', '#FFEAA4'];
 
       this.doughnutChartData = {
         labels: this.doughnutChartLabels,
@@ -140,6 +144,8 @@ export class StatsTopicsComponent implements OnInit {
         value: total > 0 ? Math.round((value / total) * 100) : 0,
         color: colors[index]
       }));
+
+      this.chartOptions!.plugins!.centerText!.text = `${unanswered} offene Fragen`;
 
       this.chart?.update();
     });

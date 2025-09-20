@@ -25,10 +25,10 @@ export class StatsHomeComponent implements OnInit {
   chartPlugins: Plugin[] = [CenterTextPlugin];
 
   public doughnutChartLabels: string[] = [
-    'falsch',
     'ausreichend gelernt',
     '2x richtig beantwortet',
     '1x richtig beantwortet',
+    'falsch',
     'nicht beantwortet'
   ];
 
@@ -37,18 +37,18 @@ export class StatsHomeComponent implements OnInit {
     datasets: [
       {
         data: [],
-        backgroundColor: ['#FE8B8B', '#309F22', '#3DD32B', '#B7F0B0', '#FFEAA4']
+        backgroundColor: ['#309F22', '#3DD32B', '#B7F0B0', '#FE8B8B', '#FFEAA4']
       }
     ]
   };
-
   public doughnutChartType: ChartType = 'doughnut';
 
   public chartOptions: ChartConfiguration['options'] = {
     plugins: {
       legend: {
         display: false
-      }
+      },
+      centerText: { text: '' }
     }
   };
 
@@ -70,6 +70,7 @@ export class StatsHomeComponent implements OnInit {
 
       //console.log(data);
 
+
       let incorrect = 0;
       let sufficient = 0;
       let correctTwice = 0;
@@ -77,7 +78,7 @@ export class StatsHomeComponent implements OnInit {
       let unanswered = 0;
 
       for (const entry of data) {
-        if (entry.lastAnsweredCorrectly === null)  {
+        if (entry.lastAnsweredCorrectly == null)  {
           unanswered++;
         } else if (entry.correctCount === 0) {
           incorrect++;
@@ -94,7 +95,7 @@ export class StatsHomeComponent implements OnInit {
       const total = rawData.reduce((a, b) => a + b, 0);
 
       const labels = this.doughnutChartLabels;
-      const colors = ['#FE8B8B', '#309F22', '#3DD32B', '#B7F0B0', '#FFEAA4'];
+      const colors = [ '#309F22', '#3DD32B', '#B7F0B0', '#FE8B8B','#FFEAA4'];
 
       this.doughnutChartData = {
         labels: labels,
@@ -108,6 +109,9 @@ export class StatsHomeComponent implements OnInit {
         value: total > 0 ? Math.round((value / total) * 100) : 0,
         color: colors[index]
       }));
+
+      this.chartOptions!.plugins!.centerText!.text = `${unanswered} offene Fragen`;
+
     });
   }
 }

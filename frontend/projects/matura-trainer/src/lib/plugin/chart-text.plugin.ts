@@ -1,10 +1,19 @@
 import { Plugin } from 'chart.js';
 
+declare module 'chart.js' {
+  interface PluginOptionsByType<TType extends ChartType> {
+    centerText?: {
+      text?: string;
+    };
+  }
+}
+
+
 export const CenterTextPlugin: Plugin = {
   id: 'centerText',
   beforeDraw(chart) {
-    const { width, height, ctx } = chart;
-    const text = '??? offene Fragen';
+    const { width, height, ctx, config } = chart;
+    const text = config.options?.plugins?.centerText?.text || '';
 
     ctx.save();
     ctx.font = 'bold 1rem Arial';
