@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { BaseChartDirective, NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType, Plugin } from 'chart.js';
-import { StatsService, StatsOverviewDto, StatsLegendEntry } from '../stats.service';
+import { StatsService, StatsOverviewDto, StatsLegendEntry } from '../../../../shared/src/lib/services/stats.service';
 import { CenterTextPlugin } from '../plugin/chart-text.plugin';
 import { FormsModule } from '@angular/forms';
 import { NgClass, NgForOf, NgStyle } from '@angular/common';
@@ -13,6 +13,7 @@ export interface TopicPool {
 
 @Component({
   selector: 'lib-stats-topics',
+  standalone: true,
   imports: [
     FormsModule,
     NgForOf,
@@ -29,6 +30,7 @@ export class StatsTopicsComponent implements OnInit {
 
   topicPools: TopicPool[] = [];
   selectedTopicPoolId = 0;
+  isDropdownOpen = false;
 
   chartPlugins: Plugin[] = [CenterTextPlugin];
 
@@ -52,7 +54,6 @@ export class StatsTopicsComponent implements OnInit {
   constructor(private statsService: StatsService) {}
 
   ngOnInit(): void {
-    // Alle TopicPools vom Backend laden
     this.statsService.getTopicPools(this.userId).subscribe(pools => {
       this.topicPools = pools;
       if (pools.length > 0) {
@@ -75,11 +76,9 @@ export class StatsTopicsComponent implements OnInit {
       return;
     }
 
-    // Backend liefert aggregierte Statistik inkl. Legend
     this.statsService.getStatsOverviewForTopicPool(this.userId, this.selectedTopicPoolId)
       .subscribe((data: StatsOverviewDto) => {
 
-        // Labels, Daten und Farben direkt aus Backend-Legende
         this.doughnutChartLabels = data.legend.map(entry => entry.label);
         const rawData = data.legend.map(entry => entry.value);
         const colors = data.legend.map(entry => entry.color);
@@ -89,10 +88,8 @@ export class StatsTopicsComponent implements OnInit {
           datasets: [{ data: rawData, backgroundColor: colors }]
         };
 
-        // Legend direkt aus Backend übernehmen
         this.legendData = data.legend;
 
-        // CenterText zeigt offene Fragen (nicht beantwortet)
         const unansweredEntry = data.legend.find(e => e.label.toLowerCase().includes('nicht beantwortet'));
         this.chartOptions!.plugins!.centerText!.text = unansweredEntry ? `${unansweredEntry.value} offene Fragen` : '';
 

@@ -1,11 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { ChartData, ChartType, ChartConfiguration, Plugin } from 'chart.js';
-import { StatsLegendEntry, StatsOverviewDto, StatsService } from '../stats.service';
+import { StatsLegendEntry, StatsOverviewDto, StatsService } from '../../../../shared/src/lib/services/stats.service';
 import { CenterTextPlugin } from '../plugin/chart-text.plugin';
+import {NgChartsModule} from 'ng2-charts';
+import {NgForOf, NgStyle} from '@angular/common';
 
 @Component({
   selector: 'lib-stats-home',
   templateUrl: './stats-home.component.html',
+  imports: [
+    NgChartsModule,
+    NgForOf,
+    NgStyle
+  ],
   styleUrls: [
     '../styles/shared-styles.css',
     './stats-home.component.css'
@@ -14,8 +21,7 @@ import { CenterTextPlugin } from '../plugin/chart-text.plugin';
 export class StatsHomeComponent implements OnInit {
 
   chartPlugins: Plugin[] = [CenterTextPlugin];
-
-  // Labels werden optional aus Backend übernommen
+  
   public doughnutChartLabels: string[] = [];
 
   public doughnutChartData: ChartData<'doughnut'> = {
@@ -39,10 +45,8 @@ export class StatsHomeComponent implements OnInit {
   constructor(private statsService: StatsService) {}
 
   ngOnInit(): void {
-    // Backend liefert aggregierte Zahlen inkl. Legend
     this.statsService.getStatsOverview(this.userId).subscribe((data: StatsOverviewDto) => {
 
-      // Labels, Daten und Farben direkt aus Backend-Legende
       this.doughnutChartLabels = data.legend.map(entry => entry.label);
       const rawData = data.legend.map(entry => entry.value);
       const colors = data.legend.map(entry => entry.color);
@@ -52,7 +56,6 @@ export class StatsHomeComponent implements OnInit {
         datasets: [{ data: rawData, backgroundColor: colors }]
       };
 
-      // Legend direkt aus Backend übernehmen
       this.legendData = data.legend;
 
       // CenterText zeigt offene Fragen
