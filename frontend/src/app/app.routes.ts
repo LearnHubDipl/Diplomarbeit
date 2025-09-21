@@ -34,6 +34,9 @@ import {
   QuestionManagerComponent
 } from '../../projects/content-management/src/lib/question-manager/question-manager.component';
 import {EditQuestionComponent} from '../../projects/content-management/src/lib/edit-question/edit-question.component';
+import {
+  SubjectDetailComponent
+} from '../../projects/content-management/src/lib/subject-detail/subject-detail.component';
 
 export const routes: Routes = [
   {
@@ -55,7 +58,9 @@ export const routes: Routes = [
       { path: 'questionCard/:id', component: FrageCardComponent },
       { path: 'finished', component: FinishedCardComponent },
       { path: 'chooseStudyTopic', component: ChooseStudyTopicComponent },
-      { path: 'subjects', component: SubjectsComponent }
+      { path: 'subjects', component: SubjectsComponent },
+      { path: 'subjects/:id', component: SubjectDetailComponent },
+      { path: 'subjects/:id/pools/:poolId', component: SubjectDetailComponent },
     ]
   },
 
