@@ -1,4 +1,5 @@
 package at.learnhub.dto.simple;
 
-public record ProgressLevelDto() {
-}
+import java.util.List;
+
+public record ProgressLevelDto(String title, List<ProgressEntryDto> entries) {}
