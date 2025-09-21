@@ -1,9 +1,9 @@
 <nav class="trainer-navigation">
   <!-- Benutzerinfo -->
   <div class="user-info">
-    <img src="https://via.placeholder.com/60" alt="" class="profile-img" />
+    <img src="{{user?.profilePicture?.path}}" alt="{{user?.profilePicture?.description}}" class="profile-img" />
     <div class="user-details">
-      <div class="full-name">Max Mustermann</div>
+      <div class="full-name">{{user?.name}}</div>
       <div class="initials">MM</div>
     </div>
   </div>

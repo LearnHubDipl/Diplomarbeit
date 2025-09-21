@@ -31,6 +31,10 @@ public class UserRepository {
         return user;
     }
 
+    public UserSlimDto getUserSlimDtoById(Long id) {
+        return UserMapper.toSlimDto(getUserById(id));
+    }
+
     public List<UserSlimDto> findAllTeachers() {
         return em.createQuery("SELECT u FROM User u WHERE u.isTeacher = true", User.class)
                 .getResultList()
