@@ -1,0 +1,80 @@
+GET https://vm91.htl-leonding.ac.at/backend/api/questions
+Accept: application/json
+
+###
+
+GET https://vm91.htl-leonding.ac.at/backend/api/subjects
+Accept: application/
+
+### Alle Fächer laden
+GET http://localhost:8080/api/subjects
+Accept: application/json
+
+### Neues Fach erstellen
+POST http://localhost:8080/api/subjects
+Content-Type: application/json
+
+{
+  "name": "Mathematick",
+  "description": "Mathe Fachbeschreibung",
+  "imgId": null
+}
+
+### Ein Fach laden (z. B. ID = 8)
+GET http://localhost:8080/api/subjects/8
+Accept: application/json
+
+### Fach aktualisieren
+PUT http://localhost:8080/api/subjects/8
+Content-Type: application/json
+
+{
+  "name": "Mathematik (updated)",
+  "description": "Neue Beschreibung"
+}
+
+### Fach löschen
+DELETE http://localhost:8080/api/subjects/8
+
+### Alle TopicPools eines Faches laden
+GET http://localhost:8080/api/subjects/1/topics
+Accept: application/json
+
+###
+
+### Einen TopicPool anlegen (einzeln)
+POST http://localhost:8080/api/subjects/1/topics
+Content-Type: application/json
+
+{
+  "name": "Algebra",
+  "description": "Grundlagen"
+}
+
+###
+
+### Mehrere TopicPools im Batch anlegen (max. 10)
+POST http://localhost:8080/api/subjects/1/topics/batch
+Content-Type: application/json
+
+{
+  "names": ["Analysis", "Geometrie", "Wahrscheinlichkeit"]
+}
+
+###
+
+### Einen TopicPool umbenennen / Beschreibung ändern
+PUT http://localhost:8080/api/subjects/1/topics/11
+Content-Type: application/json
+
+{
+  "name": "Lineare Algebra",
+  "description": "Vektorräume, Matrizen"
+}
+
+###
+
+### Einen TopicPool löschen
+DELETE http://localhost:8080/api/subjects/1/topics/11
+
+###

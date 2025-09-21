@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { TopicContent } from '../interfaces/topicContent';
 import {TopicContentSlim} from '../interfaces/TopicContentSlim';
+import {API_BASE_URL} from './globals';
 
 export interface CreateTopicContentRequest {
   subjectId: number;
@@ -20,10 +21,10 @@ export class TopicContentsService {
   list(subjectId: number, topicPoolId?: number): Observable<TopicContent[]> {
     let params = new HttpParams().set('subjectId', subjectId);
     if (topicPoolId != null) params = params.set('topicPoolId', topicPoolId);
-    return this.http.get<TopicContentSlim[]>('http://localhost:8080/api/topic-contents', { params });
+    return this.http.get<TopicContentSlim[]>(`${API_BASE_URL}/subjects/topic-contents`, { params });
   }
 
   create(req: CreateTopicContentRequest): Observable<TopicContentSlim> {
-    return this.http.post<TopicContentSlim>('/api/topic-contents', req);
+    return this.http.post<TopicContentSlim>(`${API_BASE_URL}/subjects/topic-contents`, req);
   }
 }

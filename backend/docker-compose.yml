@@ -21,6 +21,7 @@ services:
 
   quarkus:
     user: root
+    image: lienhochbichler/learnhub-backend
     build:
       context: .
       dockerfile: src/main/docker/Dockerfile
