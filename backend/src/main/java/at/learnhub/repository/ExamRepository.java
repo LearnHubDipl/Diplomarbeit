@@ -38,4 +38,13 @@ public class ExamRepository {
         }
         return exam;
     }
+
+    public List<ExamDto> findByUserId(Long userId) {
+        return em.createQuery("SELECT e FROM Exam e WHERE e.user.id = :userId ORDER BY e.startedAt DESC", Exam.class)
+                .setParameter("userId", userId)
+                .getResultList()
+                .stream()
+                .map(ExamMapper::toDto)
+                .toList();
+    }
 }

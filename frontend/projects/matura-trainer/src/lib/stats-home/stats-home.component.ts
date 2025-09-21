@@ -21,7 +21,7 @@ import {NgForOf, NgStyle} from '@angular/common';
 export class StatsHomeComponent implements OnInit {
 
   chartPlugins: Plugin[] = [CenterTextPlugin];
-  
+
   public doughnutChartLabels: string[] = [];
 
   public doughnutChartData: ChartData<'doughnut'> = {
