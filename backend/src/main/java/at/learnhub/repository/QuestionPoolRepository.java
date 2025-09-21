@@ -87,4 +87,20 @@ public class QuestionPoolRepository {
         return result;
     }
 
+    public QuestionPoolDto removeQuestions(Long userId, List<Long> questionIds) {
+        List<QuestionPoolEntry> entriesToRemove = em.createQuery(
+                        "SELECT e FROM QuestionPoolEntry e WHERE e.questionPool.user.id = :userId AND e.question.id IN :questionIds",
+                        QuestionPoolEntry.class
+                )
+                .setParameter("userId", userId)
+                .setParameter("questionIds", questionIds)
+                .getResultList();
+
+        for (QuestionPoolEntry entry : entriesToRemove) {
+            em.remove(entry); // innerhalb der Transaktion
+        }
+
+        return findByUserId(userId);
+    }
+
 }
