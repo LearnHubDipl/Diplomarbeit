@@ -1,0 +1,69 @@
+### Get question pool for a user
+### should return 200 - the user's question pool
+GET {{baseUrl}}/questionPools/1
+Accept: application/json
+
+### Get question pool for a non-existent user
+### should return 200 - empty or default response
+GET {{baseUrl}}/questionPools/9999
+Accept: application/json
+
+### Get question pool entries by topic pool
+### should return 200 - question pool entries
+GET {{baseUrl}}/questionPools/1/1
+Accept: application/json
+
+### Get question pool entries by non-existent topic pool
+### should return 200 - empty list
+GET {{baseUrl}}/questionPools/1/9999
+Accept: application/json
+
+### Add questions to question pool - valid request
+### should return 200 - questions added successfully
+POST {{baseUrl}}/questionPools/addQuestions
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "questionIds": [1, 2, 3]
+}
+
+### Add questions to question pool - non-existent user
+### should return 404 - user not found
+POST {{baseUrl}}/questionPools/addQuestions
+Content-Type: application/json
+
+{
+  "userId": 9999,
+  "questionIds": [1, 2, 3]
+}
+
+### Add questions to question pool - non-existent questions
+### should return 404 - questions not found
+POST {{baseUrl}}/questionPools/addQuestions
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "questionIds": [9999, 8888]
+}
+
+### Get all topic pools for a user
+### should return 200 - list of topic pools
+GET {{baseUrl}}/questionPools/1/topicPools
+Accept: application/json
+
+### Get all topic pools for a non-existent user
+### should return 404 - not found
+GET {{baseUrl}}/questionPools/9999/topicPools
+Accept: application/json
+
+### Get all subjects with topic pools for a user
+### should return 200 - list of subjects with topic pools
+GET {{baseUrl}}/questionPools/1/subjects
+Accept: application/json
+
+### Get all subjects with topic pools for a non-existent user
+### should return 404 - not found
+GET {{baseUrl}}/questionPools/9999/subjects
+Accept: application/json

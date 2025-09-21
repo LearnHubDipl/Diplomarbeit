@@ -8,6 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.NoResultException;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.ArrayList;
@@ -24,13 +25,14 @@ public class QuestionPoolRepository {
     }
 
     public QuestionPool findEntityByUserId(Long userId) {
-        QuestionPool pool = em.createQuery(
-                "SELECT q from QuestionPool q " +
-                        "WHERE q.user.id = :id", QuestionPool.class)
-                .setParameter("id", userId)
-                .getSingleResult();
-        if (pool == null) throw new EntityNotFoundException("Question pool of user with id " + userId + " not found");
-        return pool;
+        try {
+            return em.createQuery(
+                            "SELECT q from QuestionPool q WHERE q.user.id = :id", QuestionPool.class)
+                    .setParameter("id", userId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            throw new EntityNotFoundException("Question pool of user with id " + userId + " not found");
+        }
     }
 
     public List<QuestionPoolEntrySlimDto> findByTopicPool(Long userId, Long topicPoolId) {

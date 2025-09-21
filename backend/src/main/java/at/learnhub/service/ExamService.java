@@ -47,6 +47,20 @@ public class ExamService {
 
     @Transactional
     public CreatedExamResponseDto createExam(CreateExamRequestDto request) {
+        if (request.userId() == null) {
+            throw new BadRequestException("Invalid user id");
+        }
+        if (request.topicPoolIds() == null || request.topicPoolIds().isEmpty()) {
+            throw new BadRequestException("Invalid topic pool ids");
+        }
+        if (request.numberOfQuestions() <= 0) {
+            throw new BadRequestException("Invalid number of questions");
+        }
+        if (request.timeLimitMinutes() <= 0) {
+            throw new BadRequestException("Invalid time limit minutes");
+        }
+
+
         // check if the specified user exists
         User user = userRepository.getUserById(request.userId());
         // check if all specified topic pools exist
@@ -122,6 +136,13 @@ public class ExamService {
 
     @Transactional
     public ExamDto submitExam(SubmitExamRequestDto request) {
+        if (request.examId() == null) {
+            throw new BadRequestException("Invalid exam id");
+        }
+        if (request.answers() == null || request.answers().isEmpty()) {
+            throw new BadRequestException("Invalid number of answers");
+        }
+
         Exam exam = examRepository.getEntityById(request.examId());
 
         // Prevent multiple submissions
