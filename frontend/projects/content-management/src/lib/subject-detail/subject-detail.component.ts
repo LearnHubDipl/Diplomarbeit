@@ -11,6 +11,8 @@ import {SubjectService} from '../../../../shared/src/lib/services/subject.servic
 import {TopicPoolService} from '../../../../shared/src/lib/services/topic-pool.service';
 import {TopicContentsService} from '../../../../shared/src/lib/services/topic-content.service';
 import {FileService} from '../../../../shared/src/lib/services/file-service';
+import {finalize} from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'lib-subject-detail',
@@ -45,7 +47,8 @@ export class SubjectDetailComponent implements OnInit {
     private readonly contentsApi: TopicContentsService,
     private readonly fileService: FileService,
     private readonly sanitizer: DomSanitizer
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(pm => {
@@ -72,7 +75,10 @@ export class SubjectDetailComponent implements OnInit {
     }
   }
 
-  openUpload(): void { this.uploadOpen = true; }
+  openUpload(): void {
+    this.uploadOpen = true;
+  }
+
   cancelUpload(): void {
     this.uploadOpen = false;
     this.uploading = false;
@@ -96,7 +102,9 @@ export class SubjectDetailComponent implements OnInit {
     this.previewSrc = this.sanitizer.bypassSecurityTrustResourceUrl(blobUrl);
     const reader = new FileReader();
     reader.onload = () => (this.lastDataUrl = (reader.result as string) ?? null);
-    reader.onerror = () => { this.lastDataUrl = null; };
+    reader.onerror = () => {
+      this.lastDataUrl = null;
+    };
     reader.readAsDataURL(f);
   }
 
@@ -108,9 +116,11 @@ export class SubjectDetailComponent implements OnInit {
   getPoolId(p: any): number | undefined {
     return p?.id ?? p?.poolId ?? p?.topicPoolId ?? p?.contentId ?? p?.topic_pool_id;
   }
+
   getPoolName(p: any): string {
     return p?.name ?? p?.poolName ?? p?.topicPoolName ?? p?.title ?? 'Unbenannt';
   }
+
   getPoolNameById(id?: number): string {
     if (!id) return '';
     const found = this.pools.find(x => this.getPoolId(x) === id);
@@ -129,11 +139,20 @@ export class SubjectDetailComponent implements OnInit {
   }
 
   private reloadPools(): void {
+    const url = `${/* exakt */ ''}`;
     this.poolsApi.getTopicPoolsBySubject(this.subjectId).subscribe({
-      next: (list) => { this.pools = list ?? []; },
-      error: () => { this.error = 'Themenpools konnten nicht geladen werden.'; }
+      next: (list) => {
+        console.log('[reloadPools] received', list);
+        this.pools = list ?? [];
+      },
+      error: (e) => {
+        console.error('[reloadPools] ERROR', e);
+        this.error = 'Themenpools konnten nicht geladen werden.';
+      }
     });
   }
+
+
   private loadData(): void {
     this.error = null;
     this.loading = true;
@@ -147,7 +166,10 @@ export class SubjectDetailComponent implements OnInit {
           this.poolForUpload = this.pools?.[0]?.id ?? null;
         }
       },
-      error: () => { this.error = 'Fach konnte nicht geladen werden.'; this.loading = false; }
+      error: () => {
+        this.error = 'Fach konnte nicht geladen werden.';
+        this.loading = false;
+      }
     });
   }
 
@@ -155,38 +177,91 @@ export class SubjectDetailComponent implements OnInit {
     const name = this.newPoolName.trim();
     if (!name) return;
     this.poolsApi.createOne(this.subjectId, name).subscribe({
-      next: () => { this.newPoolName = ''; this.reloadPools(); },
+      next: () => {
+        this.newPoolName = '';
+        this.reloadPools();
+      },
       error: () => alert('Themenpool konnte nicht erstellt werden.')
     });
   }
+
+  renamingId?: number;
+  deletingId?: number;
+
   renamePool(p: TopicPool, ev?: MouseEvent) {
     ev?.stopPropagation();
     const current = p.name ?? '';
     const name = prompt('Neuer Name für Themenpool:', current)?.trim();
     if (!name || name === current) return;
-    this.poolsApi.updateOne(this.subjectId, p.id, { name }).subscribe({
-      next: () => this.reloadPools(),
-      error: () => alert('Themenpool konnte nicht umbenannt werden.')
-    });
-  }
 
+    if (this.renamingId === p.id) return; // block double fire
+    this.renamingId = p.id;
+
+    // optimistic
+    const idx = this.pools.findIndex(x => x.id === p.id);
+    const old = {...this.pools[idx]};
+    const updatedLocal = {...old, name};
+    this.pools = [
+      ...this.pools.slice(0, idx),
+      updatedLocal,
+      ...this.pools.slice(idx + 1)
+    ];
+
+    this.poolsApi.updateOne(this.subjectId, p.id, {name})
+      .subscribe({
+        next: (server) => {
+          // Übernehme Server-Wahrheit (trim etc.), kein reloadPools!
+          const fixed = {...updatedLocal, ...server};
+          this.pools = [
+            ...this.pools.slice(0, idx),
+            fixed,
+            ...this.pools.slice(idx + 1)
+          ];
+          this.renamingId = undefined;
+        },
+        error: (err: { url: any; status: any; error: any; }) => {
+          // Rollback
+          this.pools = [
+            ...this.pools.slice(0, idx),
+            old,
+            ...this.pools.slice(idx + 1)
+          ];
+          this.renamingId = undefined;
+          console.error('Rename error detail:', {url: err.url, status: err.status, body: err.error});
+          alert('Themenpool konnte nicht umbenannt werden.');
+        }
+      });
+  }
 
   deletePool(p: TopicPool, ev?: MouseEvent) {
     ev?.stopPropagation();
     if (!confirm(`Themenpool "${p.name}" wirklich löschen?`)) return;
-    this.poolsApi.deleteOne(this.subjectId, p.id).subscribe({
-      next: () => {
-        if (this.selectedPoolId === p.id) this.selectedPoolId = undefined;
-        this.reloadPools();
-      },
-      error: (err) => {
-        console.error('Delete error:', err);
-        alert('Themenpool konnte nicht gelöscht werden.');
-      }
-    });
+    if (this.deletingId === p.id) return;
+
+    this.deletingId = p.id;
+
+    // optimistic remove
+    const idx = this.pools.findIndex(x => x.id === p.id);
+    const removed = this.pools[idx];
+    this.pools = [...this.pools.slice(0, idx), ...this.pools.slice(idx + 1)];
+    if (this.selectedPoolId === p.id) this.selectedPoolId = undefined;
+
+    this.poolsApi.deleteOne(this.subjectId, p.id)
+      .subscribe({
+        next: () => {
+          this.deletingId = undefined;
+        },
+        error: (err) => {
+          // Rollback
+          this.pools = [
+            ...this.pools.slice(0, idx),
+            removed,
+            ...this.pools.slice(idx + 1)
+          ];
+          this.deletingId = undefined;
+          console.error('Delete error detail:', {url: err.url, status: err.status, body: err.error});
+          alert('Themenpool konnte nicht gelöscht werden.');
+        }
+      });
   }
-
-
-
 }
-

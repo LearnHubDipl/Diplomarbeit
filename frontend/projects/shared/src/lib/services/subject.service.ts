@@ -25,7 +25,7 @@ export class SubjectService {
     return this.httpClient.get<Subject>(`${API_BASE_URL}/subjects/${id}`);
   }
 
-  create(dto: CreateSubjectRequestDto): Observable<Subject> {
+  create(dto: { name: string; description: string; imageUrl: string | undefined }): Observable<Subject> {
     return this.httpClient.post<Subject>(API_BASE_URL + '/subjects', dto);
   }
 
