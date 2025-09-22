@@ -139,16 +139,17 @@ export class SubjectDetailComponent implements OnInit {
   }
 
   private reloadPools(): void {
-    const url = `${/* exakt */ ''}`;
     this.poolsApi.getTopicPoolsBySubject(this.subjectId).subscribe({
       next: (list) => {
-        console.log('[reloadPools] received', list);
         this.pools = list ?? [];
+        // Guard: ausgewählten Pool nur behalten, wenn er wirklich zu diesem Subject gehört
+        if (this.selectedPoolId && !this.pools.some(p => p.id === this.selectedPoolId)) {
+          this.selectedPoolId = undefined;
+          // optional: Router auf /subjects/:id ohne poolId zurücksetzen
+          this.router.navigate(['/subjects', this.subjectId]);
+        }
       },
-      error: (e) => {
-        console.error('[reloadPools] ERROR', e);
-        this.error = 'Themenpools konnten nicht geladen werden.';
-      }
+      error: (e) => { /* … */ }
     });
   }
 
@@ -193,6 +194,7 @@ export class SubjectDetailComponent implements OnInit {
     const current = p.name ?? '';
     const name = prompt('Neuer Name für Themenpool:', current)?.trim();
     if (!name || name === current) return;
+    console.log('PUT', `/api/subjects/${p}/topics/${p.id}`, {name});
 
     if (this.renamingId === p.id) return; // block double fire
     this.renamingId = p.id;
