@@ -30,11 +30,11 @@ public class TopicPoolRepository{
 
     public TopicPool getTopicPoolById(Long id) {
         TopicPool tp = em.find(TopicPool.class, id);
-        if (tp == null) {
-            throw new EntityNotFoundException("TopicPool with id " + id + " not found.");
-        }
+        System.out.println("DEBUG: Fetched TopicPool with id=" + id + " -> " + tp);
         return tp;
     }
+
+
 
     public List<TopicPool> getTopicPoolListByIds(List<Long> ids) {
         List<TopicPool> topicPools = new LinkedList<>();
@@ -58,6 +58,6 @@ public class TopicPoolRepository{
     @Transactional
     public void delete(Long id) {
         TopicPool tp = getTopicPoolById(id);
-        em.remove(tp);
+        if (tp != null) em.remove(tp);
     }
 }

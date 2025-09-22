@@ -38,52 +38,36 @@ public class SubjectResource {
 
     @GET
     @Path("/{id}")
-    public SubjectDto getSubject(@PathParam("id") Long id) {
-        return subjectRepo.getDtoById(id);
+    public SubjectDto get(@PathParam("id") Long id) {
+        Subject s = subjectRepo.getById(id);
+        return SubjectMapper.toDto(s);
     }
 
+
     @POST
-    public Response createSubject(CreateSubjectRequestDto dto) {
-        MediaFile img = null;
-        if (dto.imgId() != null) {
-            img = mediaFileRepo.getById(dto.imgId());
-        }
-
-        Subject subject = SubjectMapper.fromCreateDto(dto, img);
-        subjectRepo.create(subject);
-
-        return Response.created(URI.create("/api/subjects/" + subject.getId()))
-                .entity(SubjectMapper.toDto(subject))
-                .build();
+    @Transactional
+    public SubjectDto create(CreateSubjectRequestDto dto) {
+        MediaFile img = (dto.imgId() != null) ? mediaFileRepo.getById(dto.imgId()) : null;
+        Subject s = SubjectMapper.fromCreateDto(dto, img);
+        subjectRepo.create(s);
+        return SubjectMapper.toDto(s);
     }
 
     @PUT
     @Path("/{id}")
-    public SubjectDto updateSubject(@PathParam("id") Long id, UpdateSubjectRequestDto dto) {
-        Subject subject = subjectRepo.getById(id);
-
-        MediaFile img = null;
-        if (dto.imgId() != null) {
-            img = mediaFileRepo.getById(dto.imgId());
-        }
-
-        SubjectMapper.applyUpdate(subject, dto, img);
-        subject = subjectRepo.update(subject);
-
-        return SubjectMapper.toDto(subject);
+    @Transactional
+    public SubjectDto update(@PathParam("id") Long id, UpdateSubjectRequestDto dto) {
+        Subject s = subjectRepo.getById(id);
+        MediaFile img = (dto.imgId() != null) ? mediaFileRepo.getById(dto.imgId()) : null;
+        SubjectMapper.applyUpdate(s, dto, img);
+        subjectRepo.update(s);
+        return SubjectMapper.toDto(s);
     }
 
     @DELETE
     @Path("/{id}")
-    public Response delete(@PathParam("id") Long id) {
-        try {
-            subjectRepo.delete(id);
-            return Response.noContent().build();
-        } catch (PersistenceException | ConstraintViolationException ex) {
-            return Response.status(Response.Status.CONFLICT)
-                    .entity("Subject kann nicht gelöscht werden, solange Themenpools/Mitschriften existieren.")
-                    .build();
-        }
+    @Transactional
+    public void delete(@PathParam("id") Long id) {
+        subjectRepo.delete(id);
     }
-
 }

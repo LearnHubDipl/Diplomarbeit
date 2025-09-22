@@ -10,6 +10,7 @@ import { TopicPoolService } from '../../../../shared/src/lib/services/topic-pool
 import { SubjectCardComponent } from '../subject-card/subject-card.component';
 import { UploadBannerComponent } from '../upload-banner/upload-banner.component';
 import {MediaService} from '../../../../shared/src/lib/services/media-service';
+import {finalize, firstValueFrom, of, switchMap} from 'rxjs';
 
 @Component({
   selector: 'lib-subjects',
@@ -59,35 +60,33 @@ export class SubjectsComponent implements OnInit {
     this.newPoolsText = ''; this.newImageUrl = ''; this.newImageDesc = '';
   }
 
-  async submitCreate(): Promise<void> {
-    const name = this.newName.trim();
-    if (!name) return;
+  submitCreate() {
+    const names = (this.newPoolsText || '')
+      .split('\n')
+      .map(s => s.trim())
+      .filter(Boolean)
+      .slice(0, 10);
 
-    try {
-      let imgId: number | undefined;
-      const path = this.newImageUrl.trim();
-      if (path) {
-        const media = await this.mediaApi.create({ path, type: 'img', description: this.newImageDesc || undefined }).toPromise();
-        imgId = media?.id;
-      }
-
-      const created = await this.subjectsApi.create({
-        name,
-        description: this.newDescription || '',
-        imgId
-      }).toPromise();
-
-      const names = this.newPoolsText.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 10);
-      if (created?.id && names.length) {
-        await this.poolsApi.createBatch(created.id, names).toPromise();
-      }
-
-      this.cancelCreate();
-      this.load();
-    } catch (err: any) {
-      console.error(err);
-      alert(err?.error?.message || err?.message || 'Fach konnte nicht erstellt werden.');
-    }
+    this.loading = true;
+    this.subjectsApi.create({
+      name: this.newName.trim(),
+      description: this.newDescription || '',
+      imageUrl: this.newImageUrl.trim() || undefined
+    })
+      .pipe(
+        switchMap(created =>
+          names.length ? this.poolsApi.createBatch(created.id, names) : of([])
+        ),
+        finalize(() => this.loading = false)
+      )
+      .subscribe({
+        next: () => {
+          this.createOpen = false;
+          this.cancelCreate();   // Felder leeren
+          this.load();           // Liste wirklich neu laden
+        },
+        error: (err) => alert(err?.error?.message || 'Anlegen fehlgeschlagen')
+      });
   }
 
 
@@ -105,7 +104,6 @@ export class SubjectsComponent implements OnInit {
     this.editName = ''; this.editDescription = '';
     this.editImageUrl = ''; this.editImageDesc = '';
   }
-
   async submitEdit(): Promise<void> {
     if (this.editId == null) return;
     const name = this.editName.trim();
@@ -115,15 +113,17 @@ export class SubjectsComponent implements OnInit {
       let imgId: number | undefined;
       const path = this.editImageUrl.trim();
       if (path) {
-        const media = await this.mediaApi.create({ path, type: 'img', description: this.editImageDesc || undefined }).toPromise();
+        const media = await firstValueFrom(
+          this.mediaApi.create({path, type: 'img', description: this.editImageDesc || undefined})
+        );
         imgId = media?.id;
       }
 
-      await this.subjectsApi.update(this.editId, {
+      await firstValueFrom(this.subjectsApi.update(this.editId, {
         name,
         description: this.editDescription || '',
-        ...(imgId !== undefined ? { imgId } : {})
-      }).toPromise();
+        ...(imgId !== undefined ? {imgId} : {})
+      }));
 
       this.cancelEdit();
       this.load();

@@ -38,6 +38,4 @@ export class SubjectCardComponent {
     this.remove.emit(this.subject);
     this.closeMenu();
   }
-
-  trackById = (_: number, s: Subject) => s?.id ?? -1;
 }
