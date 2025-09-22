@@ -4,6 +4,8 @@ import { map, Observable } from 'rxjs';
 import { TopicPool } from '../../../../matura-trainer/src/lib/stats-topics/stats-topics.component';
 import {ProgressOverviewDto} from '../../../../matura-trainer/src/lib/home/home.component';
 import {Exam} from '../interfaces/exam';
+import { API_BASE_URL } from "./globals";
+
 
 // exam.service.ts
 export interface AnswerSlimDto {
@@ -79,7 +81,7 @@ export interface QuestionPoolDto {
 export class StatsService {
 
   private streakApiUrl = 'http://localhost:8080/streak';
-  private questionPoolApiUrl = 'http://localhost:8080/api/questionPools';
+  //private questionPoolApiUrl = 'http://localhost:8080/api/questionPools';
   private statsApiUrl = 'http://localhost:8080/api/stats';
   private examApiUrl = 'http://localhost:8080/api/exams';
 
@@ -91,18 +93,18 @@ export class StatsService {
   }
 
   getEntriesByTopicPool(userId: number, topicPoolId: number): Observable<QuestionPoolEntrySlimDto[]> {
-    return this.http.get<QuestionPoolEntrySlimDto[]>(`${this.questionPoolApiUrl}/${userId}/${topicPoolId}`);
+    return this.http.get<QuestionPoolEntrySlimDto[]>(`${API_BASE_URL}/questionPools/${userId}/${topicPoolId}`);
   }
 
   getTopicPools(userId: number): Observable<TopicPool[]> {
-    return this.http.get<TopicPool[]>(`${this.questionPoolApiUrl}/${userId}/topicPools`);
+    return this.http.get<TopicPool[]>(`${API_BASE_URL}/questionPools/${userId}/topicPools`);
   }
 
   getStatsOverview(userId: number): Observable<StatsOverviewDto> {
-    return this.http.get<StatsOverviewDto>(`${this.statsApiUrl}/${userId}/overview`);
+    return this.http.get<StatsOverviewDto>(`${API_BASE_URL}/stats/${userId}/overview`);
   }
   getStatsOverviewForTopicPool(userId: number, topicPoolId: number): Observable<StatsOverviewDto> {
-    return this.http.get<StatsOverviewDto>(`${this.statsApiUrl}/${userId}/topicPool/${topicPoolId}/overview`);
+    return this.http.get<StatsOverviewDto>(`${API_BASE_URL}/stats/${userId}/topicPool/${topicPoolId}/overview`);
   }
 
   getAllExams(): Observable<Exam[]> {
@@ -114,7 +116,7 @@ export class StatsService {
     if (topicPoolId != null) {
       params = params.set('topicPoolId', topicPoolId.toString());
     }
-    return this.http.get<ProgressOverviewDto>(`${this.statsApiUrl}${userId}/progress`, { params });
+    return this.http.get<ProgressOverviewDto>(`${API_BASE_URL}/stats/${userId}/progress`, { params });
   }
 
 
