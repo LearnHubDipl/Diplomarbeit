@@ -34,8 +34,24 @@ public class TopicPoolRepository{
         return tp;
     }
 
-
-
+    public int deleteByIdAndSubject(Long poolId, Long subjectId) {
+        return em.createQuery("""
+            DELETE FROM TopicPool tp
+            WHERE tp.id = :poolId AND tp.subject.id = :subjectId
+        """)
+                .setParameter("poolId", poolId)
+                .setParameter("subjectId", subjectId)
+                .executeUpdate();
+    }
+    public TopicPool getByIdAndSubject(Long poolId, Long subjectId) {
+        return em.createQuery("""
+            SELECT tp FROM TopicPool tp
+            WHERE tp.id = :poolId AND tp.subject.id = :subjectId
+        """, TopicPool.class)
+                .setParameter("poolId", poolId)
+                .setParameter("subjectId", subjectId)
+                .getResultStream().findFirst().orElse(null);
+    }
     public List<TopicPool> getTopicPoolListByIds(List<Long> ids) {
         List<TopicPool> topicPools = new LinkedList<>();
         for (Long id : ids) {

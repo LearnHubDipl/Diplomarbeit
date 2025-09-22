@@ -12,11 +12,12 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Path("/api/subjects/{subjectId}/topics")
+@Path("api/subjects/{subjectId}/topics")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class TopicPoolResource {
@@ -68,10 +69,14 @@ public class TopicPoolResource {
     @PUT
     @Path("/{topicPoolId}")
     @Transactional
-    public TopicPoolSlimDto updateOne(@PathParam("topicPoolId") Long topicPoolId,
-                                      CreateTopicPoolRequestDto dto) {
-        TopicPool tp = topicPoolRepo.getTopicPoolById(topicPoolId);
-        if (tp == null) throw new NotFoundException("TopicPool not found");
+    public Response updateOne(@PathParam("subjectId") Long subjectId,
+                              @PathParam("topicPoolId") Long topicPoolId,
+                              CreateTopicPoolRequestDto dto) {
+
+        // Atomarer belongs-to-Check (Repository siehe unten)
+        TopicPool tp = topicPoolRepo.getByIdAndSubject(topicPoolId, subjectId);
+        if (tp == null) throw new NotFoundException(
+                "TopicPool %d not found for subject %d".formatted(topicPoolId, subjectId));
 
         if (dto.name() != null && !dto.name().isBlank()) {
             tp.setName(dto.name().trim());
@@ -79,19 +84,20 @@ public class TopicPoolResource {
         if (dto.description() != null) {
             tp.setDescription(dto.description());
         }
-        topicPoolRepo.update(tp);
-        return TopicPoolMapper.toSlimDto(tp);
-    }
 
+        topicPoolRepo.update(tp);
+        return Response.ok(TopicPoolMapper.toSlimDto(tp)).build(); // 200 + aktualisiertes Objekt
+    }
     @DELETE
     @Path("/{topicPoolId}")
     @Transactional
-    public void deleteOne(@PathParam("subjectId") Long subjectId,
-                          @PathParam("topicPoolId") Long topicPoolId) {
-        TopicPool tp = topicPoolRepo.getTopicPoolById(topicPoolId);
-        if (tp == null || tp.getSubject() == null || !tp.getSubject().getId().equals(subjectId)) {
-            throw new NotFoundException("TopicPool not found for subject " + subjectId);
+    public Response deleteOne(@PathParam("subjectId") Long subjectId,
+                              @PathParam("topicPoolId") Long topicPoolId) {
+        int affected = topicPoolRepo.deleteByIdAndSubject(topicPoolId, subjectId);
+        if (affected == 0) {
+            throw new NotFoundException(
+                    "TopicPool %d not found for subject %d".formatted(topicPoolId, subjectId));
         }
-        topicPoolRepo.delete(topicPoolId);
+        return Response.noContent().build();
     }
 }
