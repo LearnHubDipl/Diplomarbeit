@@ -1,0 +1,152 @@
+### Get all questions
+### should return 200 - list of all questions
+GET {{baseUrl}}/questions
+Accept: application/json
+
+### Get a single question by ID
+### should return 200 - question found
+GET {{baseUrl}}/questions/1
+Accept: application/json
+
+### Get a non-existent question
+### should return 404 - question not found
+GET {{baseUrl}}/questions/9999
+Accept: application/json
+
+### Create a new question - valid multiple-choice
+### should return 201 - question created successfully
+POST {{baseUrl}}/questions
+Content-Type: application/json
+
+{
+  "text": "What is the capital of France?",
+  "explanation": "Paris is the capital and largest city of France.",
+  "type": "MULTIPLE_CHOICE",
+  "difficulty": 2,
+  "isPublic": true,
+  "userId": 1,
+  "topicPoolId": 1,
+  "answers": [
+    {"text": "Paris", "isCorrect": true},
+    {"text": "Berlin", "isCorrect": false},
+    {"text": "Madrid", "isCorrect": false}
+  ]
+}
+
+### Create a new question - valid freetext
+### should return 201 - question created successfully
+POST {{baseUrl}}/questions
+Content-Type: application/json
+
+{
+  "text": "Solve for x: 2x = 4",
+  "explanation": "Dividing both sides by 2 gives x = 2",
+  "type": "FREETEXT",
+  "difficulty": 1,
+  "isPublic": false,
+  "userId": 1,
+  "topicPoolId": 1,
+  "answers": [
+    {
+      "text": "2",
+      "isCorrect": true
+    }
+  ]
+}
+
+### Create a new question - missing required field `text`
+### should return 400 - invalid request
+POST {{baseUrl}}/questions
+Content-Type: application/json
+
+{
+  "explanation": "Missing text field",
+  "type": "MULTIPLE_CHOICE",
+  "difficulty": 2,
+  "isPublic": true,
+  "userId": 1,
+  "topicPoolId": 1,
+  "answers": [
+    {"text": "Answer 1", "isCorrect": true}
+  ]
+}
+
+### Create a new question - invalid difficulty
+### should return 400 - difficulty must be between 1 and 3
+POST {{baseUrl}}/questions
+Content-Type: application/json
+
+{
+  "text": "Invalid difficulty test",
+  "explanation": "Difficulty set to 5",
+  "type": "MULTIPLE_CHOICE",
+  "difficulty": 5,
+  "isPublic": true,
+  "userId": 1,
+  "topicPoolId": 1,
+  "answers": [
+    {"text": "Answer 1", "isCorrect": true}
+  ]
+}
+
+### Create a new question - empty answers for multiple-choice
+### should return 400 - multiple-choice question must have answers
+POST {{baseUrl}}/questions
+Content-Type: application/json
+
+{
+  "text": "Multiple-choice with no answers",
+  "explanation": "No answers provided",
+  "type": "MULTIPLE_CHOICE",
+  "difficulty": 2,
+  "isPublic": true,
+  "userId": 1,
+  "topicPoolId": 1,
+  "answers": []
+}
+
+
+### Delete a question - valid ID
+### should return 204 - question deleted
+DELETE {{baseUrl}}/questions/1
+Accept: application/json
+
+### Delete a non-existent question
+### should return 404 - question not found
+DELETE {{baseUrl}}/questions/9999
+Accept: application/json
+
+### Find questions by user ID
+### should return 200 - list of questions created by user
+GET {{baseUrl}}/questions/user/1
+Accept: application/json
+
+### Find questions by non-existent user
+### should return 200 - empty list
+GET {{baseUrl}}/questions/user/9999
+Accept: application/json
+
+### Find all public questions
+### should return 200 - list of public questions
+GET {{baseUrl}}/questions/public
+Accept: application/json
+
+### Find questions by type
+### should return 200 - list of questions of type MULTIPLE_CHOICE
+GET {{baseUrl}}/questions/type/MULTIPLE_CHOICE
+Accept: application/json
+
+### Find questions by difficulty
+### should return 200 - list of questions with difficulty 2
+GET {{baseUrl}}/questions/difficulty/2
+Accept: application/json
+
+### Find questions by invalid difficulty
+### should return 400 - difficulty must be between 1 and 3
+GET {{baseUrl}}/questions/difficulty/5
+Accept: application/json
+
+### Find questions by topic pool ID
+### should return 200 - list of questions in topic pool 1
+GET {{baseUrl}}/questions/topicPool/1
+Accept: application/json

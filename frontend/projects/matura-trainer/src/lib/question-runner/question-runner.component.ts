@@ -202,8 +202,8 @@ export class QuestionRunnerComponent implements OnInit {
   }
 
   navigateExam(direction: 'next' | 'prev') {
+    this.submit();
     if (direction === 'next' && this.currentQuestionIndex < this.currentQuestions.length - 1) {
-      this.submit();
       this.currentQuestionIndex++;
       this.loadQuestion(this.currentQuestionIndex);
     } else if (direction === 'prev' && this.currentQuestionIndex > 0) {
@@ -212,6 +212,12 @@ export class QuestionRunnerComponent implements OnInit {
     } else if (direction === 'next' && this.currentQuestionIndex === this.currentQuestions.length - 1) {
       this.finish();
     }
+  }
+
+  navigateToQuestion(id: number) {
+    this.submit();
+    this.currentQuestionIndex = id;
+    this.loadQuestion(this.currentQuestionIndex);
   }
 
   loadNextQuestion(): void {
@@ -255,5 +261,7 @@ export class QuestionRunnerComponent implements OnInit {
       this.finishedExam.emit(allAnswers);
     }
   }
+
+  protected readonly Math = Math;
 }
 

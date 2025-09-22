@@ -72,7 +72,6 @@ export const routes: Routes = [
           { path: '', component: TrainerHomeComponent, data: { breadcrumb: null } },
           { path: 'quiz', component: PracticeComponent, data: { breadcrumb: 'Fragen beantworten' } },
           { path: 'fragen', component: QuestionBrowserComponent, data: { breadcrumb: 'Fragen browsen' } },
-          { path: 'question-pool', component: QuestionPoolComponent, data: { breadcrumb: 'Fragenpool bearbeiten' } },
           {
             path: 'setup-exam',
             data: { breadcrumb: 'Prüfung konfigurieren' },

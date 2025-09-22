@@ -50,7 +50,17 @@ export class QuestionBrowsingViewComponent implements OnInit {
   selecting = false;
   selectedQuestionIds: number[] = [];
 
+  allViewQuestions: Question[] = [];
+  viewedQuestions: Question[] = [];
+  showOnlyPool: boolean = false;
+
+
+
   ngOnInit() {
+    const userId = 1;
+    this.questionPoolService.getQuestionPoolForUser(userId).subscribe(pool => {
+      this.selectedQuestionIds = pool.entries.map(e => e.question.id);
+    });
     this.subjectService.getAllSubjects().subscribe(subjects => {
       this.subjects = subjects;
       this.subjects.forEach(subject => {
@@ -86,14 +96,19 @@ export class QuestionBrowsingViewComponent implements OnInit {
     if (this.mode === 'browse') {
       this.questionService.getQuestionsByTopicPool(topicPool).subscribe(questions => {
         this.questions = questions;
-        this.saveState(topicPool);
+        this.allViewQuestions = [...questions];    // Backup
+        this.viewedQuestions = [...questions];     // initial alle sichtbar
       });
     } else {
       this.questionPoolService.getEntriesByTopicPool(1, topicPool).subscribe(entries => {
         this.entries = entries;
-        this.saveState(topicPool);
+        const questions = entries.map(e => e.question);
+        this.allViewQuestions = [...questions];
+        this.viewedQuestions = [...questions];
       });
     }
+
+
   }
 
   saveState(topicPool: TopicPool) {
@@ -192,6 +207,41 @@ export class QuestionBrowsingViewComponent implements OnInit {
       selectedTopicPoolId: this.selectedTopicPool?.id
     }));
 
-    this.router.navigate(['/trainer/practice/quiz']); // TODO: right navigation
+    this.router.navigate(
+      ['/trainer/practice/quiz'],
+      { state: { questionIdList: [questionId] } }
+    );
   }
+  toggleQuestionPool(questionId: number) {
+    const userId = 1;
+    const request = { userId, questionIds: [questionId] };
+
+    if (this.selectedQuestionIds.includes(questionId)) {
+      // Entfernen
+      this.questionPoolService.removeQuestionsFromPool(request).subscribe(() => {
+        this.selectedQuestionIds = this.selectedQuestionIds.filter(id => id !== questionId);
+      });
+    } else {
+      // Hinzufügen
+      this.questionPoolService.postQuestionsToQuestionPool(request).subscribe(() => {
+        this.selectedQuestionIds.push(questionId);
+      });
+    }
+  }
+
+  toggleShowOnlyPool() {
+    if (!this.showOnlyPool) {
+      // nur die fragen im Pool anzeigen
+      this.viewedQuestions = this.allViewQuestions.filter(q => this.selectedQuestionIds.includes(q.id));
+      this.showOnlyPool = true;
+    } else {
+      // alle wieder nazeigen
+      this.viewedQuestions = [...this.allViewQuestions];
+      this.showOnlyPool = false;
+    }
+  }
+
+
+
+
 }

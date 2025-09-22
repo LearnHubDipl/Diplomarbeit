@@ -33,4 +33,8 @@ export class QuestionPoolService {
   getSubjectsForUser(userId: number): Observable<Subject[]> {
     return this.httpClient.get<Subject[]>(API_BASE_URL + `/questionPools/${userId}/subjects`);
   }
+
+  removeQuestionsFromPool(request: QuestionPoolEntryRequest): Observable<QuestionPool> {
+    return this.httpClient.post<QuestionPool>(API_BASE_URL + '/questionPools/removeQuestions', request);
+  }
 }

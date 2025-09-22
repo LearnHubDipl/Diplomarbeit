@@ -48,4 +48,10 @@ public class QuestionPoolService {
         }
         return questionPoolRepository.findByUserId(request.userId());
     }
+
+
+    @Transactional
+    public QuestionPoolDto removeQuestionsFromPool(AddQuestionToQuestionPoolRequestDto request) {
+        return questionPoolRepository.removeQuestions(request.userId(), request.questionIds());
+    }
 }
