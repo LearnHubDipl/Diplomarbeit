@@ -43,10 +43,11 @@ public class StatsService {
                 "COALESCE(SUM(CASE WHEN e.correctCount = 2 THEN 1 ELSE 0 END), 0), " +
                 "COALESCE(SUM(CASE WHEN e.correctCount >= 3 THEN 1 ELSE 0 END), 0) " +
                 "FROM QuestionPoolEntry e " +
+                "JOIN e.question q " +
                 "WHERE e.questionPool.user.id = :userId";
 
         if (topicPoolId != null) {
-            query += " AND e.questionPool.id = :topicPoolId";
+            query += " AND q.topicPool.id = :topicPoolId";
         }
 
         var q = em.createQuery(query);
@@ -74,18 +75,29 @@ public class StatsService {
     }
 
 
+
     @Transactional
     public ProgressOverviewDto calculateProgressOverview(Long userId, Long topicPoolId) {
 
         // Wenn topicPoolId == null - alle Einträge des Users
-        List<QuestionPoolEntry> entries = topicPoolId == null ?
-                em.createQuery("SELECT e FROM QuestionPoolEntry e WHERE e.questionPool.user.id = :userId", QuestionPoolEntry.class)
-                        .setParameter("userId", userId)
-                        .getResultList() :
-                em.createQuery("SELECT e FROM QuestionPoolEntry e WHERE e.questionPool.user.id = :userId AND e.questionPool.id = :poolId", QuestionPoolEntry.class)
-                        .setParameter("userId", userId)
-                        .setParameter("poolId", topicPoolId)
-                        .getResultList();
+        List<QuestionPoolEntry> entries;
+        if (topicPoolId == null) {
+            entries = em.createQuery(
+                            "SELECT e FROM QuestionPoolEntry e WHERE e.questionPool.user.id = :userId",
+                            QuestionPoolEntry.class
+                    ).setParameter("userId", userId)
+                    .getResultList();
+        } else {
+            entries = em.createQuery(
+                            "SELECT e FROM QuestionPoolEntry e " +
+                                    "JOIN e.question q " +                // Verbindung zur Question
+                                    "WHERE e.questionPool.user.id = :userId " +
+                                    "AND q.topicPool.id = :topicPoolId", // Filter nach TopicPool
+                            QuestionPoolEntry.class
+                    ).setParameter("userId", userId)
+                    .setParameter("topicPoolId", topicPoolId)
+                    .getResultList();
+        }
 
         int incorrect = 0;
         int sufficient = 0;

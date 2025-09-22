@@ -108,7 +108,7 @@ export class StatsService {
   }
 
   getAllExams(): Observable<Exam[]> {
-    return this.http.get<Exam[]>(this.examApiUrl);
+    return this.http.get<Exam[]>(`${API_BASE_URL}/exams`);
   }
 
   getProgressOverview(userId: number, topicPoolId?: number): Observable<ProgressOverviewDto> {
