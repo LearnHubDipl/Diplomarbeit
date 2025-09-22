@@ -64,7 +64,7 @@ Content-Type: application/json
 ###
 
 ### Einen TopicPool umbenennen / Beschreibung ändern
-PUT http://localhost:8080/api/subjects/1/topics/11
+PUT http://localhost:8080/api/subjects/1/topics/7
 Content-Type: application/json
 
 {
@@ -75,6 +75,7 @@ Content-Type: application/json
 ###
 
 ### Einen TopicPool löschen
-DELETE http://localhost:8080/api/subjects/1/topics/11
+DELETE http://localhost:8080/api/subjects/1/topics/7
 
 ###
+GET http://localhost:8080/api/subjects/1/topics
