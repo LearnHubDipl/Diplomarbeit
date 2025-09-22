@@ -69,11 +69,11 @@ export class HomeComponent implements OnInit {
     this.statsService.getProgressOverview(this.userId, this.selectedTopicPoolId ?? undefined)
       .subscribe({
         next: (overview: ProgressOverviewDto) => {
-          console.log('Progress Overview:', overview); // 👈 Check hier
+          console.log('Progress Overview:', overview);
           this.progressLevels = overview.levels;
         },
         error: err => {
-          console.error('Fehler beim Laden der Progress-Daten:', err);
+          console.error('Fehler beim Laden der Daten:', err);
           this.progressLevels = [];
         }
       });

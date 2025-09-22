@@ -77,7 +77,7 @@ public class StatsService {
     @Transactional
     public ProgressOverviewDto calculateProgressOverview(Long userId, Long topicPoolId) {
 
-        // Wenn topicPoolId == null → alle Einträge des Users
+        // Wenn topicPoolId == null - alle Einträge des Users
         List<QuestionPoolEntry> entries = topicPoolId == null ?
                 em.createQuery("SELECT e FROM QuestionPoolEntry e WHERE e.questionPool.user.id = :userId", QuestionPoolEntry.class)
                         .setParameter("userId", userId)

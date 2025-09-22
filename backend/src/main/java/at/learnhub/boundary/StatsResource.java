@@ -32,7 +32,7 @@ public class StatsResource {
     }
 
     @GET
-    @Path("/{userId}")
+    @Path("/{userId}/progress")
     public ProgressOverviewDto getUserProgress(@PathParam("userId") Long userId,
                                                @QueryParam("topicPoolId") Long topicPoolId) {
         return statsService.calculateProgressOverview(userId, topicPoolId);
