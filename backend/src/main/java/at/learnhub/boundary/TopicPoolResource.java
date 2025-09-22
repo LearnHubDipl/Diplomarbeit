@@ -94,6 +94,4 @@ public class TopicPoolResource {
         }
         topicPoolRepo.delete(topicPoolId);
     }
-
-
 }
