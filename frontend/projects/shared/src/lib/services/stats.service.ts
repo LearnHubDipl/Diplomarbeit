@@ -82,8 +82,8 @@ export class StatsService {
 
   private streakApiUrl = 'http://localhost:8080/streak';
   //private questionPoolApiUrl = 'http://localhost:8080/api/questionPools';
-  private statsApiUrl = 'http://localhost:8080/api/stats';
-  private examApiUrl = 'http://localhost:8080/api/exams';
+  //private statsApiUrl = 'http://localhost:8080/api/stats';
+  //private examApiUrl = 'http://localhost:8080/api/exams';
 
   constructor(private http: HttpClient) {}
 
@@ -118,7 +118,4 @@ export class StatsService {
     }
     return this.http.get<ProgressOverviewDto>(`${API_BASE_URL}/stats/${userId}/progress`, { params });
   }
-
-
-
 }

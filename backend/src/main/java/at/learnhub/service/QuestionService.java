@@ -69,4 +69,16 @@ public class QuestionService {
     }
 
 
+    public List<Long> getQuestionIds(Long topicPoolId) {
+        if (topicPoolId == null) {
+            return questionRepository.findAll()
+                    .stream()
+                    .map(QuestionDto::id)
+                    .toList();
+        }
+
+        return questionRepository.findByTopicPool(topicPoolId);
+    }
+
+
 }

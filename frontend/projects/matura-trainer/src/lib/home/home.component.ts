@@ -3,6 +3,7 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import { StatsService } from '../../../../shared/src/lib/services/stats.service';
 import { NgForOf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import {QuestionService} from '../../../../shared/src/lib/services/question.service';
 
 // DTOs vom Backend
 export interface ProgressEntry {
@@ -38,7 +39,7 @@ export class HomeComponent implements OnInit {
   selectedTopicPoolId: number | null = null;
   progressLevels: ProgressLevel[] = [];
 
-  constructor(private statsService: StatsService) {}
+  constructor(private statsService: StatsService, private questionService:QuestionService) {}
 
   ngOnInit(): void {
     this.loadTopicPools();
@@ -81,9 +82,17 @@ export class HomeComponent implements OnInit {
 
 
   startPractice() {
-    this.router.navigate(
-      ['quiz'],
-      { relativeTo: this.activatedRoute, state: { questionIds: [1, 2, 3] } } // pass IDs via state
-    );
+    this.questionService.getQuestionsForPractice(this.selectedTopicPoolId ?? undefined).subscribe({
+      next:(questionIds: number[]) => {
+        this.router.navigate(
+          ['quiz'],
+          { relativeTo: this.activatedRoute, state: { questionIds } }
+        );
+      },
+      error: err => {
+        console.log('Fehler beim Laden der Daten:', err);
+      }
+    })
+
   }
 }

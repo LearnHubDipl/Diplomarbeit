@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Question, QuestionUpdateRequest} from '../interfaces/question';
 import {QuestionRequest} from '../interfaces/question-creation-request';
@@ -31,5 +31,12 @@ export class QuestionService {
   updateQuestion(id: number, updateRequest: QuestionUpdateRequest){
     return this.httpClient.patch<Question>(API_BASE_URL + '/questions/' + id, updateRequest);
   }
+
+  getQuestionsForPractice(topicPoolId?: number): Observable<number[]> {
+    const url = topicPoolId ? `${API_BASE_URL}/questions/ids?topicPoolId=${topicPoolId}` : `${API_BASE_URL}/questions/ids`;
+    return this.httpClient.get<number[]>(url);
+  }
+
+
 
 }

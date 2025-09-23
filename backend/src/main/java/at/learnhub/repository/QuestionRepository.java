@@ -6,6 +6,7 @@ import at.learnhub.dto.simple.QuestionUpdateRequestDto;
 import at.learnhub.mapper.QuestionMapper;
 import at.learnhub.model.*;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
@@ -180,5 +181,11 @@ public class QuestionRepository {
             throw new EntityNotFoundException("Question with id " + id + " not found.");
         }
         em.remove(question);
+    }
+
+    public List<Long> findByTopicPool(Long topicPoolId) {
+        return em.createQuery("SELECT q.id FROM Question q WHERE q.topicPool.id = :id", Long.class)
+                .setParameter("id", topicPoolId)
+                .getResultList();
     }
 }
