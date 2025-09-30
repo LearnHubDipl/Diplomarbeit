@@ -1,9 +1,16 @@
 <div class="exam-list">
   <div *ngFor="let exam of exams" class="exam-item">
     <div class="exam-header" (click)="toggleExam(exam.id)">
-      <strong>Prüfung #{{ exam.id }}</strong>
-      <span>Score: {{ Math.floor(exam.score) }}%</span>
-      <button>{{ expandedExamId === exam.id ? 'Einklappen' : 'Aufklappen' }}</button>
+      <strong>{{ Math.floor(exam.score) }}%</strong>
+      <span class="duration">{{formatDuration(exam)}}</span>
+      <span class="date">{{ exam.startedAt | date:'dd.MM.yyyy' }}</span>
+
+      <span class="arrow">
+        <ng-container *ngIf="expandedExamId === exam.id; else collapsed">
+          ▲
+        </ng-container>
+        <ng-template #collapsed>▼</ng-template>
+      </span>
     </div>
 
     <div *ngIf="expandedExamId === exam.id" class="exam-detail">
@@ -11,7 +18,6 @@
     </div>
   </div>
 </div>
-
 
 
 

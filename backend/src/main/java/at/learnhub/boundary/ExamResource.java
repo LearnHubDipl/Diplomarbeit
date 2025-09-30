@@ -155,4 +155,19 @@ public class ExamResource {
         ExamDto response = examService.submitExam(request);
         return Response.ok(response).build();
     }
+
+
+    @GET
+    @Path("/by-user")
+    public Response getExamsByUser(@QueryParam("userId") Long userId) {
+        if (userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("userId is required")
+                    .build();
+        }
+
+        List<ExamDto> exams = examRepository.findByUserId(userId);
+        return Response.ok(exams).build();
+    }
+
 }

@@ -8,6 +8,10 @@ import {AnswerService} from '../../../../shared/src/lib/services/answer.service'
 import {ActivatedRoute} from '@angular/router';
 import {Location} from '@angular/common';
 import {Exam} from '../../../../shared/src/lib/interfaces/exam';
+import {QuestionPoolService} from '../../../../shared/src/lib/services/question-pool.service';
+import {StatsService} from '../../../../shared/src/lib/services/stats.service';
+import {SolutionService} from '../../../../shared/src/lib/services/solution.service';
+import {Solution} from '../../../../shared/src/lib/interfaces/solution';
 
 
 @Component({
@@ -36,8 +40,13 @@ export class QuestionRunnerComponent implements OnInit {
   currentQuestionIndex: number = 0;
   isFinished = false;
 
+  userId = 1;
+  voteCounts: { [solutionId: number]: number } = {};
+
   questionService = inject(QuestionService);
   answerService = inject(AnswerService);
+  questionPoolService = inject(QuestionPoolService);
+  solutionService = inject(SolutionService);
   fb = inject(FormBuilder);
   route: ActivatedRoute = inject(ActivatedRoute);
   location: Location = inject(Location)
@@ -57,6 +66,8 @@ export class QuestionRunnerComponent implements OnInit {
   } | null = null;
 
   submitted = false;
+  showAllSolutions = false;
+
 
   ngOnInit() {
     let state = history.state;
@@ -112,6 +123,7 @@ export class QuestionRunnerComponent implements OnInit {
 
     this.questionService.getQuestionById(id).subscribe(q => {
       this.question = q;
+      //this.sortSolutions();
 
       let previous = this.previousAnswers[q.id];
 
@@ -155,6 +167,15 @@ export class QuestionRunnerComponent implements OnInit {
 
         this.lockInputs();
         this.submitted = true;
+
+        //testuser
+        const userId = 1;
+
+        if (result.correct) {
+          this.questionPoolService.increaseCorrectCount(this.question!.id, userId)
+            .subscribe(() => console.log('CorrectCount erhöht'));
+        }
+
         this.advance();
       });
     } else {
@@ -256,5 +277,34 @@ export class QuestionRunnerComponent implements OnInit {
       this.finishedExam.emit(allAnswers);
     }
   }
+  loadVotes(solutionId: number) {
+    this.solutionService.getVoteCount(solutionId).subscribe({
+      next: (res) => this.voteCounts[solutionId] = res.score,
+      error: (err) => console.error(err)
+    });
+  }
+
+  upvoteSolution(solutionId: number) {
+    this.solutionService.upvote(solutionId, this.userId).subscribe({
+      next: () => this.loadVotes(solutionId),
+      error: (err) => console.error(err)
+    });
+  }
+
+  downvoteSolution(solutionId: number) {
+    this.solutionService.downvote(solutionId, this.userId).subscribe({
+      next: () => this.loadVotes(solutionId),
+      error: (err) => console.error(err)
+    });
+  }
+  get solutions(): Solution[] {
+    return this.question?.solutions ?? [];
+  }
+
+  get hasMultipleSolutions(): boolean {
+    return this.solutions.length > 1;
+  }
+
+
 }
 

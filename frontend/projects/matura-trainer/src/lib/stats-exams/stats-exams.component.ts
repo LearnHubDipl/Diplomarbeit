@@ -4,12 +4,6 @@ import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {Exam} from '../../../../shared/src/lib/interfaces/exam';
 import {QuestionRunnerComponent} from '../question-runner/question-runner.component';
 
-interface ExamViewState {
-  exam: ExamDto;
-  expanded: boolean;
-  currentIndex: number;
-}
-
 @Component({
   selector: 'lib-stats-exams',
   imports: [
@@ -30,6 +24,7 @@ interface ExamViewState {
 export class StatsExamsComponent implements OnInit {
   exams: Exam[] = [];
   expandedExamId?: number;
+  userid=1//test
 
   constructor(private service: StatsService) {}
 
@@ -38,10 +33,9 @@ export class StatsExamsComponent implements OnInit {
   }
 
   loadExams() {
-    this.service.getAllExams().subscribe({
+    this.service.getExamsByUser(this.userid).subscribe({
       next: (data) => {
         this.exams = data;
-        // Optional: letzte Prüfung automatisch aufklappen
         if (this.exams.length) this.expandedExamId = this.exams[0].id;
       },
       error: (err) => console.error('Fehler beim Laden der Prüfungen:', err)
@@ -53,5 +47,21 @@ export class StatsExamsComponent implements OnInit {
   }
 
   protected readonly Math = Math;
+
+  formatDuration(exam: Exam){
+    const started = new Date(exam.startedAt);
+    const finished = new Date(exam.finishedAt);
+
+    const diffMs = finished.getTime() - started.getTime();
+    const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+    if (diffMinutes < 60) {
+      return `${diffMinutes} min`;
+    } else {
+      const hours = Math.floor(diffMinutes / 60);
+      const minutes = diffMinutes % 60;
+      return `${hours}h ${minutes}min`;
+    }
+  }
 }
 

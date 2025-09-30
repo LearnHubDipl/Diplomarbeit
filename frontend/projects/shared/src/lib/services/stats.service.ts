@@ -6,8 +6,6 @@ import {ProgressOverviewDto} from '../../../../matura-trainer/src/lib/home/home.
 import {Exam} from '../interfaces/exam';
 import { API_BASE_URL } from "./globals";
 
-
-// exam.service.ts
 export interface AnswerSlimDto {
   id: number;
   text: string;
@@ -16,7 +14,7 @@ export interface AnswerSlimDto {
 export interface QuestionDetailDto {
   id: number;
   text: string;
-  answers: AnswerSlimDto[]; // alle möglichen Antworten
+  answers: AnswerSlimDto[];
 }
 
 export interface ExamQuestionDetailDto {
@@ -24,7 +22,7 @@ export interface ExamQuestionDetailDto {
   question: QuestionDetailDto;
   freeTextAnswer: string;
   isCorrect: boolean;
-  selectedAnswers: AnswerSlimDto[]; // gewählte Antworten
+  selectedAnswers: AnswerSlimDto[];
 }
 
 export interface ExamDto {
@@ -62,38 +60,18 @@ export interface StatsOverviewDto {
   legend: StatsLegendEntry[];
 }
 
-export interface QuestionPoolEntrySlimDto {
-  questionId: number;
-  answeredAt: string | null;
-  correctCount: number;
-  lastAnsweredCorrectly: boolean | null;
-}
-
-export interface QuestionPoolDto {
-  id: number;
-  userId: number;
-  topicPools: TopicPool[];
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class StatsService {
 
   private streakApiUrl = 'http://localhost:8080/streak';
-  //private questionPoolApiUrl = 'http://localhost:8080/api/questionPools';
-  //private statsApiUrl = 'http://localhost:8080/api/stats';
-  //private examApiUrl = 'http://localhost:8080/api/exams';
 
   constructor(private http: HttpClient) {}
 
   getStreak(userId: number): Observable<number> {
     return this.http.get<{ streak: number }>(`${this.streakApiUrl}/user/${userId}`)
       .pipe(map(response => response.streak));
-  }
-
-  getEntriesByTopicPool(userId: number, topicPoolId: number): Observable<QuestionPoolEntrySlimDto[]> {
-    return this.http.get<QuestionPoolEntrySlimDto[]>(`${API_BASE_URL}/questionPools/${userId}/${topicPoolId}`);
   }
 
   getTopicPools(userId: number): Observable<TopicPool[]> {
@@ -107,8 +85,10 @@ export class StatsService {
     return this.http.get<StatsOverviewDto>(`${API_BASE_URL}/stats/${userId}/topicPool/${topicPoolId}/overview`);
   }
 
-  getAllExams(): Observable<Exam[]> {
-    return this.http.get<Exam[]>(`${API_BASE_URL}/exams`);
+  getExamsByUser(userId: number): Observable<Exam[]> {
+    return this.http.get<Exam[]>(`${API_BASE_URL}/exams/by-user`, {
+      params: { userId: userId.toString() }
+    });
   }
 
   getProgressOverview(userId: number, topicPoolId?: number): Observable<ProgressOverviewDto> {
