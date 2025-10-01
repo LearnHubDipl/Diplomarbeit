@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +16,9 @@ import java.util.List;
 public class StatsService {
     @Inject
     EntityManager em;
+
+    private static final int LOCK_MINUTES_ONCE = 1440;   // 1 day
+    private static final int LOCK_MINUTES_TWICE = 4320;  // 3 days
 
     private final String[] labels = {"ausreichend gelernt","2x richtig beantwortet","1x richtig beantwortet","falsch","nicht beantwortet"};
     private final String[] colors = {"#309F22","#3DD32B","#B7F0B0","#FE8B8B","#FFEAA4"};
@@ -32,6 +36,7 @@ public class StatsService {
     public StatsOverviewDto calculateStatsOverviewForTopicPool(Long userId, Long topicPoolId) {
         return calculateStatsOverviewInternal(userId, topicPoolId);
     }
+
     /**
      * Berechnet die Statistik und die Legend-Prozentwerte direkt in der DB
      */
@@ -74,12 +79,8 @@ public class StatsService {
         return new StatsOverviewDto(incorrect, sufficient, correctTwice, correctOnce, unanswered, legend);
     }
 
-
-
     @Transactional
     public ProgressOverviewDto calculateProgressOverview(Long userId, Long topicPoolId) {
-
-        // Wenn topicPoolId == null - alle Einträge des Users
         List<QuestionPoolEntry> entries;
         if (topicPoolId == null) {
             entries = em.createQuery(
@@ -90,31 +91,55 @@ public class StatsService {
         } else {
             entries = em.createQuery(
                             "SELECT e FROM QuestionPoolEntry e " +
-                                    "JOIN e.question q " +                // Verbindung zur Question
+                                    "JOIN e.question q " +
                                     "WHERE e.questionPool.user.id = :userId " +
-                                    "AND q.topicPool.id = :topicPoolId", // Filter nach TopicPool
+                                    "AND q.topicPool.id = :topicPoolId",
                             QuestionPoolEntry.class
                     ).setParameter("userId", userId)
                     .setParameter("topicPoolId", topicPoolId)
                     .getResultList();
         }
 
+        LocalDateTime now = LocalDateTime.now();
+
         int incorrect = 0;
         int sufficient = 0;
         int correctTwice = 0;
         int correctOnce = 0;
         int unanswered = 0;
+        int lockedOnce = 0;
+        int lockedTwice = 0;
 
         for (QuestionPoolEntry entry : entries) {
-            if (entry.getLastAnsweredCorrectly() == null) {
+            Integer correctCount = entry.getCorrectCount() != null ? entry.getCorrectCount() : 0;
+            Boolean lastCorrect = entry.getLastAnsweredCorrectly();
+            LocalDateTime answeredAt = entry.getAnsweredAt();
+
+            boolean isLocked = false;
+            if (lastCorrect != null && lastCorrect && answeredAt != null) {
+                int lockMinutes = (correctCount == 1) ? LOCK_MINUTES_ONCE : (correctCount == 2) ? LOCK_MINUTES_TWICE : 0;
+                if (lockMinutes > 0) {
+                    LocalDateTime unlockTime = answeredAt.plusMinutes(lockMinutes);
+                    isLocked = now.isBefore(unlockTime);
+                }
+            }
+            if (lastCorrect == null) {
                 unanswered++;
-            } else if (entry.getCorrectCount() == 0) {
+            } else if (correctCount == 0) {
                 incorrect++;
-            } else if (entry.getCorrectCount() == 1) {
-                correctOnce++;
-            } else if (entry.getCorrectCount() == 2) {
-                correctTwice++;
-            } else if (entry.getCorrectCount() >= 3) {
+            } else if (correctCount == 1) {
+                if (isLocked) {
+                    lockedOnce++;
+                } else {
+                    correctOnce++;
+                }
+            } else if (correctCount == 2) {
+                if (isLocked) {
+                    lockedTwice++;
+                } else {
+                    correctTwice++;
+                }
+            } else if (correctCount >= 3) {
                 sufficient++;
             }
         }
@@ -125,12 +150,17 @@ public class StatsService {
                 new ProgressEntryDto("Falsch", "#FE8B8B", incorrect, incorrect + " Fragen falsch beantwortet"),
                 new ProgressEntryDto("Nicht beantwortet", "#FFEAA4", unanswered, unanswered + " Fragen noch nicht beantwortet")
         )));
+
         levels.add(new ProgressLevelDto("Basislevel", List.of(
-                new ProgressEntryDto("1x richtig", "#B7F0B0", correctOnce, correctOnce + " Fragen einmal richtig beantwortet")
+                new ProgressEntryDto("1x richtig", "#B7F0B0", correctOnce, correctOnce + " Fragen einmal richtig beantwortet"),
+                new ProgressEntryDto("Davon fürs Wiederholen gesperrt", "#8FD187", lockedOnce, lockedOnce + " Fragen fürs Wiederholen gesperrt")
         )));
+
         levels.add(new ProgressLevelDto("Trainingslevel", List.of(
-                new ProgressEntryDto("2x richtig", "#3DD32B", correctTwice, correctTwice + " Fragen zweimal richtig beantwortet")
+                new ProgressEntryDto("2x richtig", "#3DD32B", correctTwice, correctTwice + " Fragen zweimal richtig beantwortet"),
+                new ProgressEntryDto("Davon fürs Wiederholen gesperrt", "#2AB624", lockedTwice, lockedTwice + " Fragen fürs Wiederholen gesperrt")
         )));
+
         levels.add(new ProgressLevelDto("Highscorelevel", List.of(
                 new ProgressEntryDto("Ausreichend geübt", "#309F22", sufficient, sufficient + " Fragen ausreichend geübt")
         )));

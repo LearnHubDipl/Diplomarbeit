@@ -98,4 +98,12 @@ export class StatsService {
     }
     return this.http.get<ProgressOverviewDto>(`${API_BASE_URL}/stats/${userId}/progress`, { params });
   }
+
+  getUserExamAverage(userId: number): Observable<{ userId: number; average: number | null; count: number; }> {
+    return this.http.get<{ userId: number; average: number | null; count: number; }>(
+      `${API_BASE_URL}/exams/by-user/average`,
+      { params: { userId: userId.toString() } }
+    );
+  }
+
 }

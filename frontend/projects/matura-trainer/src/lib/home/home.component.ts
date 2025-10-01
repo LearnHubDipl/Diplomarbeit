@@ -45,6 +45,10 @@ export class HomeComponent implements OnInit {
     this.loadTopicPools();
     this.selectedTopicPoolId = null;
     this.loadProgressData();
+
+
+    this.statsService.getProgressOverview(this.userId, this.selectedTopicPoolId ?? undefined).subscribe();
+
   }
 
   loadTopicPools(): void {
@@ -82,7 +86,7 @@ export class HomeComponent implements OnInit {
 
 
   startPractice() {
-    this.questionService.getQuestionsForPractice(this.selectedTopicPoolId ?? undefined).subscribe({
+    this.questionService.getQuestionsForPractice(this.userId,this.selectedTopicPoolId ?? undefined).subscribe({
       next:(questionIds: number[]) => {
         this.router.navigate(
           ['quiz'],

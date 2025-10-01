@@ -363,9 +363,19 @@ public class QuestionResource {
                     required = false,
                     example = "5"
             )
-            @QueryParam("topicPoolId") Long topicPoolId
+            @QueryParam("topicPoolId") Long topicPoolId,
+            @Parameter(
+                    description = "User id to filter questions",
+                    required = true,
+                    example = "1"
+            )
+            @QueryParam("userId") Long userId
     ) {
-        List<Long> ids = questionService.getQuestionIds(topicPoolId);
+        if (userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("userId must be provided").build();
+        }
+        List<Long> ids = questionService.getQuestionIds(topicPoolId, userId);
         return Response.ok(ids).build();
     }
 

@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.BadRequestException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 public class QuestionRepository {
     @Inject
     EntityManager em;
+
+    private static final int LOCK_MINUTES_ONCE = 1440;   // 1 Tag
+    private static final int LOCK_MINUTES_TWICE = 4320;  // 3 Tage
 
     public List<QuestionDto> findAll() {
         return em.createQuery("SELECT q FROM Question q", Question.class)
@@ -183,9 +187,69 @@ public class QuestionRepository {
         em.remove(question);
     }
 
-    public List<Long> findByTopicPool(Long topicPoolId) {
-        return em.createQuery("SELECT q.id FROM Question q WHERE q.topicPool.id = :id", Long.class)
-                .setParameter("id", topicPoolId)
-                .getResultList();
+
+    public List<Long> findIdsByUserAndTopicPool(Long userId, Long topicPoolId) {
+
+        String jpql = """
+            SELECT e.question.id,
+                   COALESCE(e.correctCount, 0) as cc,
+                   e.lastAnsweredCorrectly as lac,
+                   e.answeredAt as answeredAt
+            FROM QuestionPoolEntry e 
+            JOIN e.questionPool p 
+            WHERE p.user.id = :userId
+            AND COALESCE(e.correctCount, 0) < 3
+        """;
+
+        if (topicPoolId != null) {
+            jpql += " AND e.question.topicPool.id = :topicPoolId";
+        }
+
+        jpql += """
+            ORDER BY 
+                CASE 
+                    WHEN e.lastAnsweredCorrectly IS NULL OR COALESCE(e.correctCount, 0) = 0 THEN 1
+                    WHEN e.lastAnsweredCorrectly = false THEN 2
+                    WHEN COALESCE(e.correctCount, 0) = 1 THEN 3
+                    WHEN COALESCE(e.correctCount, 0) = 2 THEN 4
+                    ELSE 5
+                END,
+                e.answeredAt NULLS FIRST
+        """;
+
+        var query = em.createQuery(jpql, Object[].class)
+                .setParameter("userId", userId);
+
+        if (topicPoolId != null) {
+            query.setParameter("topicPoolId", topicPoolId);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        return query.getResultList()
+                .stream()
+                .filter(row -> {
+                    int correctCount = ((Number) row[1]).intValue();
+                    Boolean lastAnsweredCorrectly = (Boolean) row[2];
+                    LocalDateTime answeredAt = (LocalDateTime) row[3];
+
+                    if (lastAnsweredCorrectly == null || !lastAnsweredCorrectly) {
+                        return true;
+                    }
+
+                    if (answeredAt != null) {
+                        int lockMinutes = (correctCount == 1) ? LOCK_MINUTES_ONCE
+                                : (correctCount == 2) ? LOCK_MINUTES_TWICE
+                                : 0;
+                        if (lockMinutes > 0) {
+                            LocalDateTime unlockTime = answeredAt.plusMinutes(lockMinutes);
+                            return now.isAfter(unlockTime);
+                        }
+                    }
+
+                    return true;
+                })
+                .map(row -> (Long) row[0])
+                .collect(Collectors.toList());
     }
 }

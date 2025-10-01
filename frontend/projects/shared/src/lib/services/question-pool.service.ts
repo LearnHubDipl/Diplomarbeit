@@ -37,4 +37,11 @@ export class QuestionPoolService {
   removeQuestionsFromPool(request: QuestionPoolEntryRequest): Observable<QuestionPool> {
     return this.httpClient.post<QuestionPool>(API_BASE_URL + '/questionPools/removeQuestions', request);
   }
+
+  increaseCorrectCount(questionId: number, userId: number): Observable<void> {
+    return this.httpClient.post<void>(
+      `http://localhost:8080/api/entries/increase-correct-count?questionId=${questionId}&userId=${userId}`,
+      {}
+    );
+  }
 }

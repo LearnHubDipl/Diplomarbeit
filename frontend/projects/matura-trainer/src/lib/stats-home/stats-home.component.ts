@@ -42,6 +42,9 @@ export class StatsHomeComponent implements OnInit {
   streak = 0;
   userId = 1; // statisch für Test
 
+  userAverage: number | null = null;
+  examCount: number = 0;
+
   constructor(private statsService: StatsService) {}
 
   ngOnInit(): void {
@@ -61,6 +64,15 @@ export class StatsHomeComponent implements OnInit {
       // CenterText zeigt offene Fragen
       const unansweredEntry = data.legend.find(e => e.label.toLowerCase().includes('nicht beantwortet'));
       this.chartOptions!.plugins!.centerText!.text = unansweredEntry ? `${unansweredEntry.value} offene Fragen` : '';
+    });
+
+    this.statsService.getUserExamAverage(this.userId).subscribe({
+      next: dto => {
+        console.log('Average DTO', dto);
+        this.userAverage = dto.average;
+        this.examCount = dto.count;
+      },
+      error: err => console.error('Fehler beim Laden des Averages:', err)
     });
   }
 }
