@@ -15,6 +15,7 @@
         <quarkus.platform.version>3.24.2</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.3</surefire-plugin.version>
+        <aws.sdk.version>2.25.18</aws.sdk.version>
     </properties>
 
     <dependencyManagement>
@@ -26,6 +27,14 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws.sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -87,6 +96,21 @@
             <artifactId>maven-plugin-annotations</artifactId>
             <version>3.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-resteasy-multipart</artifactId>
+        </dependency>
+
+
     </dependencies>
 
     <build>
@@ -157,6 +181,7 @@
             <properties>
                 <skipITs>false</skipITs>
                 <quarkus.native.enabled>true</quarkus.native.enabled>
+                <aws.sdk.version>2.25.18</aws.sdk.version>
             </properties>
         </profile>
     </profiles>

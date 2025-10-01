@@ -1,5 +1,7 @@
-*
-!target/*-runner.jar
-!target/*-SNAPSHOT.jar
-!target/lib/*
-!target/quarkus-app/*
+target/
+.git
+.gitignore
+.idea
+.vscode
+**/*.iml
+Dockerfile*

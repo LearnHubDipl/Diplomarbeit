@@ -37,6 +37,9 @@ import {EditQuestionComponent} from '../../projects/content-management/src/lib/e
 import {
   SubjectDetailComponent
 } from '../../projects/content-management/src/lib/subject-detail/subject-detail.component';
+import {
+  SubjectPoolDetailComponent
+} from '../../projects/content-management/src/lib/subject-pool-detail/subject-pool-detail.component';
 
 export const routes: Routes = [
   {
@@ -60,7 +63,8 @@ export const routes: Routes = [
       { path: 'chooseStudyTopic', component: ChooseStudyTopicComponent },
       { path: 'subjects', component: SubjectsComponent },
       { path: 'subjects/:id', component: SubjectDetailComponent },
-      { path: 'subjects/:id/pools/:poolId', component: SubjectDetailComponent },
+      { path: 'subjects/:subjectId/pools/:poolId', component: SubjectPoolDetailComponent },
+      { path: 'subjects/:subjectId/pools/by-name/:poolName', component: SubjectPoolDetailComponent }
     ]
   },
 

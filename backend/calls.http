@@ -79,3 +79,9 @@ DELETE http://localhost:8080/api/subjects/1/topics/7
 
 ###
 GET http://localhost:8080/api/subjects/1/topics
+
+###
+GET http://localhost:8080/api/topic-pools/123/notes
+
+###
+GET http://localhost:8080/api/teachers
