@@ -8,8 +8,8 @@ import {Subject as SchoolSubject} from '../../../../shared/src/lib/interfaces/su
 import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
 
 import {SubjectService} from '../../../../shared/src/lib/services/subject.service';
+import {TopicContentService} from '../../../../shared/src/lib/services/topic-content.service';
 import {TopicPoolService} from '../../../../shared/src/lib/services/topic-pool.service';
-import {TopicContentsService} from '../../../../shared/src/lib/services/topic-content.service';
 import {FileService} from '../../../../shared/src/lib/services/file-service';
 import {finalize} from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -44,7 +44,7 @@ export class SubjectDetailComponent implements OnInit {
     private readonly router: Router,
     private readonly subjectsApi: SubjectService,
     private readonly poolsApi: TopicPoolService,
-    private readonly contentsApi: TopicContentsService,
+    private readonly contentsApi: TopicContentService,
     private readonly fileService: FileService,
     private readonly sanitizer: DomSanitizer
   ) {
@@ -66,53 +66,6 @@ export class SubjectDetailComponent implements OnInit {
   }
 
 
-  applyFilter(poolId: number | undefined): void {
-    this.selectedPoolId = poolId;
-    if (poolId) {
-      this.router.navigate(['/subjects', this.subjectId, 'pools', poolId]);
-    } else {
-      this.router.navigate(['/subjects', this.subjectId]);
-    }
-  }
-
-  openUpload(): void {
-    this.uploadOpen = true;
-  }
-
-  cancelUpload(): void {
-    this.uploadOpen = false;
-    this.uploading = false;
-    this.title = '';
-    this.uploaderName = '';
-    this.file = null;
-    this.poolForUpload = this.poolForUpload ?? (this.pools[0]?.id as number) ?? null;
-    this.newPoolName = '';
-    this.previewSrc = null;
-    this.lastDataUrl = null;
-  }
-
-  onFile(ev: Event): void {
-    const input = ev.target as HTMLInputElement;
-    const f = input.files?.[0] ?? null;
-    this.file = f;
-    this.previewSrc = null;
-    this.lastDataUrl = null;
-    if (!f) return;
-    const blobUrl = URL.createObjectURL(f);
-    this.previewSrc = this.sanitizer.bypassSecurityTrustResourceUrl(blobUrl);
-    const reader = new FileReader();
-    reader.onload = () => (this.lastDataUrl = (reader.result as string) ?? null);
-    reader.onerror = () => {
-      this.lastDataUrl = null;
-    };
-    reader.readAsDataURL(f);
-  }
-
-  toSafePdfUrl(raw: string | null | undefined): SafeResourceUrl | null {
-    if (!raw) return null;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(`${raw}#toolbar=0&navpanes=0&scrollbar=0`);
-  }
-
   getPoolId(p: any): number | undefined {
     return p?.id ?? p?.poolId ?? p?.topicPoolId ?? p?.contentId ?? p?.topic_pool_id;
   }
@@ -129,23 +82,12 @@ export class SubjectDetailComponent implements OnInit {
 
   trackPool = (_: number, p: any) => this.getPoolId(p) ?? -1;
 
-  goToPoolAny(p: TopicPool) {
-    this.router.navigate(['/subjects', this.subjectId, 'pools', p.id]);
-  }
-
-
-  submitUpload(): void {
-    alert('Upload wird später implementiert');
-  }
-
   private reloadPools(): void {
     this.poolsApi.getTopicPoolsBySubject(this.subjectId).subscribe({
       next: (list) => {
         this.pools = list ?? [];
-        // Guard: ausgewählten Pool nur behalten, wenn er wirklich zu diesem Subject gehört
         if (this.selectedPoolId && !this.pools.some(p => p.id === this.selectedPoolId)) {
           this.selectedPoolId = undefined;
-          // optional: Router auf /subjects/:id ohne poolId zurücksetzen
           this.router.navigate(['/subjects', this.subjectId]);
         }
       },
@@ -162,7 +104,7 @@ export class SubjectDetailComponent implements OnInit {
       next: (s) => {
         this.subject = s;
         this.loading = false;
-        this.reloadPools(); // <- WICHTIG: Pools immer aus eigener Quelle
+        this.reloadPools();
         if (!this.poolForUpload) {
           this.poolForUpload = this.pools?.[0]?.id ?? null;
         }
@@ -196,10 +138,9 @@ export class SubjectDetailComponent implements OnInit {
     if (!name || name === current) return;
     console.log('PUT', `/api/subjects/${p}/topics/${p.id}`, {name});
 
-    if (this.renamingId === p.id) return; // block double fire
+    if (this.renamingId === p.id) return;
     this.renamingId = p.id;
 
-    // optimistic
     const idx = this.pools.findIndex(x => x.id === p.id);
     const old = {...this.pools[idx]};
     const updatedLocal = {...old, name};
@@ -212,7 +153,6 @@ export class SubjectDetailComponent implements OnInit {
     this.poolsApi.updateOne(this.subjectId, p.id, {name})
       .subscribe({
         next: (server) => {
-          // Übernehme Server-Wahrheit (trim etc.), kein reloadPools!
           const fixed = {...updatedLocal, ...server};
           this.pools = [
             ...this.pools.slice(0, idx),
@@ -222,7 +162,6 @@ export class SubjectDetailComponent implements OnInit {
           this.renamingId = undefined;
         },
         error: (err: { url: any; status: any; error: any; }) => {
-          // Rollback
           this.pools = [
             ...this.pools.slice(0, idx),
             old,
@@ -242,7 +181,6 @@ export class SubjectDetailComponent implements OnInit {
 
     this.deletingId = p.id;
 
-    // optimistic remove
     const idx = this.pools.findIndex(x => x.id === p.id);
     const removed = this.pools[idx];
     this.pools = [...this.pools.slice(0, idx), ...this.pools.slice(idx + 1)];
@@ -254,7 +192,6 @@ export class SubjectDetailComponent implements OnInit {
           this.deletingId = undefined;
         },
         error: (err) => {
-          // Rollback
           this.pools = [
             ...this.pools.slice(0, idx),
             removed,

@@ -1,4 +1,3 @@
-// at.learnhub.dto.request/TopicContentCreateRequestDto.java
 package at.learnhub.dto.request;
 
 public record TopicContentCreateRequestDto(

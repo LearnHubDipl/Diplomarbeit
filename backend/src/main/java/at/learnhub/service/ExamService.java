@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
 @ApplicationScoped
 public class ExamService {
     @Inject

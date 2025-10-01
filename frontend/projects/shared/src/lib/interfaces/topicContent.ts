@@ -14,8 +14,11 @@ export interface TopicContent {
   topicPool?: TopicPool;
   media?: Media;
   uploaderName?: string;
-  date?: string | Date;
+  date?: Date;
+  createdAt?: Date;
   thumbnailUrl?: string;
   pdfUrl?: string;
   approved?: boolean;
+  fileName: string;
+  teacherId?: number;
 }
