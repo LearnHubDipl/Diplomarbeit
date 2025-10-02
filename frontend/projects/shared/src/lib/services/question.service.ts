@@ -33,7 +33,6 @@ export class QuestionService {
     return this.httpClient.patch<Question>(API_BASE_URL + '/questions/' + id, updateRequest);
   }
 
-  // muss in entry service
   getQuestionsForPractice(userId: number, topicPoolId?: number): Observable<number[]> {
     let params = new HttpParams().set('userId', userId.toString());
 
@@ -41,7 +40,7 @@ export class QuestionService {
       params = params.set('topicPoolId', topicPoolId.toString());
     }
 
-    return this.httpClient.get<number[]>(`http://localhost:8080/api/questions/ids`, { params });
+    return this.httpClient.get<number[]>(API_BASE_URL + `/questions/ids`, { params });
   }
 
 
