@@ -38,7 +38,7 @@ public class QuestionPoolService {
                 entry.setQuestion(question);
                 entry.setQuestionPool(pool);
                 entry.setCorrectCount(0);
-                entry.setLastAnsweredCorrectly(false);
+                entry.setLastAnsweredCorrectly(null);
 
                 pool.getEntries().add(entry);
                 question.getEntries().add(entry);
