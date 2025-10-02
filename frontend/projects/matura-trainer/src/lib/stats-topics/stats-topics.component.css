@@ -105,3 +105,7 @@
 .stats-content{
   padding: 2rem;
 }
+
+.chart-wrapper{
+  height: 70vh;
+}

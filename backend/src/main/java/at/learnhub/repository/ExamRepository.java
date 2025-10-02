@@ -2,6 +2,7 @@ package at.learnhub.repository;
 
 import at.learnhub.dto.simple.ExamDto;
 import at.learnhub.dto.simple.SubjectDto;
+import at.learnhub.dto.simple.UserExamAverageDto;
 import at.learnhub.mapper.ExamMapper;
 import at.learnhub.mapper.SubjectMapper;
 import at.learnhub.model.Exam;
@@ -46,5 +47,19 @@ public class ExamRepository {
                 .stream()
                 .map(ExamMapper::toDto)
                 .toList();
+    }
+
+    public UserExamAverageDto findAverageAndCountByUserId(Long userId) {
+        Object[] result = (Object[]) em.createQuery(
+                        "SELECT AVG(e.score), COUNT(e) FROM Exam e WHERE e.user.id = :userId")
+                .setParameter("userId", userId)
+                .getSingleResult();
+
+        Number avgNumber = (Number) result[0];
+        Long count = (Long) result[1];
+
+        Double average = (avgNumber == null) ? null : avgNumber.doubleValue();
+
+        return new UserExamAverageDto(userId, average, count);
     }
 }

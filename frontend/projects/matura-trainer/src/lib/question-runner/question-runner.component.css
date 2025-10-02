@@ -286,3 +286,9 @@ textarea[formControlName="freeTextAnswer"]:focus {
   position: absolute;
   right: 1rem; bottom: 1rem;
 }
+
+.viewMore-btn{
+  margin:2rem;
+  cursor: pointer;
+  color:#f3c400;
+}

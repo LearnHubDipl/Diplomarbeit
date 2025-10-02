@@ -97,7 +97,7 @@ public class QuestionPoolRepository {
                 .getResultList();
 
         for (QuestionPoolEntry entry : entriesToRemove) {
-            em.remove(entry); // innerhalb der Transaktion
+            em.remove(entry);
         }
 
         return findByUserId(userId);
