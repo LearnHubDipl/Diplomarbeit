@@ -31,6 +31,7 @@ export class FragenKonfiguratorComponent implements OnInit {
   subjects: Subject[] = [];
   topicPools: TopicPool[] = [];
   questionTypes = Object.values(QuestionType);
+  fromSubjectSelection: boolean = false;
 
   readonly QuestionType = QuestionType;
   readonly maxAnswers = 7;
@@ -46,6 +47,8 @@ export class FragenKonfiguratorComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.subjectId = params['subjectId'] ? Number(params['subjectId']) : undefined;
       this.topicPoolId = params['topicPoolId'] ? Number(params['topicPoolId']) : undefined;
+
+      this.fromSubjectSelection = params['fromSubjectSelection'] === 'true';
       if (this.subjectId) {
         this.questionForm.get('subjectId')?.setValue(this.subjectId);
         this.loadSubjects();
@@ -172,7 +175,8 @@ export class FragenKonfiguratorComponent implements OnInit {
             relativeTo: this.route,
             queryParams: {
               subjectId: this.questionForm.get('subjectId')?.value,
-              topicPoolId: this.questionForm.get('topicPoolId')?.value
+              topicPoolId: this.questionForm.get('topicPoolId')?.value,
+              fromSubjectSelection: this.fromSubjectSelection
             },
             queryParamsHandling: 'merge'
           });

@@ -1,4 +1,25 @@
 <div class="container py-5">
+  <nav aria-label="breadcrumb" class="mb-4" style="--bs-breadcrumb-divider: '>';">
+    <ol class="breadcrumb fs-5 fw-semibold">
+      <li class="breadcrumb-item">
+        <a routerLink="/chooseStudyOrCreate" class="text-dark text-decoration-none">
+          <i class="bi bi-journal-bookmark me-1"></i>
+          Erstellen & Lernen
+        </a>
+      </li>
+
+      <li class="breadcrumb-item" *ngIf="fromSubjectSelection">
+        <a routerLink="/chooseStudyTopic" class="text-dark text-decoration-none">Fachauswahl</a>
+      </li>
+      <li class="breadcrumb-item" *ngIf="!fromSubjectSelection">
+        <a routerLink="/startCreate" class="text-dark text-decoration-none">Fragen verwalten</a>
+      </li>
+
+      <li class="breadcrumb-item active text-orange fw-bold" aria-current="page">
+        Fragenkonfigurator
+      </li>
+    </ol>
+  </nav>
   <h2 class="fw-bold mb-1">Fragenkonfigurator</h2>
   <p class="mb-4">Individuelle Fragen erstellen &amp; Themen gezielt abdecken</p>
   <form [formGroup]="questionForm" (ngSubmit)="onSubmit()">

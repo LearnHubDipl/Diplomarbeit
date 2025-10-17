@@ -68,12 +68,17 @@
               (click)="toggleAnswer()">
         Aufdecken
       </button>
-
-      <button *ngIf="currentIndex === questions.length - 1"
+      <button *ngIf="!(currentIndex === questions.length - 1) && showAnswer"
+              class="btn btn-primary rounded-pill ms-3"
+              (click)="next()">
+        Weiter
+      </button>
+      <button *ngIf="currentIndex === questions.length - 1 && showAnswer"
               class="btn btn-primary rounded-pill ms-3"
               (click)="finishedLearning()">
         Beenden
       </button>
+
     </div>
   </div>
 
