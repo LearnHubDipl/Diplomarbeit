@@ -1,4 +1,22 @@
 <div *ngIf="questions.length > 0" class="container mt-5 d-flex flex-column" style="min-height: 85vh;">
+  <nav aria-label="breadcrumb" class="mb-4" style="--bs-breadcrumb-divider: '>';">
+    <ol class="breadcrumb fs-5 fw-semibold">
+      <li class="breadcrumb-item">
+        <a routerLink="/chooseStudyOrCreate" class="text-dark text-decoration-none">
+          <i class="bi bi-journal-bookmark me-1"></i>
+          Erstellen & Lernen
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a routerLink="/chooseStudyTopic" class="text-dark text-decoration-none">
+          Fachauswahl
+        </a>
+      </li>
+      <li class="breadcrumb-item active text-orange fw-bold" aria-current="page">
+        Lernen
+      </li>
+    </ol>
+  </nav>
   <h2 class="fw-bold">Lernen</h2>
   <p class="text-muted">Einfach und fokussiert lernen</p>
 

@@ -1,6 +1,6 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {QuestionService} from '../../../../shared/src/lib/services/question.service';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
 import {Question} from '../../../../shared/src/lib/interfaces/question';
 import {NgClass, NgForOf, NgIf, SlicePipe} from '@angular/common';
@@ -13,7 +13,8 @@ import {Subject} from '../../../../shared/src/lib/interfaces/subject';
   imports: [
     NgClass,
     NgForOf,
-    NgIf
+    NgIf,
+    RouterLink
   ],
   templateUrl: './question-manager.component.html',
   styleUrl: './question-manager.component.css'

@@ -8,13 +8,14 @@ import {QuestionType} from '../../../../shared/src/lib/interfaces/question';
 import {QuestionRequest, AnswerCreationRequest} from '../../../../shared/src/lib/interfaces/question-creation-request';
 import {Subject} from '../../../../shared/src/lib/interfaces/subject';
 import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 
 @Component({
   selector: 'lib-fragen-konfigurator',
   imports: [
     ReactiveFormsModule,
-    CommonModule
+    CommonModule,
+    RouterLink
   ],
   templateUrl: './fragen-konfigurator.component.html',
   styleUrl: './fragen-konfigurator.component.css'
@@ -30,7 +31,6 @@ export class FragenKonfiguratorComponent implements OnInit {
   subjects: Subject[] = [];
   topicPools: TopicPool[] = [];
   questionTypes = Object.values(QuestionType);
-  
 
   readonly QuestionType = QuestionType;
   readonly maxAnswers = 7;
@@ -46,7 +46,6 @@ export class FragenKonfiguratorComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.subjectId = params['subjectId'] ? Number(params['subjectId']) : undefined;
       this.topicPoolId = params['topicPoolId'] ? Number(params['topicPoolId']) : undefined;
-
       if (this.subjectId) {
         this.questionForm.get('subjectId')?.setValue(this.subjectId);
         this.loadSubjects();
@@ -213,6 +212,7 @@ export class FragenKonfiguratorComponent implements OnInit {
         return type;
     }
   }
+
   addAnswer() {
     const answersArray = this.answersArray;
 

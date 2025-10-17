@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {CommonModule} from '@angular/common';
 import {QuestionService} from '../../../../shared/src/lib/services/question.service';
 import {Question, QuestionType} from '../../../../shared/src/lib/interfaces/question';
@@ -10,7 +10,7 @@ import {ReactiveFormsModule} from '@angular/forms';
   selector: 'lib-frage-card',
   templateUrl: './frage-card.component.html',
   styleUrls: ['./frage-card.component.css'],
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   standalone: true
 })
 

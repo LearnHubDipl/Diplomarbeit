@@ -1,6 +1,24 @@
 <!--von choose-study-topic component -->
 
 <div class="container mt-5">
+  <nav aria-label="breadcrumb" class="mb-4" style="--bs-breadcrumb-divider: '>';">
+    <ol class="breadcrumb fs-5 fw-semibold">
+      <li class="breadcrumb-item">
+        <a routerLink="/chooseStudyOrCreate" class="text-dark text-decoration-none">
+          <i class="bi bi-journal-bookmark me-1"></i>
+          Erstellen & Lernen
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a routerLink="/startCreate" class="text-dark text-decoration-none">
+          Fragen verwalten
+        </a>
+      </li>
+      <li class="breadcrumb-item active text-orange fw-bold" aria-current="page">
+        Bearbeiten
+      </li>
+    </ol>
+  </nav>
   <h2 class="fw-bold text-warning">Fragen bearbeiten/löschen</h2>
   <p class="text-muted">Wähle ein Fach und dann einen Themenpool um ausgewählte Fragen zu bearbeiten & löschen</p>
   <div id="accordionSubjects">

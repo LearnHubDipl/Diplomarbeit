@@ -2,13 +2,13 @@ import { Component, OnInit, inject } from '@angular/core';
 import { SubjectService } from '../../../../shared/src/lib/services/subject.service';
 import { Subject } from '../../../../shared/src/lib/interfaces/subject';
 import { TopicPool } from '../../../../shared/src/lib/interfaces/topic-pool';
-import { Router } from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import { NgForOf, NgClass } from '@angular/common';
 
 @Component({
   selector: 'lib-choose-study-topic',
   standalone: true,
-  imports: [ NgForOf, NgClass],
+  imports: [NgForOf, NgClass, RouterLink],
   templateUrl: './choose-study-topic.component.html',
   styleUrls: ['./choose-study-topic.component.css']
 })
