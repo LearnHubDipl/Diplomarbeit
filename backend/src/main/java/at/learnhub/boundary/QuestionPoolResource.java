@@ -189,4 +189,40 @@ public class QuestionPoolResource {
         List<SubjectDto> subjects = questionPoolRepository.findSubjectsAndTopicPoolsByUserId(userId);
         return Response.ok(subjects).build();
     }
+
+    @POST
+    @Path("/removeQuestions")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Remove given questions from the question pool of the specified user",
+            description = "Returns the updated question pool after removal"
+    )
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "Questions removed successfully",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = QuestionPoolDto.class)
+                    )
+            ),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Requested question pool or questions don't exist!"
+            )
+    })
+    public Response removeQuestions(
+            @RequestBody
+            @Parameter(
+                    description = "Questions to be removed from the question pool and its user id",
+                    required = true,
+                    schema = @Schema(implementation = AddQuestionToQuestionPoolRequestDto.class)
+            )
+            AddQuestionToQuestionPoolRequestDto request
+    ) {
+        QuestionPoolDto pool = questionPoolService.removeQuestionsFromPool(request);
+        return Response.ok(pool).build();
+    }
+
 }

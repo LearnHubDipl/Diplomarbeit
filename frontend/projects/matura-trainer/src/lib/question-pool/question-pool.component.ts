@@ -17,9 +17,6 @@ import {QuestionBrowsingViewComponent} from '../question-browsing-view/question-
 @Component({
   selector: 'lib-question-pool',
   imports: [
-    NgForOf,
-    NgIf,
-    NgClass,
     QuestionBrowsingViewComponent
   ],
   templateUrl: './question-pool.component.html',

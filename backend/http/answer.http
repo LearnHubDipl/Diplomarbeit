@@ -1,0 +1,82 @@
+### Check answers for a question
+### check the correct answer (mulitple choice)
+### should return 200 - correct
+POST {{baseUrl}}/answers/check
+Content-Type: application/json
+
+{
+  "questionId": 1,
+  "selectedAnswerIds": [3]
+}
+
+### check incorrect answers (multiple choice)
+### should return 200 - incorrect
+POST {{baseUrl}}/answers/check
+Content-Type: application/json
+
+{
+  "questionId": 1,
+  "selectedAnswerIds": [2, 4]
+}
+
+### check no answers (multiple choice)
+### should return 200 - incorrect
+POST {{baseUrl}}/answers/check
+Content-Type: application/json
+
+{
+  "questionId": 1,
+  "selectedAnswerIds": []
+}
+
+### check a freetext answer (but for a multiple choice question)
+### should return 200 - incorrect
+POST {{baseUrl}}/answers/check
+Content-Type: application/json
+
+{
+  "questionId": 1,
+  "freeTextAnswer": "This isn't even a freetext question."
+}
+
+### check a freetext answer (freetext)
+### should return 200 - correct
+POST {{baseUrl}}/answers/check
+Content-Type: application/json
+
+{
+  "questionId": 5,
+  "freeTextAnswer": "2x"
+}
+
+
+### check answer for a non existant question
+### should return 404 - Question with Id not found
+POST {{baseUrl}}/answers/check
+Content-Type: application/json
+
+{
+  "questionId": -3,
+  "freeTextAnswer": "2x"
+}
+
+### check answers that do not exist
+### should return 200 - incorrect
+POST {{baseUrl}}/answers/check
+Content-Type: application/json
+
+{
+  "questionId": 1,
+  "selectedAnswerIds": [-2]
+}
+
+
+
+### missing questionId
+### should return 400 - Missing question ID
+POST {{baseUrl}}/answers/check
+Content-Type: application/json
+
+{
+  "selectedAnswerIds": [1]
+}

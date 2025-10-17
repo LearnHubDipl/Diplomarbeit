@@ -87,27 +87,56 @@
       <button
         type="button"
         class="submit-btn"
+        [disabled]="currentQuestionIndex >= currentQuestions.length - 1 && !navigateBack"
         (click)="currentQuestionIndex < currentQuestions.length - 1 ?
           navigateExam('next') :
           finish()">
-        {{ currentQuestionIndex < currentQuestions.length - 1 ? 'Weiter →' : 'Fertigstellen' }}
+        {{ currentQuestionIndex >= currentQuestions.length - 1 && navigateBack ?  'Fertigstellen' : 'Weiter →' }}
       </button>
     </div>
   </form>
 </div>
 
+
 <div *ngIf="hasSolutions && submitted && (mode === 'practice' || mode === 'review')" style="margin-top: 3rem;" class="widget-wrapper">
   <div class="header">TOP Lösungsweg</div>
 
+  <!-- Top Lösung -->
   <div class="widget-content">
-    <div *ngFor="let currentStep of this.question?.solutions?.[0]?.steps">
-      <h5>{{ currentStep.title }}</h5>
-      <p>{{ currentStep.text }}</p>
+    <div *ngFor="let step of solutions[0]?.steps">
+      <h5>{{ step.title }}</h5>
+      <p>{{ step.text }}</p>
     </div>
+
     <div class="vote-wrapper">
-      <img src="https://www.pngmart.com/files/23/Upvote-PNG-Photos.png">
-      <p>{{ this.question?.solutions?.[0]?.upVotes }}</p>
-      <img src="https://i.imgur.com/2mVSBqP.png">
+      <img src="https://www.pngmart.com/files/23/Upvote-PNG-Photos.png"
+           (click)="upvoteSolution(solutions[0].id)"
+           style="cursor:pointer; width: 24px; margin-right: 5px;">
+      <p>{{ voteCounts[solutions[0].id] ?? solutions[0].upVotes }}</p>
+      <img src="https://i.imgur.com/2mVSBqP.png"
+           (click)="downvoteSolution(solutions[0].id)"
+           style="cursor:pointer; width: 24px; margin-left: 5px;">
+    </div>
+  </div>
+
+  <div class="viewMore-btn" *ngIf="hasMultipleSolutions" (click)="showAllSolutions = !showAllSolutions">
+    {{ showAllSolutions ? 'Weniger anzeigen' : 'Mehr anzeigen' }}
+  </div>
+
+  <div *ngFor="let solution of solutions.slice(1)" class="widget-content" [hidden]="!showAllSolutions">
+    <div *ngFor="let step of solution.steps">
+      <h5>{{ step.title }}</h5>
+      <p>{{ step.text }}</p>
+    </div>
+
+    <div class="vote-wrapper">
+      <img src="https://www.pngmart.com/files/23/Upvote-PNG-Photos.png"
+           (click)="upvoteSolution(solution.id)"
+           style="cursor:pointer; width: 24px; margin-right: 5px;">
+      <p>{{ voteCounts[solution.id] ?? solution.upVotes }}</p>
+      <img src="https://i.imgur.com/2mVSBqP.png"
+           (click)="downvoteSolution(solution.id)"
+           style="cursor:pointer; width: 24px; margin-left: 5px;">
     </div>
   </div>
 </div>

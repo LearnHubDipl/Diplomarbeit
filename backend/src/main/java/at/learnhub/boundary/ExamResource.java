@@ -5,6 +5,7 @@ import at.learnhub.dto.request.SubmitExamRequestDto;
 import at.learnhub.dto.response.CreatedExamResponseDto;
 import at.learnhub.dto.response.SubmittedExamResponseDto;
 import at.learnhub.dto.simple.ExamDto;
+import at.learnhub.dto.simple.UserExamAverageDto;
 import at.learnhub.service.ExamService;
 import at.learnhub.repository.ExamRepository;
 import jakarta.inject.Inject;
@@ -155,4 +156,33 @@ public class ExamResource {
         ExamDto response = examService.submitExam(request);
         return Response.ok(response).build();
     }
+
+
+    @GET
+    @Path("/by-user")
+    public Response getExamsByUser(@QueryParam("userId") Long userId) {
+        if (userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("userId is required")
+                    .build();
+        }
+
+        List<ExamDto> exams = examRepository.findByUserId(userId);
+        return Response.ok(exams).build();
+    }
+
+    @GET
+    @Path("/by-user/average")
+    public Response getAverageByUser(@QueryParam("userId") Long userId) {
+        if (userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("userId is required")
+                    .build();
+        }
+
+        UserExamAverageDto dto = examRepository.findAverageAndCountByUserId(userId);
+
+        return Response.ok(dto).build();
+    }
+
 }

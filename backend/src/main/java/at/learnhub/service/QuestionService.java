@@ -5,10 +5,7 @@ import at.learnhub.dto.request.QuestionCreationRequestDto;
 import at.learnhub.dto.response.CheckAnswersResponseDto;
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.mapper.QuestionMapper;
-import at.learnhub.model.Answer;
-import at.learnhub.model.Question;
-import at.learnhub.model.TopicPool;
-import at.learnhub.model.User;
+import at.learnhub.model.*;
 import at.learnhub.repository.AnswerRepository;
 import at.learnhub.repository.QuestionRepository;
 import at.learnhub.repository.TopicPoolRepository;
@@ -17,9 +14,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class QuestionService {
@@ -69,4 +70,7 @@ public class QuestionService {
     }
 
 
+    public List<Long> getQuestionIds(Long topicPoolId, Long userId) {
+        return questionRepository.findIdsByUserAndTopicPool(userId, topicPoolId);
+    }
 }

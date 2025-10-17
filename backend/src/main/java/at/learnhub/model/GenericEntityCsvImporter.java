@@ -275,7 +275,7 @@ public class GenericEntityCsvImporter {
      * @return a parsed Java object
      */
     private Object convertValue(Class<?> type, String value) {
-        if (value == null || value.isEmpty()) return null;
+        if (value == null || value.isEmpty() || value.equalsIgnoreCase("null")) return null;
         if (type == Long.class || type == long.class) return Long.parseLong(value);
         if (type == Integer.class || type == int.class) return Integer.parseInt(value);
         if (type == Double.class || type == double.class) return Double.parseDouble(value);
@@ -295,6 +295,7 @@ public class GenericEntityCsvImporter {
         }
         return value;
     }
+
 
     /**
      * Converts snake-case or kebab-case file names to PascalCase class names.

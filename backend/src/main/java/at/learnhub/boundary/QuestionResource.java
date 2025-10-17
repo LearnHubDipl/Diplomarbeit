@@ -336,4 +336,47 @@ public class QuestionResource {
         Question updated = questionRepository.updateQuestion(id, request);
         return Response.ok(QuestionMapper.toDto(updated)).build();
     }
+
+    @GET
+    @Path("/ids")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Get only question IDs",
+            description = "Returns only the IDs of questions, either all or filtered by topic pool ID"
+    )
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "200",
+                    description = "List of question IDs",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(
+                                    type = SchemaType.ARRAY,
+                                    implementation = Long.class
+                            )
+                    )
+            )
+    })
+    public Response getQuestionIds(
+            @Parameter(
+                    description = "Optional topic pool id to filter questions",
+                    required = false,
+                    example = "5"
+            )
+            @QueryParam("topicPoolId") Long topicPoolId,
+            @Parameter(
+                    description = "User id to filter questions",
+                    required = true,
+                    example = "1"
+            )
+            @QueryParam("userId") Long userId
+    ) {
+        if (userId == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("userId must be provided").build();
+        }
+        List<Long> ids = questionService.getQuestionIds(topicPoolId, userId);
+        return Response.ok(ids).build();
+    }
+
 }
