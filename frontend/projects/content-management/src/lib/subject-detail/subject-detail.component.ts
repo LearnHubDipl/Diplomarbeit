@@ -26,27 +26,20 @@ export class SubjectDetailComponent implements OnInit {
   pools: TopicPool[] = [];
   selectedPoolId?: number;
 
-  uploadOpen = false;
   title = '';
   uploaderName = '';
   file: File | null = null;
   poolForUpload: number | null = null;
   newPoolName = '';
   loading = false;
-  uploading = false;
   error: string | null = null;
-  previewSrc: SafeResourceUrl | null = null;
   private lastDataUrl: string | null = null;
-  uploaderUserId: number | null = null;
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly subjectsApi: SubjectService,
     private readonly poolsApi: TopicPoolService,
-    private readonly contentsApi: TopicContentService,
-    private readonly fileService: FileService,
-    private readonly sanitizer: DomSanitizer
   ) {
   }
 

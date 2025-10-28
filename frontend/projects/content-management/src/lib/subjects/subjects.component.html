@@ -17,17 +17,6 @@
       </lib-subject-card>
     </div>
   </div>
-
-
-  <!-- Upload-Banner -->
-  <!--
-  <lib-upload-banner
-    class="mt-4"
-    title="Wollen Sie etwas hochladen?"
-    subtitle="Falls Fach oder Themenpool fehlen, können Sie das beim Upload anlegen."
-    buttonText="Upload starten"
-    link="/startCreate">
-  </lib-upload-banner>-->
 </div>
 
 
@@ -48,9 +37,22 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Bild-URL (optional)</label>
+          <label class="form-label">Bild-URL</label>
           <input class="form-control" type="text" [(ngModel)]="newImageUrl" placeholder="/uploads/images/mathe.jpg oder https://…">
-          <small class="text-muted">Es wird kein Upload durchgeführt. Der Server/externen Speicher muss den Pfad bereitstellen.</small>
+          <div *ngIf="newImageUrl" class="mt-3 text-center">
+          <img
+            [src]="normalizedNewImageUrl"
+            alt="Bildvorschau"
+            class="img-fluid rounded shadow-sm"
+            style="max-height: 200px; object-fit: contain;"
+            (error)="imageError = true"
+            (load)="imageError = false"
+          />
+          <div *ngIf="imageError" class="text-danger mt-2">
+            ⚠️ Das Bild konnte nicht geladen werden. Bitte überprüfe die URL.
+          </div>
+        </div>
+
         </div>
 
         <div class="mb-0">

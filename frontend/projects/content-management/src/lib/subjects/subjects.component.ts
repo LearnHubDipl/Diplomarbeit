@@ -15,7 +15,7 @@ import {finalize, firstValueFrom, of, switchMap} from 'rxjs';
 @Component({
   selector: 'lib-subjects',
   standalone: true,
-  imports: [CommonModule, FormsModule, SubjectCardComponent, UploadBannerComponent],
+  imports: [CommonModule, FormsModule, SubjectCardComponent],
   templateUrl: './subjects.component.html'
 })
 export class SubjectsComponent implements OnInit {
@@ -36,6 +36,7 @@ export class SubjectsComponent implements OnInit {
   editDescription = '';
   editImageUrl = '';
   editImageDesc = '';
+  imageError = false;
 
   constructor(
     private subjectsApi: SubjectService,
@@ -60,34 +61,61 @@ export class SubjectsComponent implements OnInit {
     this.newPoolsText = ''; this.newImageUrl = ''; this.newImageDesc = '';
   }
 
-  submitCreate() {
-    const names = (this.newPoolsText || '')
+  async submitCreate(): Promise<void> {
+    const name = this.newName.trim();
+    if (!name) return;
+
+    const description = this.newDescription || '';
+    const path = this.newImageUrl.trim();
+    const pools = (this.newPoolsText || '')
       .split('\n')
       .map(s => s.trim())
       .filter(Boolean)
       .slice(0, 10);
 
     this.loading = true;
-    this.subjectsApi.create({
-      name: this.newName.trim(),
-      description: this.newDescription || '',
-      imageUrl: this.newImageUrl.trim() || undefined
-    })
-      .pipe(
-        switchMap(created =>
-          names.length ? this.poolsApi.createBatch(created.id, names) : of([])
-        ),
-        finalize(() => this.loading = false)
-      )
-      .subscribe({
-        next: () => {
-          this.createOpen = false;
-          this.cancelCreate();   // Felder leeren
-          this.load();           // Liste wirklich neu laden
-        },
-        error: (err) => alert(err?.error?.message || 'Anlegen fehlgeschlagen')
-      });
+
+    try {
+      let imgId: number | undefined;
+
+
+      if (path) {
+
+        const media = await firstValueFrom(
+          this.mediaApi.create({
+            path,
+            type: 'img',
+            description: this.newImageDesc || undefined
+          })
+        );
+        imgId = media?.id;
+      }
+
+
+      const body: any = {
+        name,
+        description
+      };
+      if (imgId) {
+        body.img = { id: imgId };
+      }
+
+      const created = await firstValueFrom(this.subjectsApi.create(body));
+
+      if (pools.length) {
+        await firstValueFrom(this.poolsApi.createBatch(created.id, pools));
+      }
+
+      this.cancelCreate();
+      this.load();
+    } catch (err: any) {
+      console.error(err);
+      alert(err?.error?.message || err?.message || 'Fach konnte nicht erstellt werden.');
+    } finally {
+      this.loading = false;
+    }
   }
+
 
 
   onEdit(s: Subject): void {
@@ -142,4 +170,13 @@ export class SubjectsComponent implements OnInit {
   }
 
   trackSubject = (_: number, s: Subject) => s?.id ?? -1;
+
+
+  get normalizedNewImageUrl(): string {
+    const p = (this.newImageUrl || '').trim();
+    if (!p) return '';
+    if (/^https?:\/\//i.test(p) || p.startsWith('/')) return p;
+    return '/' + p;
+  }
+
 }
