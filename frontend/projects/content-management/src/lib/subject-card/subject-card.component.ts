@@ -38,4 +38,6 @@ export class SubjectCardComponent {
     this.remove.emit(this.subject);
     this.closeMenu();
   }
+
+
 }

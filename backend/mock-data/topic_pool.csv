@@ -1,8 +1,39 @@
 name,description,subjectId
-Algebra Grundlagen,Grundlagen der Algebra und linearen Gleichungen,1
-Mechanik,Bewegungsgesetze und Kräfte in der Physik,2
-Genetik,Vererbung und DNA-Struktur,3
-Analysis,Einstieg in die Differentialrechnung,1
-Thermodynamik,Wärmelehre und Energieübertragung,2
-Evolutionstheorie,Entwicklung des Lebens auf der Erde,3
-Kombinatorik,Teil der Wahrscheinlichkeitsberechnung,1
+"Algebra Grundlagen","Grundlagen der Algebra und linearen Gleichungen",1
+"Planung","Projektplanung, Zeitmanagement und Ressourcenverteilung",2
+"Web Technologien","Entwicklung von Websites mit modernen Webframeworks",3
+"Analysis","Einstieg in die Differentialrechnung",1
+"Kontrolle und Steuerung","Überwachung des Projektfortschritts und Anpassung von Prozessen",2
+"Akustische und visuelle Wahrnehmung","Gestaltung, Design, Schall, Printtechnik und Datenbereitstellung",3
+"Kombinatorik","Teil der Wahrscheinlichkeitsberechnung",1
+
+"Sprache und Kommunikation","Analyse der Bedeutung und Wirkung von Sprache in Gesellschaft und Medien",4
+"Medien und Gesellschaft","Einfluss moderner Medien auf Denken und Handeln",4
+"Literatur und Identität","Selbstdarstellung und Identitätssuche in literarischen Texten",4
+"Arbeit und Zukunft","Veränderung der Arbeitswelt durch Digitalisierung",4
+"Umwelt und Verantwortung","Umgang des Menschen mit Natur und Klimawandel",4
+"Zusammenleben in der Gesellschaft","Toleranz, Integration und Generationenkonflikte",4
+
+"Communication and Media","Impact of social media and fake news on communication",5
+"Environment and Sustainability","Climate change and sustainable lifestyles",5
+"Work and Future","Changing work environments and future career choices",5
+"Education and Learning","The role of technology and lifelong learning in education",5
+"Society and Culture","Cultural diversity, tolerance and gender equality",5
+"Health and Lifestyle","Mental health and modern lifestyles",5
+
+"Funktionen","Untersuchung und Anwendung verschiedener Funktionstypen",1
+"Geometrie und Vektoren","Räumliche Darstellung und Berechnungen mit Vektoren",1
+"Statistik und Wahrscheinlichkeitsrechnung","Auswertung von Daten und Berechnung von Wahrscheinlichkeiten",1
+"Finanzmathematik","Berechnung von Zinsen, Wachstums- und Tilgungsmodellen",1
+
+"Analyse","Anforderungsanalyse und Systemanalyse im Projektkontext",2
+"Design","Gestaltung und Strukturierung von Softwareprojekten",2
+"Qualitätssicherung","Teststrategien und Qualitätssicherungsmethoden",2
+"Vorgehensmodelle","Projektablaufmodelle wie Wasserfall und agile Methoden",2
+
+"Foto- und Bildbearbeitung","Hard- und Softwareeinsatz in der Bildbearbeitung",3
+"Videotechnik","Anwendung von Hard- und Software zur Videoproduktion",3
+"Audiotechnik","Aufnahme und Bearbeitung von Audio mit Hard- und Software",3
+"Contentmanagementsysteme","Erstellung von Websites und Apps mit CMS-Systemen",3
+"Kommunikation und Social Media","Medienrecht, Werbung und Kommunikationsstrategien",3
+"3D-Modellierung und Animation","Erstellung von 3D-Objekten, Interaktion und Simulation",3
