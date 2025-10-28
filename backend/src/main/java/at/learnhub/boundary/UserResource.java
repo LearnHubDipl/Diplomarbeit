@@ -54,5 +54,6 @@ public class UserResource {
         UserSlimDto user = userRepository.getUserSlimDtoById(id);
         return Response.ok(user).build();
     }
+
 }
 

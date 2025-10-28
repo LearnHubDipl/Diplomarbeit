@@ -10,8 +10,19 @@ import java.util.List;
  */
 @Entity
 @Table(name = "\"user\"")
+@NamedQueries({
+        @NamedQuery(
+                name = User.FIND_BY_UUID,
+                query = "SELECT u FROM User u WHERE u.keycloakUuid = :uuid"
+        ),
+        @NamedQuery(
+                name = User.FIND_BY_EMAIL,
+                query = "SELECT u FROM User u WHERE u.email = :email"
+        )
+})
 public class User {
-
+    public static final String FIND_BY_UUID = "User.findByUuid";
+    public static final String FIND_BY_EMAIL = "User.findByEmail";
     /**
      * Unique identifier of the user.
      * Example: 123
@@ -19,6 +30,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /**
+     * Keycloak UUID of the user.
+     * Example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+     */
+    @Column(name = "keycloak_uuid", unique = true)
+    private String keycloakUuid;
 
     /**
      * Full name of the user.
@@ -116,8 +134,25 @@ public class User {
     @JsonIgnoreProperties({"user"})
     private List<SolutionVote> solutionVotes;
 
-
+    //Constructors
+    public User() {
+    }
+    public User(String keycloakUuid, String name, String email, Boolean isTeacher) {
+        this.keycloakUuid = keycloakUuid;
+        this.name = name;
+        this.email = email;
+        this.isTeacher = isTeacher;
+        this.isAdmin = false;
+    }
     // Getter und Setter
+
+    public String getKeycloakUuid() {
+        return keycloakUuid;
+    }
+
+    public void setKeycloakUuid(String keycloakUuid) {
+        this.keycloakUuid = keycloakUuid;
+    }
 
     public Long getId() {
         return id;

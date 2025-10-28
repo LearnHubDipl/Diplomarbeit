@@ -7,8 +7,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.NoResultException;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class UserRepository {
@@ -56,4 +59,27 @@ public class UserRepository {
                 .map(UserMapper::toSlimDto)
                 .toList();
     }
+
+    public Optional<UserSlimDto> findByKeycloakUuid(String uuid) {
+        try {
+            User user = em.createNamedQuery(User.FIND_BY_UUID, User.class)
+                    .setParameter("uuid", uuid)
+                    .getSingleResult();
+            return Optional.of(UserMapper.toSlimDto(user));
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<UserSlimDto> findByEmail(String email) {
+        try {
+            User user = em.createNamedQuery(User.FIND_BY_EMAIL, User.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+            return Optional.of(UserMapper.toSlimDto(user));
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+    }
+
 }

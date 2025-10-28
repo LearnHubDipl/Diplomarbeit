@@ -1,6 +1,6 @@
 ### Get question pool for a user
 ### should return 200 - the user's question pool
-GET {{baseUrl}}/questionPools/1
+GET http://localhost:8080/api/questionPools/1
 Accept: application/json
 
 ### Get question pool for a non-existent user
