@@ -50,6 +50,10 @@ export class ExamService {
     return this.httpClient.post<CreatedExamResponse>(`${API_BASE_URL}/exams/create`, request);
   }
 
+  createExamCopy(id: number): Observable<CreatedExamResponse> {
+    return this.httpClient.get<CreatedExamResponse>(`${API_BASE_URL}/exams/create-copy/` + id);
+  }
+
   submitExam(request: SubmitExamRequest): Observable<Exam> {
     return this.httpClient.post<Exam>(`${API_BASE_URL}/exams/submit`, request);
   }

@@ -131,6 +131,38 @@ public class ExamService {
         );
     }
 
+    @Transactional
+    public CreatedExamResponseDto createExamCopy(Long id) {
+        Exam exam = examRepository.getEntityById(id);
+
+        Exam newExam = new Exam();
+        newExam.setUser(exam.getUser());
+        newExam.setTopicPools(exam.getTopicPools());
+        newExam.setTimeLimit(exam.getTimeLimit());
+        newExam.setQuestionCount(exam.getQuestionCount());
+        newExam.setStartedAt(LocalDateTime.now());
+
+        List<ExamQuestion> questions = new ArrayList<>();
+        for (ExamQuestion q : exam.getQuestions()) {
+            ExamQuestion newQ = new ExamQuestion();
+
+            newQ.setExam(newExam);
+            newQ.setEntry(q.getEntry());
+            newQ.setCorrect(false);
+            questions.add(newQ);
+        }
+        newExam.setQuestions(questions);
+
+        entityManager.persist(newExam);
+
+        return new CreatedExamResponseDto(newExam.getId(), newExam.getTimeLimit(), newExam.getStartedAt(),
+                newExam.getQuestionCount(), newExam.getQuestions().stream().map(eq -> {
+                    Question q = eq.getEntry().getQuestion();
+                    return QuestionMapper.toSlimDto(q);
+                }).toList()
+        );
+    }
+
 
 
 

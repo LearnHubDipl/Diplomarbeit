@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, Input, OnInit} from '@angular/core';
 import {QuestionRunnerComponent} from '../question-runner/question-runner.component';
 import {CheckAnswerRequest} from '../../../../shared/src/lib/interfaces/answer';
 import {CreatedExamResponse, ExamService} from '../../../../shared/src/lib/services/exam.service';
@@ -32,22 +32,29 @@ export class ExamComponent implements OnInit{
   ngOnInit() {
     // Grab the settings passed via router state
     const settings = history.state.settings;
+    let examCreated = history.state.examCreated;
     if (!settings) {
       console.error('No exam settings provided!');
       return;
     }
 
-    this.examService.createExam(settings).subscribe({
-      next: (createdExam) => {
-        this.exam = createdExam;
-        this.questionIds = createdExam.questions.map(q => q.id);
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Failed to create exam', err);
-        this.isLoading = false;
-      }
-    });
+    if (!examCreated) {
+      this.examService.createExam(settings).subscribe({
+        next: (createdExam) => {
+          this.exam = createdExam;
+          this.questionIds = createdExam.questions.map(q => q.id);
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Failed to create exam', err);
+          this.isLoading = false;
+        }
+      });
+    } else {
+      this.exam = settings;
+      this.questionIds = this.exam!.questions.map(q => q.id);
+      this.isLoading = false;
+    }
   }
 
   storeAnswer(answer: CheckAnswerRequest) {

@@ -5,13 +5,15 @@ import {NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {CheckAnswerRequest} from '../../../../shared/src/lib/interfaces/answer';
 import {AnswerService} from '../../../../shared/src/lib/services/answer.service';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {Location} from '@angular/common';
 import {Exam} from '../../../../shared/src/lib/interfaces/exam';
 import {QuestionPoolService} from '../../../../shared/src/lib/services/question-pool.service';
 import {StatsService} from '../../../../shared/src/lib/services/stats.service';
 import {SolutionService} from '../../../../shared/src/lib/services/solution.service';
 import {Solution} from '../../../../shared/src/lib/interfaces/solution';
+import {Observable} from 'rxjs';
+import {CreatedExamResponse, ExamService} from '../../../../shared/src/lib/services/exam.service';
 
 
 @Component({
@@ -47,6 +49,7 @@ export class QuestionRunnerComponent implements OnInit {
   answerService = inject(AnswerService);
   questionPoolService = inject(QuestionPoolService);
   solutionService = inject(SolutionService);
+  examService = inject(ExamService);
   fb = inject(FormBuilder);
   route: ActivatedRoute = inject(ActivatedRoute);
   location: Location = inject(Location)
@@ -67,6 +70,8 @@ export class QuestionRunnerComponent implements OnInit {
 
   submitted = false;
   showAllSolutions = false;
+
+  router: Router = inject(Router);
 
 
   ngOnInit() {
@@ -277,6 +282,16 @@ export class QuestionRunnerComponent implements OnInit {
       this.finishedExam.emit(allAnswers);
     }
   }
+
+  createExamCopy(id: number) {
+    this.examService.createExamCopy(id).subscribe(exam => {
+      let settings = exam;
+      this.router.navigate(['/trainer/practice/setup-exam/exam'], {
+        state: { settings, "examCreated": true }
+      });
+    })
+  }
+
   loadVotes(solutionId: number) {
     this.solutionService.getVoteCount(solutionId).subscribe({
       next: (res) => this.voteCounts[solutionId] = res.score,
