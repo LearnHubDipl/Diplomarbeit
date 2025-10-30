@@ -7,7 +7,6 @@
   <div *ngIf="loading" class="alert alert-secondary">Lade Fächer ...</div>
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-
   <div class="row row-cols-1 row-cols-md-2 g-3">
     <div class="col" *ngFor="let s of subjects; trackBy: trackSubject">
       <lib-subject-card
@@ -19,9 +18,8 @@
   </div>
 </div>
 
-
-<div class="modal fade show" tabindex="-1"
-     style="display:block; background: rgba(0,0,0,.35);" *ngIf="createOpen">
+<!-- Modal: Neues Fach hinzufügen -->
+<div class="modal fade show" tabindex="-1" style="display:block; background: rgba(0,0,0,.35);" *ngIf="createOpen">
   <div class="modal-dialog">
     <div class="modal-content">
 
@@ -37,22 +35,32 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Bild-URL</label>
-          <input class="form-control" type="text" [(ngModel)]="newImageUrl" placeholder="/uploads/images/mathe.jpg oder https://…">
-          <div *ngIf="newImageUrl" class="mt-3 text-center">
-          <img
-            [src]="normalizedNewImageUrl"
-            alt="Bildvorschau"
-            class="img-fluid rounded shadow-sm"
-            style="max-height: 200px; object-fit: contain;"
-            (error)="imageError = true"
-            (load)="imageError = false"
-          />
-          <div *ngIf="imageError" class="text-danger mt-2">
-            ⚠️ Das Bild konnte nicht geladen werden. Bitte überprüfe die URL.
-          </div>
+          <label class="form-label">Beschreibung</label>
+          <textarea class="form-control" rows="3" [(ngModel)]="newDescription" placeholder="Kurzbeschreibung zum Fach"></textarea>
         </div>
 
+        <div class="mb-3">
+          <label class="form-label">Bild-URL</label>
+          <input class="form-control" type="text" [(ngModel)]="newImageUrl" placeholder="https://…">
+
+          <div class="mt-2">
+            <label class="form-label">Bildbeschreibung (Alt-Text)</label>
+            <input class="form-control" type="text" [(ngModel)]="newImageDesc" placeholder="z. B. Mathe-Formeln an der Tafel">
+          </div>
+
+          <div *ngIf="newImageUrl" class="mt-3 text-center">
+            <img
+              [src]="normalizedNewImageUrl"
+              alt="Bildvorschau"
+              class="img-fluid rounded shadow-sm"
+              style="max-height: 200px; object-fit: contain;"
+              (error)="imageError = true"
+              (load)="imageError = false"
+            />
+            <div *ngIf="imageError" class="text-danger mt-2">
+              ⚠️ Das Bild konnte nicht geladen werden. Bitte überprüfe die URL.
+            </div>
+          </div>
         </div>
 
         <div class="mb-0">
@@ -61,21 +69,18 @@
                     placeholder="Algebra&#10;Geometrie&#10;..."></textarea>
           <small class="text-muted">Diese Themenpools werden dem neuen Fach hinzugefügt.</small>
         </div>
-
       </div>
 
       <div class="modal-footer">
         <button class="btn btn-dark" (click)="submitCreate()">Speichern</button>
         <button class="btn btn-outline-secondary" (click)="cancelCreate()">Abbrechen</button>
       </div>
-
     </div>
   </div>
 </div>
 
 <!-- Modal: Fach bearbeiten -->
-<div class="modal fade show" tabindex="-1"
-     style="display:block; background: rgba(0,0,0,.35);" *ngIf="editOpen">
+<div class="modal fade show" tabindex="-1" style="display:block; background: rgba(0,0,0,.35);" *ngIf="editOpen">
   <div class="modal-dialog">
     <div class="modal-content">
 
@@ -84,21 +89,40 @@
         <button type="button" class="btn-close" (click)="cancelEdit()"></button>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Neues Bild per URL (optional)</label>
-        <input class="form-control" type="text" [(ngModel)]="editImageUrl" placeholder="/uploads/images/neues.jpg oder https://…">
-        <small class="text-muted">Nur ausfüllen, wenn du das Bild ersetzen willst.</small>
-      </div>
-
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label">Fachname</label>
           <input class="form-control" type="text" [(ngModel)]="editName">
         </div>
 
-        <div class="mb-0">
+        <div class="mb-3">
           <label class="form-label">Beschreibung</label>
           <textarea class="form-control" rows="3" [(ngModel)]="editDescription"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Neues Bild per URL (optional)</label>
+          <input class="form-control" type="text" [(ngModel)]="editImageUrl" placeholder="https://…">
+          <small class="text-muted">Nur ausfüllen, wenn du das Bild ersetzen willst.</small>
+
+          <div class="mt-2">
+            <label class="form-label">Bildbeschreibung (Alt-Text)</label>
+            <input class="form-control" type="text" [(ngModel)]="editImageDesc" placeholder="Beschreibe das Bild kurz (Alt-Text)">
+          </div>
+
+          <div *ngIf="editImageUrl" class="mt-3 text-center">
+            <img
+              [src]="normalizedEditImageUrl"
+              alt="Neue Bildvorschau"
+              class="img-fluid rounded shadow-sm"
+              style="max-height: 200px; object-fit: contain;"
+              (error)="editImageError = true"
+              (load)="editImageError = false"
+            />
+            <div *ngIf="editImageError" class="text-danger mt-2">
+              ⚠️ Das Bild konnte nicht geladen werden. Bitte überprüfe die URL.
+            </div>
+          </div>
         </div>
       </div>
 
@@ -106,7 +130,6 @@
         <button class="btn btn-dark" (click)="submitEdit()">Speichern</button>
         <button class="btn btn-outline-secondary" (click)="cancelEdit()">Abbrechen</button>
       </div>
-
     </div>
   </div>
 </div>

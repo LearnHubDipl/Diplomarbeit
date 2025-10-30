@@ -5,12 +5,10 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from '../../../../shared/src/lib/interfaces/subject';
 import { SubjectService } from '../../../../shared/src/lib/services/subject.service';
 import { TopicPoolService } from '../../../../shared/src/lib/services/topic-pool.service';
-
+import { MediaService } from '../../../../shared/src/lib/services/media-service';
+import { firstValueFrom } from 'rxjs';
 
 import { SubjectCardComponent } from '../subject-card/subject-card.component';
-import { UploadBannerComponent } from '../upload-banner/upload-banner.component';
-import {MediaService} from '../../../../shared/src/lib/services/media-service';
-import {finalize, firstValueFrom, of, switchMap} from 'rxjs';
 
 @Component({
   selector: 'lib-subjects',
@@ -22,13 +20,14 @@ export class SubjectsComponent implements OnInit {
   subjects: Subject[] = [];
   loading = false;
   error: string | null = null;
-
+  
   createOpen = false;
   newName = '';
   newDescription = '';
   newPoolsText = '';
   newImageUrl = '';
   newImageDesc = '';
+  imageError = false;
 
   editOpen = false;
   editId: number | null = null;
@@ -36,7 +35,7 @@ export class SubjectsComponent implements OnInit {
   editDescription = '';
   editImageUrl = '';
   editImageDesc = '';
-  imageError = false;
+  editImageError = false;
 
   constructor(
     private subjectsApi: SubjectService,
@@ -44,21 +43,37 @@ export class SubjectsComponent implements OnInit {
     private mediaApi: MediaService
   ) {}
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+  }
 
   load(): void {
-    this.loading = true; this.error = null;
+    this.loading = true;
+    this.error = null;
     this.subjectsApi.getAllSubjects().subscribe({
-      next: (list) => { this.subjects = list ?? []; this.loading = false; },
-      error: () => { this.error = 'Fächer konnten nicht geladen werden.'; this.loading = false; }
+      next: (list) => {
+        this.subjects = list ?? [];
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Fächer konnten nicht geladen werden.';
+        this.loading = false;
+      }
     });
   }
 
-  openCreate(): void { this.createOpen = true; }
+  openCreate(): void {
+    this.createOpen = true;
+  }
+
   cancelCreate(): void {
     this.createOpen = false;
-    this.newName = ''; this.newDescription = '';
-    this.newPoolsText = ''; this.newImageUrl = ''; this.newImageDesc = '';
+    this.newName = '';
+    this.newDescription = '';
+    this.newPoolsText = '';
+    this.newImageUrl = '';
+    this.newImageDesc = '';
+    this.imageError = false;
   }
 
   async submitCreate(): Promise<void> {
@@ -69,7 +84,7 @@ export class SubjectsComponent implements OnInit {
     const path = this.newImageUrl.trim();
     const pools = (this.newPoolsText || '')
       .split('\n')
-      .map(s => s.trim())
+      .map((s) => s.trim())
       .filter(Boolean)
       .slice(0, 10);
 
@@ -78,9 +93,7 @@ export class SubjectsComponent implements OnInit {
     try {
       let imgId: number | undefined;
 
-
       if (path) {
-
         const media = await firstValueFrom(
           this.mediaApi.create({
             path,
@@ -91,14 +104,11 @@ export class SubjectsComponent implements OnInit {
         imgId = media?.id;
       }
 
-
       const body: any = {
         name,
-        description
+        description,
+        ...(imgId !== undefined ? { imgId } : {})
       };
-      if (imgId) {
-        body.img = { id: imgId };
-      }
 
       const created = await firstValueFrom(this.subjectsApi.create(body));
 
@@ -116,8 +126,6 @@ export class SubjectsComponent implements OnInit {
     }
   }
 
-
-
   onEdit(s: Subject): void {
     this.editId = s.id;
     this.editName = s.name;
@@ -126,12 +134,17 @@ export class SubjectsComponent implements OnInit {
     this.editImageDesc = '';
     this.editOpen = true;
   }
+
   cancelEdit(): void {
     this.editOpen = false;
     this.editId = null;
-    this.editName = ''; this.editDescription = '';
-    this.editImageUrl = ''; this.editImageDesc = '';
+    this.editName = '';
+    this.editDescription = '';
+    this.editImageUrl = '';
+    this.editImageDesc = '';
+    this.editImageError = false;
   }
+
   async submitEdit(): Promise<void> {
     if (this.editId == null) return;
     const name = this.editName.trim();
@@ -140,18 +153,25 @@ export class SubjectsComponent implements OnInit {
     try {
       let imgId: number | undefined;
       const path = this.editImageUrl.trim();
+
       if (path) {
         const media = await firstValueFrom(
-          this.mediaApi.create({path, type: 'img', description: this.editImageDesc || undefined})
+          this.mediaApi.create({
+            path,
+            type: 'img',
+            description: this.editImageDesc || undefined
+          })
         );
         imgId = media?.id;
       }
 
-      await firstValueFrom(this.subjectsApi.update(this.editId, {
-        name,
-        description: this.editDescription || '',
-        ...(imgId !== undefined ? {imgId} : {})
-      }));
+      await firstValueFrom(
+        this.subjectsApi.update(this.editId, {
+          name,
+          description: this.editDescription || '',
+          ...(imgId !== undefined ? { imgId } : {})
+        })
+      );
 
       this.cancelEdit();
       this.load();
@@ -171,7 +191,6 @@ export class SubjectsComponent implements OnInit {
 
   trackSubject = (_: number, s: Subject) => s?.id ?? -1;
 
-
   get normalizedNewImageUrl(): string {
     const p = (this.newImageUrl || '').trim();
     if (!p) return '';
@@ -179,4 +198,10 @@ export class SubjectsComponent implements OnInit {
     return '/' + p;
   }
 
+  get normalizedEditImageUrl(): string {
+    const p = (this.editImageUrl || '').trim();
+    if (!p) return '';
+    if (/^https?:\/\//i.test(p) || p.startsWith('/')) return p;
+    return '/' + p;
+  }
 }
