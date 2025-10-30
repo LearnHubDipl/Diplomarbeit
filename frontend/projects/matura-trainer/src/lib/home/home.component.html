@@ -32,7 +32,11 @@
             </select>
           </div>
 
-          <button class="action-button" (click)="startPractice()">Üben</button>
+          <button class="action-button"
+                  (click)="startPractice()"
+                  [disabled]="!hasQuestions">
+            Üben
+          </button>
         </div>
       </div>
     </div>

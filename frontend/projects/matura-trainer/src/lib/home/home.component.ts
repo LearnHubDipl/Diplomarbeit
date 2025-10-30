@@ -34,28 +34,26 @@ export class HomeComponent implements OnInit {
   router: Router = inject(Router);
   activatedRoute: ActivatedRoute = inject(ActivatedRoute);
 
-  userId = 1; // statisch
+  userId = 1;
   topicPools: { id: number; name: string }[] = [];
   selectedTopicPoolId: number | null = null;
   progressLevels: ProgressLevel[] = [];
+  hasQuestions = false;
 
-  constructor(private statsService: StatsService, private questionService:QuestionService) {}
+  constructor(private statsService: StatsService, private questionService: QuestionService) {}
 
   ngOnInit(): void {
     this.loadTopicPools();
     this.selectedTopicPoolId = null;
     this.loadProgressData();
 
-
-    this.statsService.getProgressOverview(this.userId, this.selectedTopicPoolId ?? undefined).subscribe();
-
+    // 👇 Direkt beim Start prüfen, ob Fragen vorhanden sind (alle Fragen)
+    this.checkQuestions();
   }
 
   loadTopicPools(): void {
     this.statsService.getTopicPools(this.userId).subscribe({
-      next: pools => {
-        this.topicPools = pools;
-      },
+      next: pools => (this.topicPools = pools),
       error: err => {
         console.error('Fehler beim Laden der Topic Pools:', err);
         this.topicPools = [];
@@ -68,35 +66,48 @@ export class HomeComponent implements OnInit {
     const value = Number(select.value);
     this.selectedTopicPoolId = value === 0 ? null : value;
     this.loadProgressData();
+
+    // 👇 Nach Wechsel des Pools wieder prüfen
+    this.checkQuestions();
   }
 
   loadProgressData(): void {
-    this.statsService.getProgressOverview(this.userId, this.selectedTopicPoolId ?? undefined)
-      .subscribe({
-        next: (overview: ProgressOverviewDto) => {
-          console.log('Progress Overview:', overview);
-          this.progressLevels = overview.levels;
-        },
-        error: err => {
-          console.error('Fehler beim Laden der Daten:', err);
-          this.progressLevels = [];
-        }
-      });
-  }
-
-
-  startPractice() {
-    this.questionService.getQuestionsForPractice(this.userId,this.selectedTopicPoolId ?? undefined).subscribe({
-      next:(questionIds: number[]) => {
-        this.router.navigate(
-          ['quiz'],
-          { relativeTo: this.activatedRoute, state: { questionIds } }
-        );
+    this.statsService.getProgressOverview(this.userId, this.selectedTopicPoolId ?? undefined).subscribe({
+      next: (overview: ProgressOverviewDto) => {
+        this.progressLevels = overview.levels;
       },
       error: err => {
-        console.log('Fehler beim Laden der Daten:', err);
+        console.error('Fehler beim Laden der Daten:', err);
+        this.progressLevels = [];
       }
-    })
+    });
+  }
 
+  checkQuestions(): void {
+    this.questionService.getQuestionsForPractice(this.userId, this.selectedTopicPoolId ?? undefined).subscribe({
+      next: (questionIds: number[]) => {
+        this.hasQuestions = questionIds.length > 0;
+      },
+      error: err => {
+        console.error('Fehler beim Prüfen der Fragen:', err);
+        this.hasQuestions = false;
+      }
+    });
+  }
+
+  startPractice(): void {
+    if (!this.hasQuestions) return; // Sicherheitscheck
+
+    this.questionService.getQuestionsForPractice(this.userId, this.selectedTopicPoolId ?? undefined).subscribe({
+      next: (questionIds: number[]) => {
+        this.router.navigate(['quiz'], {
+          relativeTo: this.activatedRoute,
+          state: { questionIds }
+        });
+      },
+      error: err => {
+        console.error('Fehler beim Laden der Daten:', err);
+      }
+    });
   }
 }

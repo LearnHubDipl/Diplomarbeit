@@ -67,7 +67,7 @@ export const routes: Routes = [
 
       {
         path: 'practice',
-        data: { breadcrumb: 'Üben' },
+        data: { breadcrumb: 'Meinen Fragenpool üben' },
         children: [
           { path: '', component: TrainerHomeComponent, data: { breadcrumb: null } },
           { path: 'quiz', component: PracticeComponent, data: { breadcrumb: 'Fragen beantworten' } },
