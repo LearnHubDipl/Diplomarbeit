@@ -12,7 +12,7 @@
     <div>{{ displayName }}</div>
   </div>
 
-  <div class="mb-3">
+  <div class="mb-3" *ngIf="isStudent">
     <label class="form-label fw-bold">Klasse</label>
     <div>{{ klasse }}</div>
   </div>
@@ -23,3 +23,4 @@
     <i class="bi bi-box-arrow-right me-2"></i> Logout
   </button>
 </div>
+<h1>hi</h1>
