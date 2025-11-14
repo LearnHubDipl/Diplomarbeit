@@ -1,23 +1,25 @@
 <div class="container mt-5" style="min-height: 85vh">
   <h1 class="fw-bold">Persönlicher Bereich</h1>
-  <p>Hallo, Isabella</p>
+
+  <p *ngIf="displayName; else helloFallback">Hallo, {{ givenName }}</p>
+  <ng-template #helloFallback>
+    <p>Hallo, {{ givenName }} {{ familyName }}</p>
+  </ng-template>
+
   <h2 class="mt-4">Persönliche Informationen</h2>
   <div class="mb-3">
-    <label class="form-label fw-bold">Name</label>
-    <div>Isabella Baumann</div>
+    <label class="form-label fw-bold">Name: </label>
+    <div>{{ displayName }}</div>
   </div>
 
   <div class="mb-3">
     <label class="form-label fw-bold">Klasse</label>
-    <div>4ahitm</div>
+    <div>{{ klasse }}</div>
   </div>
 
   <button type="button"
           class="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm text-white"
-          (click)="logout()">
+          (click)="doLogout()">
     <i class="bi bi-box-arrow-right me-2"></i> Logout
   </button>
 </div>
-
-<!-- TODO: aktuellen User ausgeben (von Datenbank) -->
-
