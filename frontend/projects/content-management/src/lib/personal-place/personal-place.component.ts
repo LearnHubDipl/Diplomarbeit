@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { KeycloakOperationService } from '../../../../shared/src/lib/auth';
-import {NgIf} from '@angular/common';
+import { UserInitializationService } from '../../../../shared/src/lib/services/user-initialization.service';
+import { UserSlim } from '../../../../shared/src/lib/interfaces/userSlim';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'lib-personal-place',
   standalone: true,
   templateUrl: './personal-place.component.html',
-  imports: [
-    NgIf
-  ],
+  imports: [NgIf],
   styleUrls: ['./personal-place.component.css']
 })
 export class PersonalPlaceComponent implements OnInit {
@@ -17,19 +17,28 @@ export class PersonalPlaceComponent implements OnInit {
   displayName = '';
   klasse = '';
   isStudent = false;
-  token = '';
   isTeacher = false;
   email = '';
 
-  constructor(private keycloakService: KeycloakOperationService) {}
+  // User from backend
+  backendUser: UserSlim | null = null;
+  isLoadingUser = true;
+
+  constructor(
+    private keycloakService: KeycloakOperationService,
+    private userInitService: UserInitializationService
+  ) {}
 
   async ngOnInit() {
-    await this.refreshUserData();
+    this.loadKeycloakData();
+    await this.loadBackendUser();
   }
 
-  async refreshUserData() {
+  /**
+   * Load data from Keycloak token
+   */
+  private loadKeycloakData() {
     try {
-      this.token = await this.keycloakService.getToken();
       this.givenName = this.keycloakService.getGivenName();
       this.familyName = this.keycloakService.getFamilyName();
       this.displayName = this.keycloakService.getDisplayName();
@@ -38,24 +47,54 @@ export class PersonalPlaceComponent implements OnInit {
       this.isTeacher = this.keycloakService.getIsTeacher();
       this.email = this.keycloakService.getEmail();
 
-      console.log('PersonalPlaceComponent -> token:', this.token);
-      console.log('claims:', this.keycloakService.getDecodedToken());
-      console.log(
-        'givenName, familyName, displayName, klasse, isStudent:',
-        this.givenName,
-        this.familyName,
-        this.displayName,
-        this.klasse,
-        this.isStudent,
-        this.isTeacher,
-        this.email
-      );
+      console.log('PersonalPlaceComponent -> Keycloak Data loaded');
+      console.log('User info:', {
+        givenName: this.givenName,
+        familyName: this.familyName,
+        displayName: this.displayName,
+        klasse: this.klasse,
+        isStudent: this.isStudent,
+        isTeacher: this.isTeacher,
+        email: this.email
+      });
     } catch (err) {
-      console.error('Error refreshing personal place:', err);
+      console.error('Error loading Keycloak data:', err);
+    }
+  }
+
+  /**
+   * Load user from backend (should already be initialized at app start)
+   */
+  private async loadBackendUser() {
+    try {
+      this.isLoadingUser = true;
+
+      // Get the already initialized user
+      this.backendUser = this.userInitService.getCurrentUser();
+
+      // If not available yet, wait for initialization
+      if (!this.backendUser) {
+        console.log('User not yet initialized, waiting...');
+        this.backendUser = await this.userInitService.initializeUser();
+      }
+
+      if (this.backendUser) {
+        console.log('Backend user loaded:', this.backendUser);
+        console.log('Database ID:', this.backendUser.id);
+        console.log('Keycloak Sub:', this.backendUser.keycloakSub);
+      } else {
+        console.warn('No backend user available');
+      }
+    } catch (error) {
+      console.error('Error loading backend user:', error);
+    } finally {
+      this.isLoadingUser = false;
     }
   }
 
   async doLogout() {
+    // Clear user before logout
+    this.userInitService.clearUser();
     await this.keycloakService.logout();
   }
 }

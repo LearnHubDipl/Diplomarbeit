@@ -1,7 +1,8 @@
-import { APP_INITIALIZER, Provider } from '@angular/core';
+import { APP_INITIALIZER, Provider, Injector } from '@angular/core';
 import { KeycloakService } from 'keycloak-angular';
+import { UserInitializationService } from '../services/user-initialization.service';
 
-export function initializeKeycloak(keycloak: KeycloakService) {
+export function initializeKeycloak(keycloak: KeycloakService, injector: Injector) {
   return async () => {
     try {
       const authenticated = await keycloak.init({
@@ -17,6 +18,16 @@ export function initializeKeycloak(keycloak: KeycloakService) {
         }
       });
       console.log('[KEYCLOAK] initialized:', authenticated);
+
+      // Initialize user in backend after successful Keycloak authentication
+      if (authenticated) {
+        // Wait for token to be fully available and refresh if needed
+        await keycloak.updateToken(30);
+
+        const userInitService = injector.get(UserInitializationService);
+        await userInitService.initializeUser();
+      }
+
       return authenticated;
     } catch (error) {
       console.error('[KEYCLOAK] Init Error:', error);
@@ -30,7 +41,7 @@ export function provideKeycloakConfig(): Provider[] {
     {
       provide: APP_INITIALIZER,
       multi: true,
-      deps: [KeycloakService],
+      deps: [KeycloakService, Injector],
       useFactory: initializeKeycloak
     }
   ];
