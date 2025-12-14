@@ -16,6 +16,12 @@
   </nav>
   <h2 class="fw-bold text-warning">Lernbereich starten</h2>
   <p class="text-muted">Wähle ein Fach und dann einen Themenpool</p>
+
+  <div *ngIf="loadError" class="alert alert-danger mt-3">
+    <strong>Fächer konnten nicht geladen werden</strong><br>
+    {{ errorMessage }}
+  </div>
+
   <div id="accordionSubjects">
     <div *ngFor="let subject of subjects" class="mb-2 border rounded overflow-hidden">
       <div class="bg-warning text-white p-3 d-flex justify-content-between align-items-center"

@@ -4,6 +4,7 @@ import {CommonModule} from '@angular/common';
 import {QuestionService} from '../../../../shared/src/lib/services/question.service';
 import {SubjectService} from '../../../../shared/src/lib/services/subject.service';
 import {TopicPoolService} from '../../../../shared/src/lib/services/topic-pool.service';
+import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
 import {QuestionType} from '../../../../shared/src/lib/interfaces/question';
 import {QuestionRequest, AnswerCreationRequest} from '../../../../shared/src/lib/interfaces/question-creation-request';
 import {Subject} from '../../../../shared/src/lib/interfaces/subject';
@@ -24,6 +25,7 @@ export class FragenKonfiguratorComponent implements OnInit {
   private fb = inject(FormBuilder);
   private questionService = inject(QuestionService);
   private subjectService = inject(SubjectService);
+  private userInitService = inject(UserInitializationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -39,10 +41,12 @@ export class FragenKonfiguratorComponent implements OnInit {
 
   private subjectId?: number;
   private topicPoolId?: number;
+  private currentUserId: number | null = null;
 
   ngOnInit() {
     this.initForm();
     this.setupFormSubscriptions();
+    this.loadCurrentUser();
 
     this.route.queryParams.subscribe(params => {
       this.subjectId = params['subjectId'] ? Number(params['subjectId']) : undefined;
@@ -56,6 +60,22 @@ export class FragenKonfiguratorComponent implements OnInit {
         this.loadSubjects();
       }
     });
+  }
+
+  private loadCurrentUser() {
+    const user = this.userInitService.getCurrentUser();
+
+    if (user?.id) {
+      this.currentUserId = user.id;
+      console.log('Current user ID loaded:', this.currentUserId);
+    } else {
+      this.userInitService.currentUser$.subscribe(user => {
+        if (user?.id) {
+          this.currentUserId = user.id;
+          console.log('Current user ID loaded from subscription:', this.currentUserId);
+        }
+      });
+    }
   }
 
   private initForm() {
@@ -153,6 +173,12 @@ export class FragenKonfiguratorComponent implements OnInit {
   }
 
   onSubmit() {
+    if (!this.currentUserId) {
+      alert('Fehler: Benutzer-ID konnte nicht geladen werden. Bitte laden Sie die Seite neu.');
+      console.error('Current user ID is not available');
+      return;
+    }
+
     if (this.questionForm.valid) {
       const formValue = this.questionForm.value;
 
@@ -162,10 +188,12 @@ export class FragenKonfiguratorComponent implements OnInit {
         type: formValue.type,
         difficulty: formValue.difficulty,
         isPublic: formValue.isPublic,
-        userId: 1, // TODO: Aktuelle User-ID aus Authentication Service
+        userId: this.currentUserId, // Using the current logged-in user's ID
         topicPoolId: Number(formValue.topicPoolId),
         answers: formValue.answers || []
       };
+
+      console.log('Submitting question with user ID:', this.currentUserId);
 
       this.questionService.createQuestion(questionRequest).subscribe({
         next: () => {
