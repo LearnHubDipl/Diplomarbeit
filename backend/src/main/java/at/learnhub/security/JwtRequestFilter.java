@@ -52,19 +52,16 @@ public class JwtRequestFilter implements ContainerRequestFilter {
         if (isPermitAll()) {
             System.out.println("[JwtRequestFilter] ✓ Endpoint has @PermitAll - skipping authentication");
 
-            // Even for @PermitAll, we can still extract user info if token is provided
             String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 try {
                     String token = authHeader.substring("Bearer ".length()).trim();
                     System.out.println("[JwtRequestFilter] Token found for @PermitAll endpoint");
 
-                    // Verify token but don't require it
                     Algorithm algorithm = Algorithm.RSA256(getPublicKey(REALM_PUBLIC_KEY), null);
                     JWTVerifier verifier = JWT.require(algorithm).build();
                     DecodedJWT jwt = verifier.verify(token);
 
-                    // Extract user information
                     String keycloakSub = jwt.getSubject();
                     String username = jwt.getClaim("preferred_username").asString();
                     String fullName = jwt.getClaim("name").asString();
@@ -74,7 +71,6 @@ public class JwtRequestFilter implements ContainerRequestFilter {
                     String distinguishedName = jwt.getClaim("distinguishedName").asString();
                     List<String> userRoles = extractRoles(jwt);
 
-                    // Create and set security context
                     CustomSecurityContext securityContext = new CustomSecurityContext(
                             username, userRoles, fullName, keycloakSub,
                             email, givenName, familyName, distinguishedName
@@ -84,7 +80,6 @@ public class JwtRequestFilter implements ContainerRequestFilter {
                     System.out.println("[JwtRequestFilter] ✓ Security context created for @PermitAll endpoint");
                 } catch (Exception e) {
                     System.out.println("[JwtRequestFilter] Token verification failed for @PermitAll: " + e.getMessage());
-                    // Don't abort for @PermitAll, just continue without security context
                 }
             }
             return;
