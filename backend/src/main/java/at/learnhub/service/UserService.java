@@ -5,6 +5,7 @@ import at.learnhub.dto.simple.UserSlimDto;
 import at.learnhub.mapper.UserMapper;
 import at.learnhub.model.User;
 import at.learnhub.repository.UserRepository;
+import at.learnhub.security.CustomSecurityContext;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -43,6 +44,46 @@ public class UserService {
         // Create new user
         User newUser = UserMapper.toEntity(dto);
         User savedUser = userRepository.createUser(newUser);
+
+        return UserMapper.toSlimDto(savedUser);
+    }
+
+    /**
+     * Finds or creates a user based on CustomSecurityContext.
+     * This is the recommended method as the token is already validated.
+     */
+    @Transactional
+    public UserSlimDto findOrCreateUserFromContext(CustomSecurityContext context) {
+        String keycloakSub = context.getKeycloakSub();
+
+        System.out.println("[UserService] Looking for user with keycloakSub: " + keycloakSub);
+
+        // Check if user already exists
+        Optional<UserSlimDto> existingUser = userRepository.findByKeycloakSub(keycloakSub);
+        if (existingUser.isPresent()) {
+            System.out.println("[UserService] User exists: " + keycloakSub);
+            return existingUser.get();
+        }
+
+        System.out.println("[UserService] Creating new user: " + keycloakSub);
+
+        // Create DTO from context
+        UserCreateDto dto = new UserCreateDto(
+                keycloakSub,
+                context.getFullName(),
+                context.getEmail(),
+                context.getUsername(),
+                context.getGivenName(),
+                context.getFamilyName(),
+                context.getClassName(),
+                context.isTeacher()
+        );
+
+        // Create new user
+        User newUser = UserMapper.toEntity(dto);
+        User savedUser = userRepository.createUser(newUser);
+
+        System.out.println("[UserService] User created with ID: " + savedUser.getId());
 
         return UserMapper.toSlimDto(savedUser);
     }

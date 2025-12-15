@@ -1,0 +1,15 @@
+## before runing http file choose Run with dev1 !
+## and change your user credentials in the http-client.private.env.json file
+
+### Get access Token
+POST https://auth.htl-leonding.ac.at/realms/2526_5bhitm/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&
+client_id=frontend&
+username={{KC_USER}}&
+password={{KC_PASSWORD}}
+
+> {% client.global.set("access_token", response.body.access_token); %}
+
+

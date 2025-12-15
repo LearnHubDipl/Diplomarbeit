@@ -6,8 +6,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const keycloak = inject(KeycloakService);
 
   console.log('[AuthInterceptor] Intercepting request to:', req.url);
+  console.log('[AuthInterceptor] Method:', req.method);
 
-  // Skip if no auth needed or external URL
+  // Skip if no auth needed
   if (req.url.includes('/assets') || req.url.includes('/public')) {
     console.log('[AuthInterceptor] Skipping - public resource');
     return next(req);
@@ -16,22 +17,21 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const keycloakInstance = keycloak.getKeycloakInstance();
   const token = keycloakInstance.token;
 
-  console.log('[AuthInterceptor] Token type:', typeof token);
   console.log('[AuthInterceptor] Token available:', !!token);
-  console.log('[AuthInterceptor] Token length:', token?.length || 0);
 
   if (token && typeof token === 'string' && token.length > 0) {
-    console.log('[AuthInterceptor] Adding token to request');
-    console.log('[AuthInterceptor] Token preview:', token.substring(0, 50) + '...');
+    console.log('[AuthInterceptor] Adding token to', req.method, 'request');
 
     const cloned = req.clone({
       setHeaders: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
+        ...(req.method === 'POST' || req.method === 'PUT' ? {
+          'Content-Type': 'application/json'
+        } : {})
       }
     });
 
-    console.log('[AuthInterceptor] Request headers:', cloned.headers.keys());
-    console.log('[AuthInterceptor] Authorization header value:', cloned.headers.get('Authorization')?.substring(0, 60) + '...');
+    console.log('[AuthInterceptor] Headers:', Object.keys(cloned.headers.keys()));
     return next(cloned);
   }
 

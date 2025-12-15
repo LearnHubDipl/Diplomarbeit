@@ -1,0 +1,7 @@
+### Get all subjects
+GET {{baseUrl}}/subjects
+Authorization: Bearer {{access_token}}
+
+### Get topics by subject
+GET {{baseUrl}}/subjects/1/topics
+Authorization: Bearer {{access_token}}

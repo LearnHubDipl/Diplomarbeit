@@ -1,0 +1,63 @@
+## before runing http file choose Run with dev1 !
+## and change your user credentials in the http-client.private.env.json file
+
+### Get access Token
+POST https://auth.htl-leonding.ac.at/realms/2526_5bhitm/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&
+client_id=frontend&
+username={{KC_USER}}&
+password={{KC_PASSWORD}}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    console.log("Token obtained: " + response.body.access_token.substring(0, 50) + "...");
+%}
+
+
+
+### Get current user
+GET http://localhost:8080/api/users/me
+Authorization: Bearer {{access_token}}
+
+### Register user (after login)
+POST http://localhost:8080/api/users/register
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+### Get all users
+GET http://localhost:8080/api/users
+Authorization: Bearer {{access_token}}
+
+### Get teachers
+GET http://localhost:8080/api/users/teachers
+Authorization: Bearer {{access_token}}
+
+### Get all questions
+### should return 200 - list of all questions
+GET http://localhost:8080/api/questions
+Accept: application/json
+Authorization: Bearer {{access_token}}
+
+
+### Create a new question - valid multiple-choice
+### should return 201 - question created successfully
+POST http://localhost:8080/api/questions
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "text": "What is the capital of France?",
+  "explanation": "Paris is the capital and largest city of France.",
+  "type": "MULTIPLE_CHOICE",
+  "difficulty": 2,
+  "isPublic": true,
+  "userId": 1,
+  "topicPoolId": 1,
+  "answers": [
+    {"text": "Paris", "isCorrect": true},
+    {"text": "Berlin", "isCorrect": false},
+    {"text": "Madrid", "isCorrect": false}
+  ]
+}

@@ -1,5 +1,6 @@
 package at.learnhub.repository;
 
+import at.learnhub.dto.request.QuestionCreationRequestDto;
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.dto.simple.QuestionPoolDto;
 import at.learnhub.dto.simple.QuestionUpdateRequestDto;
@@ -251,5 +252,68 @@ public class QuestionRepository {
                 })
                 .map(row -> (Long) row[0])
                 .collect(Collectors.toList());
+    }
+    /**
+     * Creates a new question with answers from the creation DTO
+     *
+     * @param dto the creation request DTO
+     * @return the created Question entity
+     */
+    @Transactional
+    public Question createQuestion(QuestionCreationRequestDto dto) {
+        System.out.println("[QuestionRepository] Creating question from DTO");
+        System.out.println("[QuestionRepository] User ID: " + dto.userId());
+        System.out.println("[QuestionRepository] TopicPool ID: " + dto.topicPoolId());
+
+        User user = em.find(User.class, dto.userId());
+        if (user == null) {
+            throw new EntityNotFoundException("User not found with ID: " + dto.userId());
+        }
+        System.out.println("[QuestionRepository] User found: " + user.getName());
+
+        TopicPool topicPool = em.find(TopicPool.class, dto.topicPoolId());
+        if (topicPool == null) {
+            throw new EntityNotFoundException("Topic pool not found with ID: " + dto.topicPoolId());
+        }
+        System.out.println("[QuestionRepository] TopicPool found: " + topicPool.getName());
+
+        Question question = new Question();
+        question.setText(dto.text());
+        question.setExplanation(dto.explanation());
+        question.setType(dto.type());
+        question.setDifficulty(dto.difficulty());
+        question.setPublic(dto.isPublic() != null ? dto.isPublic() : false);
+        question.setUser(user);
+        question.setTopicPool(topicPool);
+
+        question.setAnswers(new ArrayList<>());
+        question.setSolutions(new ArrayList<>());
+        question.setEntries(new ArrayList<>());
+
+        em.persist(question);
+        em.flush();
+
+        System.out.println("[QuestionRepository] Question persisted with ID: " + question.getId());
+
+        if (dto.answers() != null && !dto.answers().isEmpty()) {
+            System.out.println("[QuestionRepository] Adding " + dto.answers().size() + " answers");
+
+            for (at.learnhub.dto.request.AnswerCreationRequestDto answerDto : dto.answers()) {
+                Answer answer = new Answer();
+                answer.setText(answerDto.text());
+                answer.setCorrect(answerDto.isCorrect() != null ? answerDto.isCorrect() : false);
+                answer.setQuestion(question);
+
+                em.persist(answer);
+                question.getAnswers().add(answer);
+            }
+
+            em.flush();
+            System.out.println("[QuestionRepository] Answers added successfully");
+        }
+
+        System.out.println("[QuestionRepository] Question created successfully with ID: " + question.getId());
+
+        return question;
     }
 }
