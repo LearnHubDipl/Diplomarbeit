@@ -49,4 +49,4 @@ nb-configuration.xml
 uploads/
 
 # pw for auth
-http/*.env.json
+http/http-client.private.env.json
