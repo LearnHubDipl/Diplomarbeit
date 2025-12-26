@@ -15,7 +15,7 @@ export interface CreateExamRequest {
 
 export interface CreatedExamResponse {
   examId: number;
-  timeLimit: number;
+  timeLimitMinutes: number;
   startedAt: string;
   questionCount: number;
   questions: Question[];

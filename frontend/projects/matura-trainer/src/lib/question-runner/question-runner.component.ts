@@ -34,6 +34,7 @@ import {CreatedExamResponse, ExamService} from '../../../../shared/src/lib/servi
 export class QuestionRunnerComponent implements OnInit {
   @Input() mode: 'practice' | 'exam' | 'review' = 'practice';
   @Input() exam?: Exam;   // only needed for review mode
+  @Input() timeLimit?: number = 0;
   @Output() answered = new EventEmitter<CheckAnswerRequest>();
   @Output() finishedExam = new EventEmitter<CheckAnswerRequest[]>(); // emit all answers at the end of exam
   @Input() questionIdList: number[] = [];
@@ -70,6 +71,8 @@ export class QuestionRunnerComponent implements OnInit {
   submitted = false;
   showAllSolutions = false;
 
+  timeLeft: number = 0;
+
   router: Router = inject(Router);
 
 
@@ -87,6 +90,17 @@ export class QuestionRunnerComponent implements OnInit {
       }
     } else {
       this.loadQuestion(this.currentQuestionIndex)
+    }
+    if (this.mode === 'exam') {
+      this.timeLeft = this.timeLimit! * 60
+      this.timerTickDown()
+    } else if (this.mode === 'review') {
+      let started = new Date(this.exam!.startedAt);
+      let finished = new Date(this.exam!.finishedAt);
+
+      let elapsed = (finished.getTime() - started.getTime()) / 1000;
+      this.timeLeft = this.exam!.timeLimit*60 - elapsed;
+      console.log(this.exam, this.timeLeft)
     }
   }
 
@@ -244,6 +258,16 @@ export class QuestionRunnerComponent implements OnInit {
     this.submit();
     this.currentQuestionIndex = id;
     this.loadQuestion(this.currentQuestionIndex);
+  }
+
+  timerTickDown() {
+    this.timeLeft -= 1;
+    if (this.timeLeft <= 0) {
+      this.isFinished = true;
+      this.finish()
+    } else {
+      setTimeout(() => this.timerTickDown(), 1000);
+    }
   }
 
 

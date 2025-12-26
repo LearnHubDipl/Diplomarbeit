@@ -56,7 +56,12 @@
 <!-- Question View -->
 <div class="widget-wrapper question-wrapper">
   <!-- inner 'bread crumbs' showing the subject and the topic pool -->
-  <div class="header">{{ question?.topicPool?.subject?.name }} &gt; {{ question?.topicPool?.name }}</div>
+  <div class="header" style="display: flex; justify-content: space-between">
+    {{ question?.topicPool?.subject?.name }} &gt; {{ question?.topicPool?.name }}
+    <span *ngIf="this.mode !== 'practice'" style="border-radius: 5px; padding: 0.4rem; border: 2px white solid;">
+      {{ Math.floor(timeLeft / 60).toString().padStart(2, '0') }}:{{ Math.floor(timeLeft % 60).toString().padStart(2, '0') }}
+    </span>
+  </div>
 
   <form [formGroup]="form" class="widget-content question-content {{ mode !== 'practice' ? 'exam-form' : ''}}" (ngSubmit)="submit()">    <div class="widget-content-top">
       <div *ngIf="(mode === 'practice' || mode === 'review') && submitted" class="result-badge"

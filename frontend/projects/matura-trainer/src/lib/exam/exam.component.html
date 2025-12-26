@@ -1,6 +1,7 @@
 <div *ngIf="!isLoading && exam && !examSubmitted">
   <lib-question-runner
     mode="exam"
+    [timeLimit]="this.exam?.timeLimitMinutes"
     [questionIdList]="this.questionIds"
     (answered)="storeAnswer($event)"
     (finishedExam)="submitExam($event)">
