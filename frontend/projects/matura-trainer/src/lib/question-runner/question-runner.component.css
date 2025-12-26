@@ -238,8 +238,8 @@ textarea[formControlName="freeTextAnswer"]:focus {
 
 .exam-score-nav-grid {
   display: grid;
-  grid-template-columns: 60% 40%;
-  column-gap: 1rem;
+  grid-template-columns: 59% 39%;
+  column-gap: 2%;
   width: 100%;
   margin-bottom: 1rem;
 }

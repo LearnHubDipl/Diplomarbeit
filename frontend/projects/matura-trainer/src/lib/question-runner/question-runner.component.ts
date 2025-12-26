@@ -37,7 +37,6 @@ export class QuestionRunnerComponent implements OnInit {
   @Output() answered = new EventEmitter<CheckAnswerRequest>();
   @Output() finishedExam = new EventEmitter<CheckAnswerRequest[]>(); // emit all answers at the end of exam
   @Input() questionIdList: number[] = [];
-  @Input() navigateBack = true;
 
   currentQuestionIndex: number = 0;
   isFinished = false;
@@ -229,8 +228,8 @@ export class QuestionRunnerComponent implements OnInit {
   }
 
   navigateExam(direction: 'next' | 'prev') {
+    this.submit();
     if (direction === 'next' && this.currentQuestionIndex < this.currentQuestions.length - 1) {
-      this.submit();
       this.currentQuestionIndex++;
       this.loadQuestion(this.currentQuestionIndex);
     } else if (direction === 'prev' && this.currentQuestionIndex > 0) {
@@ -240,6 +239,13 @@ export class QuestionRunnerComponent implements OnInit {
       this.finish();
     }
   }
+
+  navigateToQuestion(id: number) {
+    this.submit();
+    this.currentQuestionIndex = id;
+    this.loadQuestion(this.currentQuestionIndex);
+  }
+
 
   loadNextQuestion(): void {
     if (!this.isFinished) {
@@ -275,7 +281,7 @@ export class QuestionRunnerComponent implements OnInit {
   finish() {
     this.submit()
 
-    if (this.mode !== 'exam' && this.navigateBack) {
+    if (this.mode !== 'exam') {
       this.location.back()
     } else {
       let allAnswers = Object.values(this.previousAnswers);
@@ -321,5 +327,6 @@ export class QuestionRunnerComponent implements OnInit {
   }
 
 
+  protected readonly Math = Math;
 }
 
