@@ -2,6 +2,7 @@ import {Answer, AnswerUpdateRequest} from './answer';
 import {TopicPool} from './topic-pool';
 import {Media} from './media';
 import {Solution} from './solution';
+import {UserSlim} from './userSlim';
 
 export enum QuestionType {
   FREETEXT = 'FREETEXT',
@@ -19,6 +20,7 @@ export interface Question {
   topicPool: TopicPool;
   media: Media;
   solutions: Solution[];
+  user?: UserSlim;
 }
 
 export interface QuestionUpdateRequest{

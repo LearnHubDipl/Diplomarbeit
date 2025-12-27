@@ -29,18 +29,20 @@ export class EditQuestionComponent implements OnInit {
   questionForm!: FormGroup;
   questionId!: number;
   isAdmin: boolean = false;
+  userId: number | null = null;
+
+  loadError = false;
+  errorMessage = '';
+  cannotEditQuestion = false;
 
   readonly QuestionType = QuestionType;
   readonly maxAnswers = 7;
 
-  ngOnInit(): void {
+  async ngOnInit() {
     this.questionId = Number(this.route.snapshot.paramMap.get('id'));
     this.initForm();
-
-    this.questionService.getQuestionById(this.questionId).subscribe({
-      next: question => this.patchForm(question),
-      error: err => console.error('Fehler beim Laden', err)
-    });
+    await this.loadCurrentUser();
+    this.loadQuestion();
 
     this.questionForm.get('type')?.valueChanges.subscribe(type => {
       this.updateAnswersArray(type);
@@ -51,23 +53,52 @@ export class EditQuestionComponent implements OnInit {
     const user = this.userInitService.getCurrentUser();
 
     if (user?.id) {
+      this.userId = user.id;
       this.isAdmin = user.isAdmin || false;
-      if (!this.isAdmin) {
-        this.questionForm.get('isPublic')?.disable();
-      }
     } else {
       try {
         const initializedUser = await this.userInitService.initializeUser();
         if (initializedUser) {
+          this.userId = initializedUser.id;
           this.isAdmin = initializedUser.isAdmin || false;
-          if (!this.isAdmin) {
-            this.questionForm.get('isPublic')?.disable();
-          }
         }
       } catch (error) {
         console.error('Error loading user:', error);
       }
     }
+  }
+
+  private loadQuestion() {
+    this.questionService.getQuestionById(this.questionId).subscribe({
+      next: question => {
+        if (this.canAccessQuestion(question)) {
+          this.patchForm(question);
+        } else {
+          this.cannotEditQuestion = true;
+          this.errorMessage = this.isAdmin
+            ? 'Du kannst nur deine eigenen oder öffentliche Fragen bearbeiten.'
+            : 'Du kannst nur deine eigenen Fragen bearbeiten.';
+        }
+      },
+      error: err => {
+        console.error('Fehler beim Laden', err);
+        this.loadError = true;
+        this.errorMessage = 'Frage konnte nicht geladen werden.';
+      }
+    });
+  }
+
+  private canAccessQuestion(question: Question): boolean {
+    if (!this.userId) return false;
+
+    const isOwnQuestion = question.user?.id === this.userId;
+    const isPublicQuestion = question.isPublic === true;
+
+    if (this.isAdmin) {
+      return isOwnQuestion || isPublicQuestion;
+    }
+
+    return isOwnQuestion;
   }
 
   private initForm() {
@@ -76,7 +107,7 @@ export class EditQuestionComponent implements OnInit {
       type: ['', Validators.required],
       difficulty: [2],
       explanation: [''],
-      isPublic: [true],
+      isPublic: [false],
       answers: this.fb.array([])
     });
   }
@@ -107,7 +138,6 @@ export class EditQuestionComponent implements OnInit {
         isCorrect: [a.isCorrect]
       }));
     })
-
   }
 
   get answersArray() {
@@ -147,11 +177,13 @@ export class EditQuestionComponent implements OnInit {
       return;
     }
 
+    const formValue = this.questionForm.getRawValue();
+
     const updateRequest: QuestionUpdateRequest = {
-      text: this.questionForm.get('text')?.value,
-      explanation: this.questionForm.get('explanation')?.value,
+      text: formValue.text,
+      explanation: formValue.explanation,
       answers: this.answersArray.value.map((a: any) => ({id: a.id, text: a.text, isCorrect: a.isCorrect})),
-      isPublic: this.questionForm.get('isPublic')?.value
+      isPublic: formValue.isPublic
     };
 
     this.questionService.updateQuestion(this.questionId, updateRequest).subscribe({
@@ -161,7 +193,11 @@ export class EditQuestionComponent implements OnInit {
       },
       error: err => {
         console.error(err);
-        alert('Fehler beim aktualisieren')
+        if (err.status === 403) {
+          alert(err.error?.error || 'Du hast keine Berechtigung diese Frage zu bearbeiten.');
+        } else {
+          alert('Fehler beim Aktualisieren der Frage.');
+        }
       }
     })
   }

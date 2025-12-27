@@ -1,4 +1,3 @@
-<!--von choose-study-topic component -->
 <div class="container mt-5">
   <nav aria-label="breadcrumb" class="mb-4" style="--bs-breadcrumb-divider: '>';">
     <ol class="breadcrumb fs-5 fw-semibold">
@@ -23,11 +22,51 @@
   <p class="text-muted">
     Wähle ein Fach und dann einen Themenpool um ausgewählte Fragen zu bearbeiten & löschen
   </p>
-  <div *ngIf="loadError" class="alert alert-danger mt-3">
-    <strong>Fragen konnten nicht geladen werden</strong>
+
+  <div class="btn-group mb-4" role="group">
+
+    <button type="button"
+            class="btn hover-white"
+            [ngClass]="isPublicMode ? 'btn-warning text-white' : 'btn-outline-warning'"
+            [disabled]="!isAdmin"
+            [title]="!isAdmin ? 'Nur Admins können öffentliche Fragen verwalten' : ''"
+            (click)="isPublicMode = true; loadQuestions()">
+      <i class="bi bi-globe me-1"></i>
+      Öffentlich
+      <small *ngIf="!isAdmin" class="d-block" style="font-size: 0.7rem;">(Nur für Admins)</small>
+    </button>
+    <button type="button"
+            class="btn hover-white"
+            [ngClass]="!isPublicMode ? 'btn-warning text-white' : 'btn-outline-warning'"
+            (click)="isPublicMode = false; loadQuestions()">
+      <i class="bi bi-person me-1"></i>
+      Persönlich
+    </button>
   </div>
-  <div id="accordionSubjects" *ngIf="!loadError">
-    <div *ngFor="let subject of subjects" class="mb-2 border rounded overflow-hidden">
+
+  <div *ngIf="loadError" class="alert alert-danger mt-3">
+    <strong>Fragen konnten nicht geladen werden</strong><br>
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!loadError && noQuestionsFound && !isPublicMode" class="text-center mt-5">
+    <i class="bi bi-question-circle text-warning" style="font-size: 4rem;"></i>
+    <h4 class="mt-3 fw-bold">Du hast noch keine Fragen erstellt</h4>
+    <p class="text-muted mb-4">Erstelle deine erste Frage und sie wird hier angezeigt.</p>
+    <a routerLink="/questions/new" class="btn btn-warning text-white rounded-pill px-4 py-2 fw-semibold shadow-sm">
+      <i class="bi bi-plus-circle me-2"></i>
+      Frage erstellen
+    </a>
+  </div>
+
+  <div *ngIf="!loadError && noQuestionsFound && isPublicMode" class="text-center mt-5">
+    <i class="bi bi-globe text-warning" style="font-size: 4rem;"></i>
+    <h4 class="mt-3 fw-bold">Es gibt noch keine öffentlichen Fragen</h4>
+    <p class="text-muted">Bisher wurden noch keine Fragen als öffentlich markiert.</p>
+  </div>
+
+  <div id="accordionSubjects" *ngIf="!loadError && !noQuestionsFound">
+    <div *ngFor="let subject of filteredSubjects" class="mb-2 border rounded overflow-hidden">
 
       <div class="bg-warning text-white p-3 d-flex justify-content-between align-items-center"
            style="cursor: pointer;"
@@ -56,30 +95,22 @@
                  }"></i>
             </div>
             <ul *ngIf="openPoolId === pool.id" class="list-group mt-2">
-              <li *ngIf="questionLoadErrorByPool[pool.id]"
-                  class="list-group-item text-danger">
-                Fragen konnten nicht geladen werden
-              </li>
-              <li *ngFor="let questions of questionsByPool[pool.id] || []"
+              <li *ngFor="let question of questionsByPool[pool.id] || []"
                   class="list-group-item d-flex justify-content-between align-items-center">
-                <div>{{ getFirstCharacters(questions.text) }}</div>
+                <div>{{ getFirstCharacters(question.text) }}</div>
                 <div class="d-flex gap-2">
                   <i class="bi bi-trash-fill text-danger fs-5"
                      style="cursor:pointer"
-                     (click)="deleteQuestion(questions, pool.id)"></i>
+                     title="Löschen"
+                     (click)="deleteQuestion(question, pool.id)"></i>
                   <i class="bi bi-pencil-fill text-success fs-5"
                      style="cursor:pointer"
-                     (click)="editQuestion(questions)"></i>
+                     title="Bearbeiten"
+                     (click)="editQuestion(question)"></i>
                 </div>
-              </li>
-              <li *ngIf="!questionLoadErrorByPool[pool.id] &&
-                         questionsByPool[pool.id]?.length === 0"
-                  class="list-group-item text-warning">
-                Keine Fragen vorhanden.
               </li>
             </ul>
           </li>
-
         </ul>
       </div>
     </div>

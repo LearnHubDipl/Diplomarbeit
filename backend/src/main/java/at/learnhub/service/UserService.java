@@ -56,16 +56,16 @@ public class UserService {
     public UserSlimDto findOrCreateUserFromContext(CustomSecurityContext context) {
         String keycloakSub = context.getKeycloakSub();
 
-        System.out.println("[UserService] Looking for user with keycloakSub: " + keycloakSub);
+        // System.out.println("[UserService] Looking for user with keycloakSub: " + keycloakSub);
 
         // Check if user already exists
         Optional<UserSlimDto> existingUser = userRepository.findByKeycloakSub(keycloakSub);
         if (existingUser.isPresent()) {
-            System.out.println("[UserService] User exists: " + keycloakSub);
+            //System.out.println("[UserService] User exists: " + keycloakSub);
             return existingUser.get();
         }
 
-        System.out.println("[UserService] Creating new user: " + keycloakSub);
+        //System.out.println("[UserService] Creating new user: " + keycloakSub);
 
         // Create DTO from context
         UserCreateDto dto = new UserCreateDto(
@@ -83,7 +83,7 @@ public class UserService {
         User newUser = UserMapper.toEntity(dto);
         User savedUser = userRepository.createUser(newUser);
 
-        System.out.println("[UserService] User created with ID: " + savedUser.getId());
+        //System.out.println("[UserService] User created with ID: " + savedUser.getId());
 
         return UserMapper.toSlimDto(savedUser);
     }
