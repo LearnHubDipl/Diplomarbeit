@@ -43,7 +43,11 @@ export class QuestionService {
     return this.httpClient.get<number[]>(API_BASE_URL + `/questions/ids`, { params });
   }
 
+  getAllQuestionsFromLoggedInUser(userId: number): Observable<Question[]> {
+    return this.httpClient.get<Question[]>(API_BASE_URL + '/questions/user/' + userId);
+  }
 
-
-
+  getAllPublicQuestions(): Observable<Question[]> {
+    return this.httpClient.get<Question[]>(API_BASE_URL + '/questions/public');
+  }
 }

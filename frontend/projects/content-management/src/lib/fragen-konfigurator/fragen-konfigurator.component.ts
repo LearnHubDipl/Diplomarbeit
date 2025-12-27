@@ -3,7 +3,6 @@ import {FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule} from
 import {CommonModule} from '@angular/common';
 import {QuestionService} from '../../../../shared/src/lib/services/question.service';
 import {SubjectService} from '../../../../shared/src/lib/services/subject.service';
-import {TopicPoolService} from '../../../../shared/src/lib/services/topic-pool.service';
 import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
 import {QuestionType} from '../../../../shared/src/lib/interfaces/question';
 import {QuestionRequest, AnswerCreationRequest} from '../../../../shared/src/lib/interfaces/question-creation-request';
@@ -42,11 +41,12 @@ export class FragenKonfiguratorComponent implements OnInit {
   private subjectId?: number;
   private topicPoolId?: number;
   private currentUserId: number | null = null;
+  isAdmin: boolean = false;
 
-  ngOnInit() {
+  async ngOnInit() {
     this.initForm();
     this.setupFormSubscriptions();
-    this.loadCurrentUser();
+    await this.loadCurrentUser();
 
     this.route.queryParams.subscribe(params => {
       this.subjectId = params['subjectId'] ? Number(params['subjectId']) : undefined;
@@ -62,19 +62,35 @@ export class FragenKonfiguratorComponent implements OnInit {
     });
   }
 
-  private loadCurrentUser() {
+  private async loadCurrentUser() {
     const user = this.userInitService.getCurrentUser();
 
     if (user?.id) {
       this.currentUserId = user.id;
+      this.isAdmin = user.isAdmin || false;
       console.log('Current user ID loaded:', this.currentUserId);
+      console.log('Is admin:', this.isAdmin);
+
+      // Disable isPublic toggle if not admin
+      if (!this.isAdmin) {
+        this.questionForm.get('isPublic')?.disable();
+      }
     } else {
-      this.userInitService.currentUser$.subscribe(user => {
-        if (user?.id) {
-          this.currentUserId = user.id;
-          console.log('Current user ID loaded from subscription:', this.currentUserId);
+      try {
+        const initializedUser = await this.userInitService.initializeUser();
+        if (initializedUser) {
+          this.currentUserId = initializedUser.id;
+          this.isAdmin = initializedUser.isAdmin || false;
+          console.log('Current user ID loaded:', this.currentUserId);
+          console.log('Is admin:', this.isAdmin);
+
+          if (!this.isAdmin) {
+            this.questionForm.get('isPublic')?.disable(); // Disable toggle
+          }
         }
-      });
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
     }
   }
 
@@ -86,7 +102,7 @@ export class FragenKonfiguratorComponent implements OnInit {
       text: ['', Validators.required],
       difficulty: [2],
       explanation: [''],
-      isPublic: [true],
+      isPublic: [false],
       answers: this.fb.array([])
     });
   }
@@ -180,7 +196,7 @@ export class FragenKonfiguratorComponent implements OnInit {
     }
 
     if (this.questionForm.valid) {
-      const formValue = this.questionForm.value;
+      const formValue = this.questionForm.getRawValue();
 
       const questionRequest: QuestionRequest = {
         text: formValue.text,
@@ -188,12 +204,13 @@ export class FragenKonfiguratorComponent implements OnInit {
         type: formValue.type,
         difficulty: formValue.difficulty,
         isPublic: formValue.isPublic,
-        userId: this.currentUserId, // Using the current logged-in user's ID
+        userId: this.currentUserId,
         topicPoolId: Number(formValue.topicPoolId),
         answers: formValue.answers || []
       };
 
       console.log('Submitting question with user ID:', this.currentUserId);
+      console.log('Is public:', questionRequest.isPublic);
 
       this.questionService.createQuestion(questionRequest).subscribe({
         next: () => {
@@ -211,6 +228,10 @@ export class FragenKonfiguratorComponent implements OnInit {
 
           this.initForm();
           this.setupFormSubscriptions();
+
+          if (!this.isAdmin) {
+            this.questionForm.get('isPublic')?.disable();
+          }
         },
         error: (error) => {
           console.error('Fehler beim Erstellen der Frage:', error);

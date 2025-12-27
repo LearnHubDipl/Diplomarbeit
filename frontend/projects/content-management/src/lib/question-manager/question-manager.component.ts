@@ -94,6 +94,6 @@ export class QuestionManagerComponent implements OnInit {
   }
 
   editQuestion(question: Question): void {
-    this.router.navigate(['/edit-question', question.id]);
+    this.router.navigate(['/questions/edit', question.id]);
   }
 }

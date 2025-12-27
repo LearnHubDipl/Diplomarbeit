@@ -41,8 +41,7 @@ public class JwtRequestFilter implements ContainerRequestFilter {
         String path = requestContext.getUriInfo().getPath();
         String method = requestContext.getMethod();
 
-        System.out.println("\n[JwtRequestFilter] ========================================");
-        System.out.println("[JwtRequestFilter] Request: " + method + " " + path);
+        //System.out.println("[JwtRequestFilter] Request: " + method + " " + path);
 
         if ("OPTIONS".equalsIgnoreCase(method)) {
             System.out.println("[JwtRequestFilter] ✓ Skipping OPTIONS (CORS preflight)");
@@ -50,13 +49,13 @@ public class JwtRequestFilter implements ContainerRequestFilter {
         }
 
         if (isPermitAll()) {
-            System.out.println("[JwtRequestFilter] ✓ Endpoint has @PermitAll - skipping authentication");
+            //System.out.println("[JwtRequestFilter] ✓ Endpoint has @PermitAll - skipping authentication");
 
             String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 try {
                     String token = authHeader.substring("Bearer ".length()).trim();
-                    System.out.println("[JwtRequestFilter] Token found for @PermitAll endpoint");
+                    //System.out.println("[JwtRequestFilter] Token found for @PermitAll endpoint");
 
                     Algorithm algorithm = Algorithm.RSA256(getPublicKey(REALM_PUBLIC_KEY), null);
                     JWTVerifier verifier = JWT.require(algorithm).build();
@@ -77,7 +76,7 @@ public class JwtRequestFilter implements ContainerRequestFilter {
                     );
                     requestContext.setSecurityContext(securityContext);
 
-                    System.out.println("[JwtRequestFilter] ✓ Security context created for @PermitAll endpoint");
+                    //System.out.println("[JwtRequestFilter] ✓ Security context created for @PermitAll endpoint");
                 } catch (Exception e) {
                     System.out.println("[JwtRequestFilter] Token verification failed for @PermitAll: " + e.getMessage());
                 }
@@ -88,36 +87,36 @@ public class JwtRequestFilter implements ContainerRequestFilter {
         String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null) {
-            System.err.println("[JwtRequestFilter] ✗ No Authorization header found");
-            System.err.println("[JwtRequestFilter] All headers: " + requestContext.getHeaders());
+            //System.err.println("[JwtRequestFilter] ✗ No Authorization header found");
+            //System.err.println("[JwtRequestFilter] All headers: " + requestContext.getHeaders());
             abortWithUnauthorized(requestContext, "No authorization header provided");
             return;
         }
 
-        System.out.println("[JwtRequestFilter] Authorization header found");
+        //System.out.println("[JwtRequestFilter] Authorization header found");
 
         if (!authHeader.startsWith("Bearer ")) {
-            System.err.println("[JwtRequestFilter] ✗ Authorization header doesn't start with 'Bearer '");
+            //System.err.println("[JwtRequestFilter] ✗ Authorization header doesn't start with 'Bearer '");
             abortWithUnauthorized(requestContext, "Invalid authorization header format");
             return;
         }
 
         String token = authHeader.substring("Bearer ".length()).trim();
-        System.out.println("[JwtRequestFilter] Token extracted, length: " + token.length());
+        //System.out.println("[JwtRequestFilter] Token extracted, length: " + token.length());
 
         if (token.isEmpty()) {
-            System.err.println("[JwtRequestFilter] ✗ Token is empty after extraction");
+            //System.err.println("[JwtRequestFilter] ✗ Token is empty after extraction");
             abortWithUnauthorized(requestContext, "Empty token provided");
             return;
         }
 
         try {
-            System.out.println("[JwtRequestFilter] Verifying token with Keycloak public key...");
+            //System.out.println("[JwtRequestFilter] Verifying token with Keycloak public key...");
             Algorithm algorithm = Algorithm.RSA256(getPublicKey(REALM_PUBLIC_KEY), null);
             JWTVerifier verifier = JWT.require(algorithm).build();
             DecodedJWT jwt = verifier.verify(token);
 
-            System.out.println("[JwtRequestFilter] ✓ Token verified successfully");
+            //System.out.println("[JwtRequestFilter] ✓ Token verified successfully");
 
             String keycloakSub = jwt.getSubject();
             String username = jwt.getClaim("preferred_username").asString();
@@ -128,16 +127,17 @@ public class JwtRequestFilter implements ContainerRequestFilter {
             String distinguishedName = jwt.getClaim("distinguishedName").asString();
             List<String> userRoles = extractRoles(jwt);
 
-            System.out.println("[JwtRequestFilter] User Details:");
-            System.out.println("  - Username: " + username);
-            System.out.println("  - Keycloak Sub: " + keycloakSub);
-            System.out.println("  - Full Name: " + fullName);
-            System.out.println("  - Email: " + email);
-            System.out.println("  - Roles: " + userRoles);
-
+            /**
+             System.out.println("[JwtRequestFilter] User Details:");
+             System.out.println("  - Username: " + username);
+             System.out.println("  - Keycloak Sub: " + keycloakSub);
+             System.out.println("  - Full Name: " + fullName);
+             System.out.println("  - Email: " + email);
+             System.out.println("  - Roles: " + userRoles);
+             **/
             Set<String> requiredRoles = getRolesAllowed();
             if (!requiredRoles.isEmpty()) {
-                System.out.println("[JwtRequestFilter] Required roles: " + requiredRoles);
+                //System.out.println("[JwtRequestFilter] Required roles: " + requiredRoles);
                 if (Collections.disjoint(userRoles, requiredRoles)) {
                     System.err.println("[JwtRequestFilter] ✗ User doesn't have required roles");
                     System.err.println("[JwtRequestFilter] User has: " + userRoles);
@@ -145,7 +145,7 @@ public class JwtRequestFilter implements ContainerRequestFilter {
                     abortWithUnauthorized(requestContext, "Insufficient permissions");
                     return;
                 }
-                System.out.println("[JwtRequestFilter] ✓ Role check passed");
+                //System.out.println("[JwtRequestFilter] ✓ Role check passed");
             }
 
             CustomSecurityContext securityContext = new CustomSecurityContext(
@@ -155,8 +155,7 @@ public class JwtRequestFilter implements ContainerRequestFilter {
 
             requestContext.setSecurityContext(securityContext);
 
-            System.out.println("[JwtRequestFilter] ✓ Security context set successfully");
-            System.out.println("[JwtRequestFilter] ========================================\n");
+            //System.out.println("[JwtRequestFilter] ✓ Security context set successfully");
 
         } catch (JWTVerificationException e) {
             System.err.println("[JwtRequestFilter] ✗ Token verification failed");
@@ -178,8 +177,8 @@ public class JwtRequestFilter implements ContainerRequestFilter {
         boolean methodPermitAll = resourceInfo.getResourceMethod().isAnnotationPresent(PermitAll.class);
         boolean classPermitAll = resourceInfo.getResourceClass().isAnnotationPresent(PermitAll.class);
 
-        System.out.println("[JwtRequestFilter] Method has @PermitAll: " + methodPermitAll);
-        System.out.println("[JwtRequestFilter] Class has @PermitAll: " + classPermitAll);
+        //System.out.println("[JwtRequestFilter] Method has @PermitAll: " + methodPermitAll);
+        //System.out.println("[JwtRequestFilter] Class has @PermitAll: " + classPermitAll);
 
         return methodPermitAll || classPermitAll;
     }

@@ -4,6 +4,7 @@ import {QuestionService} from '../../../../shared/src/lib/services/question.serv
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {Question, QuestionType, QuestionUpdateRequest} from '../../../../shared/src/lib/interfaces/question';
 import {KeyValuePipe, NgForOf, NgIf} from '@angular/common';
+import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
 
 @Component({
   selector: 'lib-edit-question',
@@ -19,83 +20,112 @@ import {KeyValuePipe, NgForOf, NgIf} from '@angular/common';
 })
 export class EditQuestionComponent implements OnInit {
 
- private fb = inject(FormBuilder);
- private questionService = inject(QuestionService);
- private router = inject(Router);
- private route = inject(ActivatedRoute);
+  private fb = inject(FormBuilder);
+  private questionService = inject(QuestionService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private userInitService = inject(UserInitializationService);
 
- questionForm!: FormGroup;
- questionId!:number;
+  questionForm!: FormGroup;
+  questionId!: number;
+  isAdmin: boolean = false;
 
- readonly QuestionType = QuestionType;
- readonly maxAnswers = 7;
+  readonly QuestionType = QuestionType;
+  readonly maxAnswers = 7;
 
- ngOnInit(): void {
-   this.questionId = Number(this.route.snapshot.paramMap.get('id'));
-   this.initForm();
+  ngOnInit(): void {
+    this.questionId = Number(this.route.snapshot.paramMap.get('id'));
+    this.initForm();
 
-   this.questionService.getQuestionById(this.questionId).subscribe({
-     next: question => this.patchForm(question),
-     error: err => console.error('Fehler beim Laden', err)
-   });
+    this.questionService.getQuestionById(this.questionId).subscribe({
+      next: question => this.patchForm(question),
+      error: err => console.error('Fehler beim Laden', err)
+    });
 
-   this.questionForm.get('type')?.valueChanges.subscribe(type => {
-     this.updateAnswersArray(type);
-   });
- }
+    this.questionForm.get('type')?.valueChanges.subscribe(type => {
+      this.updateAnswersArray(type);
+    });
+  }
 
- private initForm(){
-   this.questionForm = this.fb.group({
-     text: ['', Validators.required],
-     type: ['', Validators.required],
-     difficulty: [2],
-     explanation: [''],
-     isPublic: [true],
-     answers: this.fb.array([])
-   });
- }
+  private async loadCurrentUser() {
+    const user = this.userInitService.getCurrentUser();
 
- private patchForm(question: Question) {
-   this.questionForm.patchValue({
-     text: question.text,
-     type: question.type,
-     difficulty: question.difficulty,
-     explanation: question.explanation,
-     isPublic: question.isPublic
-   });
+    if (user?.id) {
+      this.isAdmin = user.isAdmin || false;
+      if (!this.isAdmin) {
+        this.questionForm.get('isPublic')?.disable();
+      }
+    } else {
+      try {
+        const initializedUser = await this.userInitService.initializeUser();
+        if (initializedUser) {
+          this.isAdmin = initializedUser.isAdmin || false;
+          if (!this.isAdmin) {
+            this.questionForm.get('isPublic')?.disable();
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
+    }
+  }
 
-   this.questionForm.get('type')?.disable();
-   this.questionForm.get('difficulty')?.disable();
+  private initForm() {
+    this.questionForm = this.fb.group({
+      text: ['', Validators.required],
+      type: ['', Validators.required],
+      difficulty: [2],
+      explanation: [''],
+      isPublic: [true],
+      answers: this.fb.array([])
+    });
+  }
 
-   const answersArray = this.answersArray;
-   answersArray.clear();
+  private patchForm(question: Question) {
+    this.questionForm.patchValue({
+      text: question.text,
+      type: question.type,
+      difficulty: question.difficulty,
+      explanation: question.explanation,
+      isPublic: question.isPublic
+    });
 
-   question.answers?.forEach(a =>{
-     answersArray.push(this.fb.group({
-       id: [a.id],
-       text: [a.text, Validators.required],
-       isCorrect: [a.isCorrect]
-     }));
-   })
+    this.questionForm.get('type')?.disable();
+    this.questionForm.get('difficulty')?.disable();
 
- }
+    if (!this.isAdmin) {
+      this.questionForm.get('isPublic')?.disable();
+    }
 
- get answersArray() {
-   return this.questionForm.get('answers') as FormArray;
- }
+    const answersArray = this.answersArray;
+    answersArray.clear();
 
- addAnswer(){
-   if(this.answersArray.length < this.maxAnswers){
-     this.answersArray.push(this.fb.group({
-       text: ['', Validators.required],
-       isCorrect: [false]
-     }));
-   }
- }
+    question.answers?.forEach(a => {
+      answersArray.push(this.fb.group({
+        id: [a.id],
+        text: [a.text, Validators.required],
+        isCorrect: [a.isCorrect]
+      }));
+    })
 
- removeAnswer(index:number){
-   this.answersArray.removeAt(index);
- }
+  }
+
+  get answersArray() {
+    return this.questionForm.get('answers') as FormArray;
+  }
+
+  addAnswer() {
+    if (this.answersArray.length < this.maxAnswers) {
+      this.answersArray.push(this.fb.group({
+        text: ['', Validators.required],
+        isCorrect: [false]
+      }));
+    }
+  }
+
+  removeAnswer(index: number) {
+    this.answersArray.removeAt(index);
+  }
 
   private updateAnswersArray(type: QuestionType) {
     if (type !== QuestionType.MULTIPLE_CHOICE) {
@@ -110,31 +140,32 @@ export class EditQuestionComponent implements OnInit {
     }
   }
 
-  onSubmit(){
-   if(this.questionForm.invalid){
-     this.markAllFieldsAsTouched();
-     alert('Bitte alles ausfüllen')
-     return;
-   }
+  onSubmit() {
+    if (this.questionForm.invalid) {
+      this.markAllFieldsAsTouched();
+      alert('Bitte alles ausfüllen')
+      return;
+    }
 
-   const updateRequest: QuestionUpdateRequest = {
-     text:this.questionForm.get('text')?.value,
-     explanation:this.questionForm.get('explanation')?.value,
-     answers: this.answersArray.value.map((a: any) => ({ id: a.id, text: a.text, isCorrect: a.isCorrect })),
-     isPublic: this.questionForm.get('isPublic')?.value
-   };
+    const updateRequest: QuestionUpdateRequest = {
+      text: this.questionForm.get('text')?.value,
+      explanation: this.questionForm.get('explanation')?.value,
+      answers: this.answersArray.value.map((a: any) => ({id: a.id, text: a.text, isCorrect: a.isCorrect})),
+      isPublic: this.questionForm.get('isPublic')?.value
+    };
 
-   this.questionService.updateQuestion(this.questionId, updateRequest).subscribe({
-     next:()=>{
-       alert('Frage wurde aktualisiert');
-       this.router.navigate(['/manageQuestions']);
-     },
-     error:err => {
-       console.error(err);
-       alert('Fehler beim aktualisieren')
-     }
-   })
+    this.questionService.updateQuestion(this.questionId, updateRequest).subscribe({
+      next: () => {
+        alert('Frage wurde aktualisiert');
+        this.router.navigate(['/questions/manage']);
+      },
+      error: err => {
+        console.error(err);
+        alert('Fehler beim aktualisieren')
+      }
+    })
   }
+
   private markAllFieldsAsTouched() {
     Object.keys(this.questionForm.controls).forEach(key => {
       const control = this.questionForm.get(key);

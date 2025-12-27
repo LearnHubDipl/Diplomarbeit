@@ -3,18 +3,18 @@
   <nav aria-label="breadcrumb" class="mb-4" style="--bs-breadcrumb-divider: '>';">
     <ol class="breadcrumb fs-5 fw-semibold">
       <li class="breadcrumb-item">
-        <a routerLink="/chooseStudyOrCreate" class="text-dark text-decoration-none">
+        <a routerLink="/study/choose" class="text-dark text-decoration-none">
           <i class="bi bi-journal-bookmark me-1"></i>
           Erstellen & Lernen
         </a>
       </li>
       <li class="breadcrumb-item">
-        <a routerLink="/fragenkonfigurator" class="text-dark text-decoration-none">
+        <a routerLink="/questions/new" class="text-dark text-decoration-none">
           Fragen verwalten
         </a>
       </li>
       <li class="breadcrumb-item">
-        <a routerLink="/manageQuestions" class="text-dark text-decoration-none">
+        <a routerLink="/questions/manage" class="text-dark text-decoration-none">
           Bearbeiten
         </a>
       </li>
@@ -79,17 +79,26 @@
     </div>
 
     <div class="form-check form-switch mb-3">
-      <input class="form-check-input" type="checkbox" id="isPublic" formControlName="isPublic">
-      <label class="form-check-label" for="isPublic">{{ questionForm.get('isPublic')?.value ? 'Öffentlich' : 'Privat' }}</label>
+      <input class="form-check-input"
+             type="checkbox"
+             id="isPublic"
+             formControlName="isPublic"
+             [title]="!isAdmin ? 'Nur Admins können Fragen öffentlich machen' : ''">
+      <label class="form-check-label"
+             for="isPublic"
+             [class.text-muted]="!isAdmin">
+        {{ questionForm.get('isPublic')?.value ? 'Öffentlich' : 'Privat' }}
+        <small *ngIf="!isAdmin" class="text-muted d-block">(Nur für Admins)</small>
+      </label>
     </div>
 
     <button type="submit" class="btn btn-warning rounded-pill px-4 py-2 fw-semibold text-white" [disabled]="questionForm.invalid">
       Speichern
     </button>
 
-    <button [routerLink]="'/manageQuestions'" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold ms-2">
+    <button [routerLink]="'/questions/manage'" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold ms-2">
       Zurück zur Übersicht
     </button>
 
-      </form>
+    </form>
 </div>

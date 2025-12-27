@@ -35,6 +35,14 @@ public class QuestionRepository {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Finds a question entity by ID (for security checks)
+     * @param id the question ID
+     * @return Question entity or null if not found
+     */
+    public Question findById(Long id) {
+        return em.find(Question.class, id);
+    }
 
     public QuestionDto getQuestionDtoById(Long id) {
         Question question = getQuestionById(id);

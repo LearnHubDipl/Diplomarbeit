@@ -4,8 +4,8 @@ import at.learnhub.dto.simple.UserSlimDto;
 import at.learnhub.repository.UserRepository;
 import at.learnhub.security.CustomSecurityContext;
 import at.learnhub.service.UserService;
-import jakarta.annotation.security.RolesAllowed;
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -90,8 +90,8 @@ public class UserResource {
             @APIResponse(responseCode = "404", description = "User not found in database")
     })
     public Response getCurrentUser(@Context SecurityContext securityContext) {
-        System.out.println("\n[UserResource /me] ===================");
-        System.out.println("[UserResource /me] Processing request");
+        //System.out.println("\n[UserResource /me] ===================");
+        //System.out.println("[UserResource /me] Processing request");
 
         if (securityContext == null) {
             System.err.println("[UserResource /me] SecurityContext is NULL!");
@@ -100,13 +100,14 @@ public class UserResource {
                     .build();
         }
 
-        System.out.println("[UserResource /me] SecurityContext type: " +
-                securityContext.getClass().getName());
+        /**
+         System.out.println("[UserResource /me] SecurityContext type: " +
+         securityContext.getClass().getName());
 
-        System.out.println("[UserResource /me] User principal: " +
-                (securityContext.getUserPrincipal() != null ?
-                        securityContext.getUserPrincipal().getName() : "null"));
-
+         System.out.println("[UserResource /me] User principal: " +
+         (securityContext.getUserPrincipal() != null ?
+         securityContext.getUserPrincipal().getName() : "null"));
+         **/
         CustomSecurityContext customContext = extractCustomSecurityContext(securityContext);
 
         if (customContext == null) {
@@ -114,11 +115,11 @@ public class UserResource {
             Principal principal = securityContext.getUserPrincipal();
             if (principal != null) {
                 String keycloakSub = principal.getName();
-                System.out.println("[UserResource /me] Using principal name as keycloakSub: " + keycloakSub);
+                //System.out.println("[UserResource /me] Using principal name as keycloakSub: " + keycloakSub);
 
                 return userService.getUserByKeycloakSub(keycloakSub)
                         .map(user -> {
-                            System.out.println("[UserResource /me] ✓ User found via principal: ID=" + user.id());
+                            //System.out.println("[UserResource /me]  User found via principal: ID=" + user.id());
                             return Response.ok(user).build();
                         })
                         .orElseGet(() -> {
@@ -139,17 +140,17 @@ public class UserResource {
         }
 
         String keycloakSub = customContext.getKeycloakSub();
-        System.out.println("[UserResource /me] Keycloak Sub: " + keycloakSub);
-        System.out.println("[UserResource /me] Username: " + customContext.getUsername());
+        //System.out.println("[UserResource /me] Keycloak Sub: " + keycloakSub);
+        //System.out.println("[UserResource /me] Username: " + customContext.getUsername());
 
         return userService.getUserByKeycloakSub(keycloakSub)
                 .map(user -> {
-                    System.out.println("[UserResource /me] ✓ User found: ID=" + user.id());
+                    System.out.println("[UserResource /me] User found: ID=" + user.id());
                     return Response.ok(user).build();
                 })
                 .orElseGet(() -> {
-                    System.err.println("[UserResource /me] User not in database!");
-                    System.err.println("[UserResource /me] User needs to call /register first");
+                    //System.err.println("[UserResource /me] User not in database!");
+                    //System.err.println("[UserResource /me] User needs to call /register first");
                     return Response.status(Response.Status.NOT_FOUND)
                             .entity(Map.of(
                                     "error", "User not found",
@@ -183,8 +184,7 @@ public class UserResource {
             @APIResponse(responseCode = "401", description = "Unauthorized")
     })
     public Response registerUser(@Context SecurityContext securityContext) {
-        System.out.println("\n[UserResource /register] ===================");
-        System.out.println("[UserResource /register] Processing request");
+        //System.out.println("[UserResource /register] Processing request");
 
         if (securityContext == null) {
             System.err.println("[UserResource /register] SecurityContext is NULL!");
@@ -193,13 +193,14 @@ public class UserResource {
                     .build();
         }
 
-        System.out.println("[UserResource /register] SecurityContext type: " +
-                securityContext.getClass().getName());
+        /**
+         System.out.println("[UserResource /register] SecurityContext type: " +
+         securityContext.getClass().getName());
 
-        System.out.println("[UserResource /register] User principal: " +
-                (securityContext.getUserPrincipal() != null ?
-                        securityContext.getUserPrincipal().getName() : "null"));
-
+         System.out.println("[UserResource /register] User principal: " +
+         (securityContext.getUserPrincipal() != null ?
+         securityContext.getUserPrincipal().getName() : "null"));
+         **/
         CustomSecurityContext customContext = extractCustomSecurityContext(securityContext);
 
         if (customContext == null) {
@@ -207,7 +208,7 @@ public class UserResource {
             Principal principal = securityContext.getUserPrincipal();
             if (principal != null) {
                 String keycloakSub = principal.getName();
-                System.out.println("[UserResource /register] Using principal name as keycloakSub: " + keycloakSub);
+                // System.out.println("[UserResource /register] Using principal name as keycloakSub: " + keycloakSub);
 
                 customContext = new CustomSecurityContext(
                         keycloakSub,
@@ -227,17 +228,18 @@ public class UserResource {
         }
 
         String keycloakSub = customContext.getKeycloakSub();
-        System.out.println("[UserResource /register] Keycloak Sub: " + keycloakSub);
-        System.out.println("[UserResource /register] Username: " + customContext.getUsername());
-        System.out.println("[UserResource /register] Email: " + customContext.getEmail());
-        System.out.println("[UserResource /register] Roles: " + customContext.getRoles());
-
+        /**
+         System.out.println("[UserResource /register] Keycloak Sub: " + keycloakSub);
+         System.out.println("[UserResource /register] Username: " + customContext.getUsername());
+         System.out.println("[UserResource /register] Email: " + customContext.getEmail());
+         System.out.println("[UserResource /register] Roles: " + customContext.getRoles());
+         **/
         try {
             UserSlimDto user = userService.findOrCreateUserFromContext(customContext);
-            System.out.println("[UserResource /register] ✓ Success: ID=" + user.id());
+            //System.out.println("[UserResource /register] Success: ID=" + user.id());
             return Response.ok(user).build();
         } catch (Exception e) {
-            System.err.println("[UserResource /register] ✗ Error: " + e.getMessage());
+            System.err.println("[UserResource /register] Error: " + e.getMessage());
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(Map.of("error", "Registration failed", "message", e.getMessage()))
@@ -297,7 +299,7 @@ public class UserResource {
             @APIResponse(responseCode = "401", description = "Unauthorized")
     })
     public Response getAllUsers() {
-        System.out.println("[UserResource /users] Getting all users");
+        //System.out.println("[UserResource /users] Getting all users");
         return Response.ok(userRepository.findAll()).build();
     }
 

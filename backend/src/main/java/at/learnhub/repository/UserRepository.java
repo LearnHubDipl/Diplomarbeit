@@ -61,7 +61,7 @@ public class UserRepository {
     }
 
     /**
-     * Finds a user by Keycloak sub.
+     * Finds a user by Keycloak sub - returns DTO.
      * @param keycloakSub the Keycloak sub
      * @return Optional containing the UserSlimDto if found
      */
@@ -77,7 +77,8 @@ public class UserRepository {
     }
 
     /**
-     * Finds a user entity by Keycloak sub.
+     * Finds a user entity by Keycloak sub - returns Entity.
+     * Used for security checks in resources.
      * @param keycloakSub the Keycloak sub
      * @return Optional containing the User entity if found
      */

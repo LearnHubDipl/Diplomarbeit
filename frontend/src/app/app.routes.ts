@@ -40,6 +40,7 @@ import {
 import {
   SubjectPoolDetailComponent
 } from '../../projects/content-management/src/lib/subject-pool-detail/subject-pool-detail.component';
+import {NotFoundComponent} from '../../projects/content-management/src/lib/not-found/not-found.component';
 
 export const routes: Routes = [
   {
@@ -48,23 +49,32 @@ export const routes: Routes = [
     children: [
       { path: '', component: ContentHomeComponent },
       { path: 'about', component: AboutComponent },
+      {
+        path: 'study',
+        children: [
+          { path: 'choose', component: StudyOrCreateComponent },
+          { path: 'start', component: StartLearningComponent },
+          { path: 'topics', component: ChooseStudyTopicComponent },
+          { path: 'card/:id', component: FrageCardComponent },
+          { path: 'finished', component: FinishedCardComponent },
+        ]
+      },
 
-      { path: 'chooseStudyOrCreate', component: StudyOrCreateComponent },
-      { path: 'startCreate', component: StartCreateComponent },
-      { path: 'startStudy', component: StartLearningComponent },
-      { path: 'fragenkonfigurator', component: FragenKonfiguratorComponent },
-      { path: 'edit-question/:id', component: EditQuestionComponent },
-      { path: 'manageQuestions', component: QuestionManagerComponent },
+      {
+        path: 'questions',
+        children: [
+          { path: 'create', component: StartCreateComponent },
+          { path: 'new', component: FragenKonfiguratorComponent },
+          { path: 'edit/:id', component: EditQuestionComponent },
+          { path: 'manage', component: QuestionManagerComponent },
+        ]
+      },
 
-      // content-management neue Seiten:
-      { path: 'personalPlace', component: PersonalPlaceComponent },
-      { path: 'questionCard/:id', component: FrageCardComponent },
-      { path: 'finished', component: FinishedCardComponent },
-      { path: 'chooseStudyTopic', component: ChooseStudyTopicComponent },
+      { path: 'profile', component: PersonalPlaceComponent },
       { path: 'subjects', component: SubjectsComponent },
       { path: 'subjects/:id', component: SubjectDetailComponent },
       { path: 'subjects/:subjectId/pools/:poolId', component: SubjectPoolDetailComponent },
-      { path: 'subjects/:subjectId/pools/by-name/:poolName', component: SubjectPoolDetailComponent }
+      { path: 'subjects/:subjectId/pools/by-name/:poolName', component: SubjectPoolDetailComponent },
     ]
   },
 
@@ -102,6 +112,13 @@ export const routes: Routes = [
           { path: '', redirectTo: 'generell', pathMatch: 'full' }
         ]
       }
+    ]
+  },
+  {
+    path: '**',
+    component: AppLayoutComponent,
+    children: [
+      { path: '**', component: NotFoundComponent }
     ]
   }
 ];

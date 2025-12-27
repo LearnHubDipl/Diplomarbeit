@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { KeycloakOperationService } from '../../../../shared/src/lib/auth';
 import { UserInitializationService } from '../../../../shared/src/lib/services/user-initialization.service';
 import { UserSlim } from '../../../../shared/src/lib/interfaces/userSlim';
@@ -12,6 +12,8 @@ import { NgIf } from '@angular/common';
   styleUrls: ['./personal-place.component.css']
 })
 export class PersonalPlaceComponent implements OnInit {
+  keycloakService = inject(KeycloakOperationService);
+  userInitService = inject(UserInitializationService);
   givenName = '';
   familyName = '';
   displayName = '';
@@ -24,10 +26,6 @@ export class PersonalPlaceComponent implements OnInit {
   backendUser: UserSlim | null = null;
   isLoadingUser = true;
 
-  constructor(
-    private keycloakService: KeycloakOperationService,
-    private userInitService: UserInitializationService
-  ) {}
 
   async ngOnInit() {
     this.loadKeycloakData();

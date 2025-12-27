@@ -2,13 +2,13 @@
   <nav aria-label="breadcrumb" class="mb-4" style="--bs-breadcrumb-divider: '>';">
     <ol class="breadcrumb fs-5 fw-semibold">
       <li class="breadcrumb-item">
-        <a routerLink="/chooseStudyOrCreate" class="text-dark text-decoration-none">
+        <a routerLink="/study/choose" class="text-dark text-decoration-none">
           <i class="bi bi-journal-bookmark me-1"></i>
           Erstellen & Lernen
         </a>
       </li>
       <li class="breadcrumb-item">
-        <a routerLink="/chooseStudyTopic" class="text-dark text-decoration-none">
+        <a routerLink="/study/topics" class="text-dark text-decoration-none">
           Fachauswahl
         </a>
       </li>
@@ -89,6 +89,19 @@
     {{ currentIndex + 1 }}/{{ questions.length }}
   </div>
 </div>
-<div *ngIf="questions.length === 0" class="text-center mt-5">
-  <p>Keine Fragen gefunden.</p>
+<div *ngIf="questions.length === 0" class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <div class="card-body py-5">
+        <h4 class="card-title mb-2">Keine Fragen gefunden</h4>
+        <p class="card-text text-muted mb-4">
+          Für dieses Thema sind aktuell leider keine Fragen verfügbar.
+          Bitte wähle ein anderes Thema aus.
+        </p>
+        <a routerLink="/study/topics" class="btn btn-dark">
+          Thema auswählen
+        </a>
+      </div>
+    </div>
+  </div>
 </div>

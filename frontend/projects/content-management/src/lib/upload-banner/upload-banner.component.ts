@@ -12,5 +12,5 @@ export class UploadBannerComponent {
   @Input() title = 'Wollen Sie etwas hochladen?';
   @Input() subtitle = 'Wenn Fach oder Themenpool nicht existieren, können Sie das beim Upload anlegen.';
   @Input() buttonText = 'Upload starten';
-  @Input() link = '/startCreate';
+  @Input() link = '/questions/create';
 }
