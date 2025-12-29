@@ -57,13 +57,28 @@
 <div class="widget-wrapper question-wrapper">
   <!-- inner 'bread crumbs' showing the subject and the topic pool -->
   <div class="header" style="display: flex; justify-content: space-between">
-    {{ question?.topicPool?.subject?.name }} &gt; {{ question?.topicPool?.name }}
+    {{ question?.topicPool?.subject?.name || 'Fach' }} &gt; {{ question?.topicPool?.name || 'Themenpool' }}
     <span *ngIf="this.mode !== 'practice'" style="border-radius: 5px; padding: 0.4rem; border: 2px white solid;">
       {{ Math.floor(timeLeft / 60).toString().padStart(2, '0') }}:{{ Math.floor(timeLeft % 60).toString().padStart(2, '0') }}
     </span>
   </div>
 
-  <form [formGroup]="form" class="widget-content question-content {{ mode !== 'practice' ? 'exam-form' : ''}}" (ngSubmit)="submit()">    <div class="widget-content-top">
+  <!-- ERROR MESSAGES, IF THERE ARE ANY -->
+  <div *ngIf="errorMessage" class="inline-error">
+    {{ errorMessage }}
+
+    <button *ngIf="lastFailedAction === 'loadQuestion'"
+            (click)="loadQuestion(currentQuestionIndex)">
+      Erneut laden
+    </button>
+
+    <button *ngIf="lastFailedAction === 'submitAnswer'"
+            (click)="submit()">
+      Erneut prüfen
+    </button>
+  </div>
+
+  <form *ngIf="lastFailedAction == null" [formGroup]="form" class="widget-content question-content {{ mode !== 'practice' ? 'exam-form' : ''}}" (ngSubmit)="submit()">    <div class="widget-content-top">
       <div *ngIf="(mode === 'practice' || mode === 'review') && submitted" class="result-badge"
            [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
           <span class="icon">

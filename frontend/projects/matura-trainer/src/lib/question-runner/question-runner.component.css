@@ -254,6 +254,29 @@ textarea[formControlName="freeTextAnswer"]:focus {
 }
 
 
+/* ERROR */
+.inline-error {
+  margin: 1rem 3rem;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid #721c24;
+  border-radius: 0.5rem;
+  background: #f8d7da;
+  color: #721c24;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.inline-error button {
+  border: none;
+  background: #ffffff55;
+  padding: 0.4rem 0.8rem;
+  border-radius: .4rem;
+  cursor: pointer;
+}
+
+
+
 
 /* additional widget styles */
 .question-wrapper {

@@ -4,7 +4,7 @@ import {CheckAnswerRequest} from '../../../../shared/src/lib/interfaces/answer';
 import {CreatedExamResponse, ExamService} from '../../../../shared/src/lib/services/exam.service';
 import {Exam} from '../../../../shared/src/lib/interfaces/exam';
 import {ActivatedRoute} from '@angular/router';
-import {NgIf} from '@angular/common';
+import {Location, NgIf} from '@angular/common';
 import {query} from '@angular/animations';
 
 @Component({
@@ -20,6 +20,9 @@ export class ExamComponent implements OnInit{
   answers: CheckAnswerRequest[] = [];
   examService: ExamService = inject(ExamService);
   activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+  location: Location = inject(Location)
+
+  errorMessage: string | null = null;
 
   exam: CreatedExamResponse | null = null;
   submittedExam?: Exam;
@@ -44,9 +47,10 @@ export class ExamComponent implements OnInit{
           this.exam = createdExam;
           this.questionIds = createdExam.questions.map(q => q.id);
           this.isLoading = false;
+          this.clearError()
         },
         error: (err) => {
-          console.error('Failed to create exam', err);
+          this.handleError("Prüfung konnte nicht erstellt werden.", err)
           this.isLoading = false;
         }
       });
@@ -76,6 +80,19 @@ export class ExamComponent implements OnInit{
     });
   }
 
+  navigateBack() {
+    this.location.back()
+  }
+
   protected readonly query = query;
   protected readonly Math = Math;
+
+  handleError(msg: string, err: any) {
+    console.error(err);
+    this.errorMessage = msg;
+  }
+
+  clearError() {
+    this.errorMessage = null;
+  }
 }

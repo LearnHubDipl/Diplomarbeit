@@ -39,6 +39,10 @@ export class QuestionRunnerComponent implements OnInit {
   @Output() finishedExam = new EventEmitter<CheckAnswerRequest[]>(); // emit all answers at the end of exam
   @Input() questionIdList: number[] = [];
 
+  errorMessage: string | null = null;
+  lastFailedAction: 'loadQuestion' | 'submitAnswer' | 'vote' | null = null;
+  loading: boolean = false;
+
   currentQuestionIndex: number = 0;
   isFinished = false;
 
@@ -139,22 +143,36 @@ export class QuestionRunnerComponent implements OnInit {
     let id = this.questionIdList[index]
     if(!id) return;
 
-    this.questionService.getQuestionById(id).subscribe(q => {
-      this.question = q;
-      //this.sortSolutions();
+    this.loading = true;
+    this.clearError();
 
-      let previous = this.previousAnswers[q.id];
+    this.questionService.getQuestionById(id).subscribe({
+      next: q => {
+        this.loading = false;
+        this.question = q;
+        //this.sortSolutions();
 
-      if (q.type === 'MULTIPLE_CHOICE') {
-        let answerControls = this.fb.array(
-          q.answers.map((a, i) => previous?.selectedAnswerIds?.includes(a.id) ?? false)
-        );
-        this.form.setControl('answers', answerControls);
-        this.form.get('freeTextAnswer')?.disable();
-      } else if (q.type === 'FREETEXT') {
-        this.form.setControl('answers', this.fb.array([]));
-        this.form.get('freeTextAnswer')?.enable();
-        this.form.get('freeTextAnswer')?.setValue(previous?.freeTextAnswer ?? '');
+        let previous = this.previousAnswers[q.id];
+
+        if (q.type === 'MULTIPLE_CHOICE') {
+          let answerControls = this.fb.array(
+            q.answers.map((a, i) => previous?.selectedAnswerIds?.includes(a.id) ?? false)
+          );
+          this.form.setControl('answers', answerControls);
+          this.form.get('freeTextAnswer')?.disable();
+        } else if (q.type === 'FREETEXT') {
+          this.form.setControl('answers', this.fb.array([]));
+          this.form.get('freeTextAnswer')?.enable();
+          this.form.get('freeTextAnswer')?.setValue(previous?.freeTextAnswer ?? '');
+        }
+      },
+      error: err => {
+        this.loading = false;
+        this.handleError(
+          'Die Frage konnte nicht geladen werden.',
+          'loadQuestion',
+          err
+        )
       }
     });
   }
@@ -176,25 +194,34 @@ export class QuestionRunnerComponent implements OnInit {
     let payload = this.buildPayLoad();
     if (this.mode === 'practice') {
       // practice mode: give instant feedback
-      this.answerService.checkAnswers(payload).subscribe(result => {
-        this.answerResult = {
-          correct: result.correct,
-          correctAnswerIds: result.correctAnswerIds ?? null,
-          correctFreeTextAnswers: result.correctFreeTextAnswers ?? null
-        };
+      this.answerService.checkAnswers(payload).subscribe({
+        next: result => {
+          this.answerResult = {
+            correct: result.correct,
+            correctAnswerIds: result.correctAnswerIds ?? null,
+            correctFreeTextAnswers: result.correctFreeTextAnswers ?? null
+          };
 
-        this.lockInputs();
-        this.submitted = true;
+          this.lockInputs();
+          this.submitted = true;
 
-        //testuser
-        const userId = 1;
+          //testuser
+          const userId = 1;
 
-        if (result.correct) {
-          this.questionPoolService.increaseCorrectCount(this.question!.id, userId)
-            .subscribe(() => console.log('CorrectCount erhöht'));
+          if (result.correct) {
+            this.questionPoolService.increaseCorrectCount(this.question!.id, userId)
+              .subscribe(() => console.log('CorrectCount erhöht'));
+          }
+
+          this.advance();
+        },
+        error: err => {
+          this.handleError(
+            'Die Frage konnte nicht geladen werden.',
+            'submitAnswer',
+            err
+          )
         }
-
-        this.advance();
       });
     } else {
       // save answers
@@ -352,5 +379,16 @@ export class QuestionRunnerComponent implements OnInit {
 
 
   protected readonly Math = Math;
+
+  handleError(msg: string, action: typeof this.lastFailedAction, err: any) {
+    console.error(err);
+    this.errorMessage = msg;
+    this.lastFailedAction = action;
+  }
+
+  clearError() {
+    this.errorMessage = null;
+    this.lastFailedAction = null;
+  }
 }
 

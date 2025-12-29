@@ -35,6 +35,8 @@ export class ExamSetupComponent implements OnInit {
   subjectService: SubjectService = inject(SubjectService);
   subjects: Subject[] = []
 
+  errorMessage: string | null = null;
+
   form: FormGroup = this.fb.group({
     userId: [1],
     topicPoolIds: [[], Validators.required],
@@ -43,8 +45,18 @@ export class ExamSetupComponent implements OnInit {
   });
 
   ngOnInit() {
+    this.loadSubjects()
+  }
+
+  loadSubjects() {
+    this.clearError()
     // this.subjectService.getAllSubjects().subscribe(subjects => {this.subjects = subjects;});
-    this.questionPoolService.getSubjectsForUser(1).subscribe(subjects => this.subjects = subjects);
+    this.questionPoolService.getSubjectsForUser(1).subscribe({
+      next: subjects => {
+        this.subjects = subjects
+      },
+      error: err => this.handleError("Themenpools konnten nicht geladen werden.", err)
+    });
   }
 
   startExam() {
@@ -89,5 +101,14 @@ export class ExamSetupComponent implements OnInit {
         subject.topicPools.some(pool => selectedTopicPoolIds.includes(pool.id))
       )
       .map(subject => subject.name);
+  }
+
+  handleError(msg: string, err: any) {
+    console.error(err);
+    this.errorMessage = msg;
+  }
+
+  clearError() {
+    this.errorMessage = null;
   }
 }
