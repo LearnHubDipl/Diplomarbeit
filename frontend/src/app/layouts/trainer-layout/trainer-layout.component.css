@@ -7,3 +7,14 @@
 .trainer-main-layout .trainer-content {
   padding: 4% 10%;
 }
+
+
+/**** RESPONSIVE ****/
+@media (max-width: 767px) {
+  .trainer-main-layout {
+    grid-template-columns: 1fr;
+  }
+  .trainer-main-layout .trainer-content {
+    padding: 2% 5%;
+  }
+}

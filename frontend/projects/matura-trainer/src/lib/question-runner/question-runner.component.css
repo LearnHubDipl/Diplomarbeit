@@ -315,3 +315,159 @@ textarea[formControlName="freeTextAnswer"]:focus {
   cursor: pointer;
   color:#f3c400;
 }
+
+.question-content,
+.feedback,
+.big-nav {
+  overflow: auto;
+}
+
+.widget-content-top {
+  display: flex;
+  gap: 1.5rem;
+}
+
+/* right media column */
+.widget-content-right {
+  width: 40%;
+  padding: 1.5rem;
+  display: flex;
+}
+
+.widget-content-left {
+  width: 60%;
+}
+
+/* IMAGE scales */
+.widget-content-right img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.big-nav-item {
+  min-height: 70px;
+}
+
+/****************/
+/** RESPONSIVE **/
+/****************/
+@media (max-width: 767px) {
+
+  .exam-score-nav-grid {
+    grid-template-columns: 1fr;
+    row-gap: 1rem;
+  }
+
+  .big-nav {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 1rem;
+  }
+
+  .widget-content-top {
+    flex-direction: column;
+  }
+
+  .widget-content-left,
+  .widget-content-right {
+    width: 100% !important;
+    padding: 0;
+  }
+
+  .question {
+    margin-left: 0;
+    font-size: 1.2rem;
+  }
+
+  .answers {
+    margin: 1.5rem 0;
+  }
+
+  .answers li {
+    font-size: 1rem;
+    gap: 1rem;
+    padding: .6rem;
+  }
+
+  textarea[formControlName="freeTextAnswer"] {
+    width: 100%;
+    margin: 1rem 0;
+  }
+
+  .button-container {
+    position: static;
+    margin-top: 1.5rem;
+    width: 100%;
+  }
+
+  button.submit-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+  }
+
+  .big-nav-item {
+    min-height: 60px;
+  }
+
+  .big-nav-item p {
+    font-size: 1rem;
+  }
+
+  .inline-error {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .5rem;
+  }
+
+  .inline-error button {
+    width: 100%;
+  }
+
+  .score-content {
+    padding: 1rem !important;
+  }
+
+  .score-text {
+    font-size: 1.1rem;
+  }
+
+  .answers li {
+    gap: .8rem;
+  }
+
+  .answers input[type="checkbox"] {
+    transform: scale(1.3);
+  }
+
+}
+
+
+@media (min-width: 768px) and (max-width: 1199px) {
+
+  .exam-score-nav-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .big-nav {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .widget-content-left {
+    width: 65%;
+  }
+
+  .widget-content-right {
+    width: 35%;
+  }
+
+  button.submit-btn {
+    padding: 1rem 3rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .big-nav {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+

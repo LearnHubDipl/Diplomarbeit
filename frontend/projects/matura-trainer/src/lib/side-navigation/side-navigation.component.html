@@ -1,4 +1,7 @@
-<nav class="trainer-navigation">
+<button class="nav-toggle" (click)="sidebarOpen = !sidebarOpen">
+  ☰
+</button>
+<nav class="trainer-navigation" [class.open]="sidebarOpen">
   <!-- Benutzerinfo -->
   <div class="user-info">
     <img src="{{user?.profilePicture?.path}}" alt="{{user?.profilePicture?.description}}" class="profile-img" />
