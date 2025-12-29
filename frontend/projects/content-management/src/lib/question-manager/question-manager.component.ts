@@ -7,6 +7,7 @@ import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { SubjectService } from '../../../../shared/src/lib/services/subject.service';
 import { Subject } from '../../../../shared/src/lib/interfaces/subject';
 import { UserInitializationService } from '../../../../shared/src/lib/services/user-initialization.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'lib-question-manager',
@@ -26,6 +27,7 @@ export class QuestionManagerComponent implements OnInit {
   private questionService = inject(QuestionService);
   private userInitService = inject(UserInitializationService);
   private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
 
   subjects: Subject[] = [];
   filteredSubjects: Subject[] = [];
@@ -181,9 +183,19 @@ export class QuestionManagerComponent implements OnInit {
         error: (err) => {
           console.error('Fehler beim Löschen', err);
           if (err.status === 403) {
-            alert(err.error?.error || 'Du hast keine Berechtigung diese Frage zu löschen.');
+            this.snackBar.open(err.error?.error || 'Du hast keine Berechtigung diese Frage zu löschen.', 'Schließen', {
+              duration: 5000,
+              horizontalPosition: 'right',
+              verticalPosition: 'top',
+              panelClass: ['error-snackbar']
+            });
           } else {
-            alert('Fehler beim Löschen der Frage.');
+            this.snackBar.open('Fehler beim Löschen der Frage.', 'Schließen', {
+              duration: 5000,
+              horizontalPosition: 'right',
+              verticalPosition: 'top',
+              panelClass: ['error-snackbar']
+            });
           }
         }
       });

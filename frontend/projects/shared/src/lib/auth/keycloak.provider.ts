@@ -1,15 +1,12 @@
 import { APP_INITIALIZER, Provider, Injector } from '@angular/core';
 import { KeycloakService } from 'keycloak-angular';
 import { UserInitializationService } from '../services/user-initialization.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 const TOKEN_REFRESH_INTERVAL = 30000;
 const TOKEN_MIN_VALIDITY = 70;
 const MAX_SESSION_DURATION = 2 * 60 * 60 * 1000;
 
-/**
-const TOKEN_REFRESH_INTERVAL = 5000;          // 5 Sekunden (statt 30 Sekunden)
-const TOKEN_MIN_VALIDITY = 10;                // 10 Sekunden (statt 70 Sekunden)
-const MAX_SESSION_DURATION = 2 * 60 * 1000;  // 2 Minuten (statt 2 Stunden)**/
 export function initializeKeycloak(keycloak: KeycloakService, injector: Injector) {
   return async () => {
     try {
@@ -38,7 +35,7 @@ export function initializeKeycloak(keycloak: KeycloakService, injector: Injector
         const token = await keycloak.getToken();
         console.log('[KEYCLOAK] Token obtained, length:', token?.length || 0);
 
-        setupTokenRefreshWithTimeout(keycloak);
+        setupTokenRefreshWithTimeout(keycloak, injector);
 
         console.log('[KEYCLOAK] Initializing user in backend...');
         const userInitService = injector.get(UserInitializationService);
@@ -66,12 +63,22 @@ export function initializeKeycloak(keycloak: KeycloakService, injector: Injector
   };
 }
 
+function showSnackbar(injector: Injector, message: string, action: string = 'OK', panelClass: string[] = []) {
+  const snackBar = injector.get(MatSnackBar);
+  snackBar.open(message, action, {
+    duration: 5000,
+    horizontalPosition: 'right',
+    verticalPosition: 'top',
+    panelClass: panelClass
+  });
+}
+
 /**
  * Setup automatic token refresh with maximum session duration
  * - Refreshes token every 30 seconds if needed
  * - Forces re-login after MAX_SESSION_DURATION
  */
-function setupTokenRefreshWithTimeout(keycloak: KeycloakService): void {
+function setupTokenRefreshWithTimeout(keycloak: KeycloakService, injector: Injector): void {
   const sessionStartTime = Date.now();
   let refreshIntervalId: any;
 
@@ -86,7 +93,7 @@ function setupTokenRefreshWithTimeout(keycloak: KeycloakService): void {
       console.log('[KEYCLOAK] Maximum session duration reached. Logging out...');
       clearInterval(refreshIntervalId);
 
-      alert('Deine Session ist abgelaufen. Bitte melde dich erneut an.');
+      showSnackbar(injector, 'Deine Session ist abgelaufen. Bitte melde dich erneut an.', 'OK', ['error-snackbar']);
       await keycloak.logout();
       return;
     }
@@ -106,7 +113,7 @@ function setupTokenRefreshWithTimeout(keycloak: KeycloakService): void {
       console.error('[KEYCLOAK] ✗ Token refresh failed:', error);
       console.log('[KEYCLOAK] Session invalid. Redirecting to login...');
       clearInterval(refreshIntervalId);
-      alert('Deine Session ist abgelaufen. Bitte melde dich erneut an.');
+      showSnackbar(injector, 'Deine Session ist abgelaufen. Bitte melde dich erneut an.', 'OK', ['error-snackbar']);
       await keycloak.login();
     }
   }, TOKEN_REFRESH_INTERVAL);
@@ -116,7 +123,7 @@ function setupTokenRefreshWithTimeout(keycloak: KeycloakService): void {
     const warningTime = MAX_SESSION_DURATION - (warningMinutes * 60 * 1000);
     setTimeout(() => {
       console.log(`[KEYCLOAK] Session expires in ${warningMinutes} minutes`);
-      alert(`Deine Session läuft in ${warningMinutes} Minuten ab.`);
+      showSnackbar(injector, `Deine Session läuft in ${warningMinutes} Minuten ab.`, 'OK', ['warning-snackbar']);
     }, warningTime);
   }
 }

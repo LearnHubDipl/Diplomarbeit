@@ -5,6 +5,7 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {Question, QuestionType, QuestionUpdateRequest} from '../../../../shared/src/lib/interfaces/question';
 import {KeyValuePipe, NgForOf, NgIf} from '@angular/common';
 import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'lib-edit-question',
@@ -25,6 +26,7 @@ export class EditQuestionComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private userInitService = inject(UserInitializationService);
+  private snackBar = inject(MatSnackBar);
 
   questionForm!: FormGroup;
   questionId!: number;
@@ -173,7 +175,12 @@ export class EditQuestionComponent implements OnInit {
   onSubmit() {
     if (this.questionForm.invalid) {
       this.markAllFieldsAsTouched();
-      alert('Bitte alles ausfüllen')
+      this.snackBar.open('Bitte alles ausfüllen', 'Schließen', {
+        duration: 5000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar']
+      });
       return;
     }
 
@@ -188,15 +195,30 @@ export class EditQuestionComponent implements OnInit {
 
     this.questionService.updateQuestion(this.questionId, updateRequest).subscribe({
       next: () => {
-        alert('Frage wurde aktualisiert');
+        this.snackBar.open('Frage wurde aktualisiert', 'Schließen', {
+          duration: 5000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
         this.router.navigate(['/questions/manage']);
       },
       error: err => {
         console.error(err);
         if (err.status === 403) {
-          alert(err.error?.error || 'Du hast keine Berechtigung diese Frage zu bearbeiten.');
+          this.snackBar.open(err.error?.error || 'Du hast keine Berechtigung diese Frage zu bearbeiten.', 'OK', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar']
+          });
         } else {
-          alert('Fehler beim Aktualisieren der Frage.');
+          this.snackBar.open('Fehler beim Aktualisieren der Frage.', 'OK', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar']
+          });
         }
       }
     })

@@ -9,6 +9,7 @@ import {QuestionRequest, AnswerCreationRequest} from '../../../../shared/src/lib
 import {Subject} from '../../../../shared/src/lib/interfaces/subject';
 import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'lib-fragen-konfigurator',
@@ -27,6 +28,7 @@ export class FragenKonfiguratorComponent implements OnInit {
   private userInitService = inject(UserInitializationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
 
   questionForm!: FormGroup;
   subjects: Subject[] = [];
@@ -180,6 +182,12 @@ export class FragenKonfiguratorComponent implements OnInit {
       },
       error: (error) => {
         console.error('Fehler beim Laden der Schulfächer:', error);
+        this.snackBar.open('Fehler beim Laden der Schulfächer', 'Schließen', {
+          duration: 5000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
       }
     });
   }
@@ -196,7 +204,12 @@ export class FragenKonfiguratorComponent implements OnInit {
 
   onSubmit() {
     if (!this.currentUserId) {
-      alert('Fehler: Benutzer-ID konnte nicht geladen werden. Bitte laden Sie die Seite neu.');
+      this.snackBar.open('Benutzer-ID konnte nicht geladen werden. Bitte laden Sie die Seite neu.', 'Schließen', {
+        duration: 5000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar']
+      });
       console.error('Current user ID is not available');
       return;
     }
@@ -220,7 +233,12 @@ export class FragenKonfiguratorComponent implements OnInit {
 
       this.questionService.createQuestion(questionRequest).subscribe({
         next: () => {
-          alert('Frage wurde erfolgreich veröffentlicht!');
+          this.snackBar.open('Frage wurde erfolgreich veröffentlicht!', 'OK', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar']
+          });
 
           this.router.navigate([], {
             relativeTo: this.route,
@@ -241,12 +259,22 @@ export class FragenKonfiguratorComponent implements OnInit {
         },
         error: (error) => {
           console.error('Fehler beim Erstellen der Frage:', error);
-          alert('Fehler beim Veröffentlichen der Frage. Bitte versuchen Sie es erneut.');
+          this.snackBar.open('Fehler beim Veröffentlichen der Frage. Bitte versuchen Sie es erneut.', 'Schließen', {
+            duration: 5000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['error-snackbar']
+          });
         }
       });
     } else {
       this.markAllFieldsAsTouched();
-      alert('Bitte füllen Sie alle Pflichtfelder aus.');
+      this.snackBar.open('Bitte füllen Sie alle Pflichtfelder aus.', 'OK', {
+        duration: 4000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        panelClass: ['warning-snackbar']
+      });
     }
   }
 
