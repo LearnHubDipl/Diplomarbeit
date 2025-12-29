@@ -52,12 +52,18 @@ export class FragenKonfiguratorComponent implements OnInit {
       this.subjectId = params['subjectId'] ? Number(params['subjectId']) : undefined;
       this.topicPoolId = params['topicPoolId'] ? Number(params['topicPoolId']) : undefined;
 
+      const isPublicParam = params['isPublic'] === 'true';
+
       this.fromSubjectSelection = params['fromSubjectSelection'] === 'true';
       if (this.subjectId) {
         this.questionForm.get('subjectId')?.setValue(this.subjectId);
         this.loadSubjects();
       } else {
         this.loadSubjects();
+      }
+
+      if (isPublicParam && this.isAdmin) {
+        this.questionForm.get('isPublic')?.setValue(true);
       }
     });
   }

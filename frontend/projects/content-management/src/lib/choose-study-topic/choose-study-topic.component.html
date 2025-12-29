@@ -17,7 +17,7 @@
 
   <div class="btn-group mb-4" role="group">
     <button type="button"
-            class="btn  hover-white"
+            class="btn hover-white"
             [ngClass]="{
             'btn-warning': isPublicMode,
             'btn-outline-warning': !isPublicMode,
@@ -40,14 +40,13 @@
     </button>
   </div>
 
-
   <div *ngIf="loadError" class="alert alert-danger mt-3">
     <strong>Fächer konnten nicht geladen werden</strong><br>
     {{ errorMessage }}
   </div>
 
   <div id="accordionSubjects">
-    <div *ngFor="let subject of subjects" class="mb-2 border rounded overflow-hidden">
+    <div *ngFor="let subject of filteredSubjects" class="mb-2 border rounded overflow-hidden">
       <div class="bg-warning text-white p-3 d-flex justify-content-between align-items-center"
            style="cursor: pointer;"
            (click)="toggleSubject(subject.id)">
@@ -65,7 +64,7 @@
            [ngClass]="{ show: openSubjectId === subject.id }">
 
         <ul class="list-group rounded-0 border-top border-warning">
-          <li *ngFor="let pool of subject.topicPools"
+          <li *ngFor="let pool of getFilteredTopicPools(subject)"
               class="list-group-item d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2">
               <span> {{ pool.name }} </span>
@@ -80,7 +79,10 @@
                  [style.cursor]="hasQuestions(pool.id) ? 'pointer' : 'not-allowed'"
                  [title]="hasQuestions(pool.id) ? 'Lernen starten' : 'Keine Fragen gefunden'"
                  (click)="navigateToTopicPool(pool)"></i>
-              <i class="bi bi-plus-circle-fill text-success fs-5" style="cursor: pointer"
+
+              <i *ngIf="showPlusIcon()"
+                 class="bi bi-plus-circle-fill text-success fs-5"
+                 style="cursor: pointer"
                  (click)="navigateToFragenkonfigurator(subject,pool)"></i>
             </div>
           </li>

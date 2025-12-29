@@ -6,7 +6,7 @@ import {Router, RouterLink} from '@angular/router';
 import {NgForOf, NgClass, NgIf} from '@angular/common';
 import {QuestionService} from '../../../../shared/src/lib/services/question.service';
 import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
-import {forkJoin} from 'rxjs';
+import {UserSlim} from '../../../../shared/src/lib/interfaces/userSlim';
 
 @Component({
   selector: 'lib-choose-study-topic',
@@ -25,6 +25,7 @@ export class ChooseStudyTopicComponent implements OnInit {
   openSubjectId: number | null = null;
   isPublicMode = true; // true = Öffentlich, false = Persönlich
   userId: number | null = null;
+  currentUser: UserSlim | null = null;
 
   // Track which pools have questions
   poolsWithQuestions = new Set<number>();
@@ -39,10 +40,12 @@ export class ChooseStudyTopicComponent implements OnInit {
     const user = this.userInitService.getCurrentUser();
     if (user) {
       this.userId = user.id;
+      this.currentUser = user;
     } else {
       try {
         const initializedUser = await this.userInitService.initializeUser();
         this.userId = initializedUser?.id || null;
+        this.currentUser = initializedUser;
       } catch (err) {
         console.error('Fehler beim Laden des Users:', err);
       }
@@ -100,6 +103,31 @@ export class ChooseStudyTopicComponent implements OnInit {
     return this.poolsWithQuestions.has(poolId);
   }
 
+  hasSubjectQuestionsInPools(subject: Subject): boolean {
+    return subject.topicPools.some(pool => this.hasQuestions(pool.id));
+  }
+
+  get filteredSubjects(): Subject[] {
+    if (this.isPublicMode && this.currentUser && this.currentUser.isTeacher) {
+      return this.subjects.filter(subject => this.hasSubjectQuestionsInPools(subject));
+    }
+    return this.subjects;
+  }
+
+  getFilteredTopicPools(subject: Subject): TopicPool[] {
+    if (this.isPublicMode && this.currentUser && this.currentUser.isTeacher) {
+      return subject.topicPools.filter(pool => this.hasQuestions(pool.id));
+    }
+    return subject.topicPools;
+  }
+
+  showPlusIcon(): boolean {
+    if (this.isPublicMode && this.currentUser && this.currentUser.isTeacher) {
+      return false;
+    }
+    return true;
+  }
+
   toggleSubject(id: number): void {
     this.openSubjectId = this.openSubjectId === id ? null : id;
   }
@@ -120,7 +148,8 @@ export class ChooseStudyTopicComponent implements OnInit {
       queryParams: {
         subjectId: subject.id,
         topicPoolId: pool.id,
-        fromSubjectSelection: true
+        fromSubjectSelection: true,
+        isPublic: this.isPublicMode
       }
     });
   }
