@@ -342,10 +342,24 @@ export class QuestionRunnerComponent implements OnInit {
 
   createExamCopy(id: number) {
     this.examService.createExamCopy(id).subscribe(exam => {
+      console.log(exam)
       let settings = exam;
-      this.router.navigate(['/trainer/practice/setup-exam/exam'], {
-        state: { settings, "examCreated": true }
-      });
+      let target = '/trainer/practice/setup-exam/exam';
+
+      if (this.router.url.startsWith(target)) {
+        // navigate to dummy route, then back (because if on same page angular does not automatically reload it via the navigate function)
+        this.router.navigateByUrl('/', { skipLocationChange: true })
+          .then(() =>
+            this.router.navigate([target], {
+              state: { settings, examCreated: true }
+            })
+          );
+      } else {
+        this.router.navigate([target], {
+          state: { settings, examCreated: true }
+        });
+      }
+
     })
   }
 
