@@ -1,0 +1,181 @@
+<div class="container mt-5 mb-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4" style="--bs-breadcrumb-divider: '>';">
+    <ol class="breadcrumb fs-5 fw-semibold">
+      <li class="breadcrumb-item">
+        <a routerLink="/profile" class="text-dark text-decoration-none">
+          <i class="bi bi-person-circle me-1"></i>
+          Persönlicher Bereich
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a routerLink="/questions/approve" class="text-dark text-decoration-none">
+          Fragen genehmigen
+        </a>
+      </li>
+      <li class="breadcrumb-item active text-orange fw-bold" aria-current="page">
+        Details
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center mt-5">
+    <div class="spinner-border text-warning" role="status">
+      <span class="visually-hidden">Laden...</span>
+    </div>
+    <p class="text-muted mt-2">Frage wird geladen...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="loadError" class="alert alert-danger mt-3">
+    <strong>Fehler</strong><br>
+    {{ errorMessage }}
+    <div class="mt-3">
+      <button class="btn btn-secondary" (click)="backToList()">
+        <i class="bi bi-arrow-left me-2"></i>
+        Zurück zur Liste
+      </button>
+    </div>
+  </div>
+
+  <!-- Question Details -->
+  <div *ngIf="!isLoading && !loadError && question" class="card border-warning">
+    <div class="card-header bg-warning text-white">
+      <h5 class="mb-0">
+        <i class="bi bi-eye me-2"></i>
+        Fragendetails
+      </h5>
+    </div>
+    <div class="card-body">
+
+      <!-- Already Public Warning -->
+      <div *ngIf="question.isPublic" class="alert alert-info mb-4">
+        <i class="bi bi-info-circle me-2"></i>
+        <strong>Hinweis:</strong> Diese Frage ist bereits öffentlich.
+      </div>
+
+      <!-- Creator Info -->
+      <div class="mb-4 p-3 bg-light rounded">
+        <h6 class="fw-bold text-warning mb-2">
+          <i class="bi bi-person-badge me-2"></i>
+          Ersteller
+        </h6>
+        <div class="row">
+          <div class="col-md-6">
+            <div class="small text-muted">Name</div>
+            <div class="fw-semibold">{{ question.user?.name || 'Unbekannt' }}</div>
+          </div>
+          <div class="col-md-6">
+            <div class="small text-muted">Klasse</div>
+            <div class="fw-semibold">{{ getCreatorClass() }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Question Text -->
+      <div class="mb-4">
+        <h6 class="fw-bold text-warning mb-2">
+          <i class="bi bi-question-circle me-2"></i>
+          Frage
+        </h6>
+        <p class="fs-5">{{ question.text }}</p>
+      </div>
+
+      <!-- Question Type & Difficulty & TopicPool -->
+      <div class="mb-4">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="small text-muted">Typ</div>
+            <div class="fw-semibold">
+              <span class="badge bg-info">
+                {{ getQuestionTypeLabel(question.type) }}
+              </span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="small text-muted">Schwierigkeit</div>
+            <div class="fw-semibold">
+              <span class="badge"
+                    [ngClass]="{
+                      'bg-success': question.difficulty === 1,
+                      'bg-warning': question.difficulty === 2,
+                      'bg-danger': question.difficulty === 3
+                    }">
+                {{ getDifficultyLabel(question.difficulty) }}
+              </span>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="small text-muted">Themenpool</div>
+            <div class="fw-semibold">{{ question.topicPool?.name || 'N/A' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Answers (for Multiple Choice) -->
+      <div *ngIf="question.type === 'MULTIPLE_CHOICE' && question.answers && question.answers.length > 0" class="mb-4">
+        <h6 class="fw-bold text-warning mb-2">
+          <i class="bi bi-list-check me-2"></i>
+          Antwortmöglichkeiten
+        </h6>
+        <ul class="list-group">
+          <li
+            *ngFor="let answer of question.answers"
+            class="list-group-item d-flex align-items-center"
+            [ngClass]="{
+              'list-group-item-success': answer.isCorrect,
+              'list-group-item-light': !answer.isCorrect
+            }">
+            <i class="bi me-2 fs-5"
+               [ngClass]="{
+                 'bi-check-circle-fill text-success': answer.isCorrect,
+                 'bi-x-circle text-danger': !answer.isCorrect
+               }"></i>
+            <span>{{ answer.text }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Freetext Info -->
+      <div *ngIf="question.type === 'FREETEXT'" class="mb-4">
+        <div class="alert alert-info">
+          <i class="bi bi-pencil me-2"></i>
+          Dies ist eine Freitext-Frage. Schüler geben ihre eigene Antwort ein.
+        </div>
+      </div>
+
+      <!-- Explanation -->
+      <div *ngIf="question.explanation" class="mb-4">
+        <h6 class="fw-bold text-warning mb-2">
+          <i class="bi bi-info-circle me-2"></i>
+          Erklärung
+        </h6>
+        <p class="text-muted">{{ question.explanation }}</p>
+      </div>
+
+      <!-- No Explanation Warning -->
+      <div *ngIf="!question.explanation" class="alert alert-warning mb-4">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Keine Erklärung vorhanden
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button
+          class="btn btn-outline-secondary"
+          (click)="backToList()">
+          <i class="bi bi-arrow-left me-2"></i>
+          Zurück zur Liste
+        </button>
+        <button
+          class="btn btn-warning text-white"
+          [disabled]="question.isPublic"
+          (click)="approveQuestion()">
+          <i class="bi bi-check-circle me-2"></i>
+          {{ question.isPublic ? 'Bereits genehmigt' : 'Frage genehmigen' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -3,6 +3,7 @@ package at.learnhub.boundary;
 import at.learnhub.dto.simple.UserSlimDto;
 import at.learnhub.repository.UserRepository;
 import at.learnhub.security.CustomSecurityContext;
+import at.learnhub.security.SecurityContextHolder;
 import at.learnhub.service.UserService;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -168,24 +169,7 @@ public class UserResource {
     @POST
     @Path("/register")
     @PermitAll
-    @Operation(
-            summary = "Register or retrieve user",
-            description = "Automatically registers a new user or retrieves existing user based on Keycloak token"
-    )
-    @APIResponses({
-            @APIResponse(
-                    responseCode = "200",
-                    description = "User retrieved or created",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON,
-                            schema = @Schema(implementation = UserSlimDto.class)
-                    )
-            ),
-            @APIResponse(responseCode = "401", description = "Unauthorized")
-    })
     public Response registerUser(@Context SecurityContext securityContext) {
-        //System.out.println("[UserResource /register] Processing request");
-
         if (securityContext == null) {
             System.err.println("[UserResource /register] SecurityContext is NULL!");
             return Response.status(Response.Status.UNAUTHORIZED)
@@ -193,33 +177,51 @@ public class UserResource {
                     .build();
         }
 
-        /**
-         System.out.println("[UserResource /register] SecurityContext type: " +
-         securityContext.getClass().getName());
+        CustomSecurityContext customContext = null;
 
-         System.out.println("[UserResource /register] User principal: " +
-         (securityContext.getUserPrincipal() != null ?
-         securityContext.getUserPrincipal().getName() : "null"));
-         **/
-        CustomSecurityContext customContext = extractCustomSecurityContext(securityContext);
+        customContext = SecurityContextHolder.getContext();
+        /*
+        if (customContext != null) {
+            System.out.println("[UserResource /register] Got from ThreadLocal");
+            System.out.println("[UserResource /register] User: " + customContext.getFullName());
+            System.out.println("[UserResource /register] Email: " + customContext.getEmail());
+            System.out.println("[UserResource /register] Class: " + customContext.getClassName());
+        }
+
+*/
+
+        if (customContext == null && securityContext instanceof CustomSecurityContext) {
+            customContext = (CustomSecurityContext) securityContext;
+            //System.out.println("[UserResource /register] Direct cast worked");
+        }
 
         if (customContext == null) {
-            System.err.println("[UserResource /register] Could not extract CustomSecurityContext");
+            customContext = extractCustomSecurityContext(securityContext);
+            if (customContext != null) {
+                //System.out.println("[UserResource /register] Extracted from proxy");
+            }
+        }
+
+        if (customContext == null) {
+            System.err.println("[UserResource /register] ⚠️ All extraction methods failed!");
+
             Principal principal = securityContext.getUserPrincipal();
             if (principal != null) {
                 String keycloakSub = principal.getName();
-                // System.out.println("[UserResource /register] Using principal name as keycloakSub: " + keycloakSub);
+                System.out.println("[UserResource /register] Using FALLBACK");
 
                 customContext = new CustomSecurityContext(
                         keycloakSub,
                         java.util.Collections.emptyList(),
+                        "User " + keycloakSub.substring(0, Math.min(8, keycloakSub.length())),
                         keycloakSub,
-                        keycloakSub,
                         "",
-                        "",
-                        "",
+                        "User",
+                        keycloakSub.substring(0, Math.min(8, keycloakSub.length())),
                         ""
                 );
+
+                System.err.println("[UserResource /register] ⚠️ User data will be incomplete!");
             } else {
                 return Response.status(Response.Status.UNAUTHORIZED)
                         .entity(Map.of("error", "No user principal found"))
@@ -227,16 +229,9 @@ public class UserResource {
             }
         }
 
-        String keycloakSub = customContext.getKeycloakSub();
-        /**
-         System.out.println("[UserResource /register] Keycloak Sub: " + keycloakSub);
-         System.out.println("[UserResource /register] Username: " + customContext.getUsername());
-         System.out.println("[UserResource /register] Email: " + customContext.getEmail());
-         System.out.println("[UserResource /register] Roles: " + customContext.getRoles());
-         **/
         try {
             UserSlimDto user = userService.findOrCreateUserFromContext(customContext);
-            //System.out.println("[UserResource /register] Success: ID=" + user.id());
+            // System.out.println("[UserResource /register] Success: " + user.name());
             return Response.ok(user).build();
         } catch (Exception e) {
             System.err.println("[UserResource /register] Error: " + e.getMessage());
@@ -244,8 +239,11 @@ public class UserResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(Map.of("error", "Registration failed", "message", e.getMessage()))
                     .build();
+        } finally {
+            SecurityContextHolder.clear();
         }
     }
+
 
     /**
      * Get user by ID

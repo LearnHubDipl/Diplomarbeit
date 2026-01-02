@@ -237,6 +237,48 @@ public class QuestionResource {
     }
 
     @GET
+    @Path("/private")
+    @Operation(summary = "Get all private questions (admin only)",
+            description = "Returns all questions where isPublic = false. Only accessible by admins.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "List of private questions",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(type = SchemaType.ARRAY, implementation = QuestionDto.class))),
+            @APIResponse(responseCode = "403", description = "Forbidden - Only admins can access"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response getAllPrivateQuestions(@Context SecurityContext securityContext) {
+        System.out.println("\n[QuestionResource] Getting all private questions");
+
+        try {
+            User currentUser = getCurrentUser(securityContext);
+
+            if (!Boolean.TRUE.equals(currentUser.getAdmin())) {
+                //System.out.println("[QuestionResource] Non-admin tried to access private questions");
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(Map.of("error", "Only admins can view all private questions"))
+                        .build();
+            }
+
+            List<QuestionDto> questions = questionRepository.findAllPrivateQuestions();
+            //System.out.println("[QuestionResource] Found " + questions.size() + " private questions");
+            return Response.ok(questions).build();
+
+        } catch (NotAuthorizedException | NotFoundException e) {
+            System.err.println("[QuestionResource] Auth error: " + e.getMessage());
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(Map.of("error", e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            System.err.println("[QuestionResource] Error: " + e.getMessage());
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("error", "Error loading private questions", "message", e.getMessage()))
+                    .build();
+        }
+    }
+
+    @GET
     @Path("/type/{type}")
     @Operation(summary = "Get questions by type")
     public Response getQuestionsByType(@PathParam("type") String type, @Context SecurityContext securityContext) {
@@ -421,6 +463,65 @@ public class QuestionResource {
             e.printStackTrace();
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(Map.of("error", "Error updating question", "message", e.getMessage()))
+                    .build();
+        }
+    }
+
+    @PATCH
+    @Path("/{id}/public")
+    @Transactional
+    @Operation(summary = "Change public status of a question (admin only)")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "Public status changed"),
+            @APIResponse(responseCode = "403", description = "Forbidden - Only admins can change public status"),
+            @APIResponse(responseCode = "404", description = "Question not found")
+    })
+    public Response changeQuestionPublicStatus(
+            @PathParam("id") Long id,
+            @QueryParam("isPublic") @Parameter(description = "New public status (true/false)", required = true) Boolean isPublic,
+            @Context SecurityContext securityContext) {
+        System.out.println("\n[QuestionResource] Changing public status for question: " + id + " to: " + isPublic);
+
+        try {
+            User currentUser = getCurrentUser(securityContext);
+
+            if (!Boolean.TRUE.equals(currentUser.getAdmin())) {
+                //System.out.println("[QuestionResource] Non-admin tried to change public status");
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(Map.of("error", "Only admins can change public status of questions"))
+                        .build();
+            }
+
+            Question question = questionRepository.findById(id);
+            if (question == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(Map.of("error", "Question not found"))
+                        .build();
+            }
+
+            if (isPublic == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(Map.of("error", "isPublic parameter is required"))
+                        .build();
+            }
+
+            question.setPublic(isPublic);
+
+            QuestionDto resultDto = QuestionMapper.toDto(question);
+
+            //System.out.println("[QuestionResource] Question " + id + " public status changed to: " + isPublic);
+
+            return Response.ok(resultDto).build();
+
+        } catch (NotAuthorizedException | NotFoundException e) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(Map.of("error", e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            System.err.println("[QuestionResource] Error changing public status: " + e.getMessage());
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("error", "Error changing public status", "message", e.getMessage()))
                     .build();
         }
     }

@@ -86,6 +86,19 @@ public class QuestionRepository {
     }
 
     /**
+     * Retrieves all public questions
+     *
+     * @return list of publicly visible questions
+     */
+    public List<QuestionDto> findAllPrivateQuestions() {
+        return em.createQuery("select q from Question q where q.isPublic = false", Question.class)
+                .getResultList()
+                .stream()
+                .map(QuestionMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * Retrieves all questions of a given type (f.e. FREETEXT, MULTIPLE_CHOICE).
      *
      * @param type the QuestionType enum

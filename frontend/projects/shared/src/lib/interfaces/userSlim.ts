@@ -8,4 +8,5 @@ export interface UserSlim {
   isTeacher: boolean;
   isAdmin?: boolean;
   profilePicture?: Media;
+  className?: string;
 }

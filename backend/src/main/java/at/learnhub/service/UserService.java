@@ -56,34 +56,67 @@ public class UserService {
     public UserSlimDto findOrCreateUserFromContext(CustomSecurityContext context) {
         String keycloakSub = context.getKeycloakSub();
 
-        // System.out.println("[UserService] Looking for user with keycloakSub: " + keycloakSub);
+        System.out.println("[UserService] Looking for user with keycloakSub: " + keycloakSub);
 
-        // Check if user already exists
         Optional<UserSlimDto> existingUser = userRepository.findByKeycloakSub(keycloakSub);
         if (existingUser.isPresent()) {
-            //System.out.println("[UserService] User exists: " + keycloakSub);
+            System.out.println("[UserService] User exists: " + existingUser.get().name());
             return existingUser.get();
         }
 
-        //System.out.println("[UserService] Creating new user: " + keycloakSub);
+        System.out.println("[UserService] Creating new user: " + keycloakSub);
 
-        // Create DTO from context
+        String fullName = context.getFullName();
+        String givenName = context.getGivenName();
+        String familyName = context.getFamilyName();
+
+        if (fullName == null || fullName.trim().isEmpty() || fullName.equals(keycloakSub)) {
+            System.out.println("[UserService] fullName not useful, building from givenName + familyName");
+
+            if (givenName != null && !givenName.trim().isEmpty() &&
+                    familyName != null && !familyName.trim().isEmpty()) {
+                fullName = (givenName.trim() + " " + familyName.trim()).trim();
+                System.out.println("[UserService] Built name from parts: " + fullName);
+            } else if (givenName != null && !givenName.trim().isEmpty()) {
+                fullName = givenName.trim();
+                System.out.println("[UserService] Using givenName only: " + fullName);
+            } else if (familyName != null && !familyName.trim().isEmpty()) {
+                fullName = familyName.trim();
+                System.out.println("[UserService] Using familyName only: " + fullName);
+            } else {
+                String username = context.getUsername();
+                if (username != null && !username.trim().isEmpty() && !username.equals(keycloakSub)) {
+                    fullName = username;
+                    System.out.println("[UserService] Using username: " + fullName);
+                } else {
+                    // Absolute last resort: shortened UUID
+                    fullName = "User " + keycloakSub.substring(0, Math.min(8, keycloakSub.length()));
+                    System.out.println("[UserService] WARNING: Using fallback name: " + fullName);
+                }
+            }
+        } else {
+            System.out.println("[UserService] Using fullName from context: " + fullName);
+        }
         UserCreateDto dto = new UserCreateDto(
                 keycloakSub,
-                context.getFullName(),
+                fullName,
                 context.getEmail(),
                 context.getUsername(),
-                context.getGivenName(),
-                context.getFamilyName(),
+                givenName,
+                familyName,
                 context.getClassName(),
                 context.isTeacher()
         );
 
-        // Create new user
         User newUser = UserMapper.toEntity(dto);
         User savedUser = userRepository.createUser(newUser);
 
-        //System.out.println("[UserService] User created with ID: " + savedUser.getId());
+        System.out.println("[UserService] User created successfully:");
+        System.out.println("  - ID: " + savedUser.getId());
+        System.out.println("  - Name: " + savedUser.getName());
+        System.out.println("  - Email: " + savedUser.getEmail());
+        System.out.println("  - Class: " + savedUser.getClassName());
+        System.out.println("  - isTeacher: " + savedUser.getTeacher());
 
         return UserMapper.toSlimDto(savedUser);
     }
