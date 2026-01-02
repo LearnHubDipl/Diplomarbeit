@@ -50,4 +50,15 @@ export class QuestionService {
   getAllPublicQuestions(): Observable<Question[]> {
     return this.httpClient.get<Question[]>(API_BASE_URL + '/questions/public');
   }
+
+  getAllPrivateQuestions(): Observable<Question[]> {
+    return this.httpClient.get<Question[]>(API_BASE_URL + '/questions/private');
+  }
+
+  approveQuestion(id: number): Observable<Question> {
+    return this.httpClient.patch<Question>(
+      API_BASE_URL + `/questions/${id}/public?isPublic=true`,
+      {}
+    );
+  }
 }

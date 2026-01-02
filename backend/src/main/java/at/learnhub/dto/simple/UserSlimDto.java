@@ -45,6 +45,11 @@ public record UserSlimDto(
                 description = "Profile picture of the user.",
                 implementation = MediaFile.class
         )
-        MediaFile profilePicture
+        MediaFile profilePicture,
+        @Schema(
+                description = "Class name of the user (e.g., 5AHITM).",
+                example = "5AHITM"
+        )
+        String className
 ) {
 }

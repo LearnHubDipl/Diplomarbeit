@@ -41,6 +41,12 @@ import {
   SubjectPoolDetailComponent
 } from '../../projects/content-management/src/lib/subject-pool-detail/subject-pool-detail.component';
 import {NotFoundComponent} from '../../projects/content-management/src/lib/not-found/not-found.component';
+import {
+  QuestionApprovalListComponent
+} from '../../projects/content-management/src/lib/question-approval-list/question-approval-list.component';
+import {
+  QuestionApprovalDetailComponent
+} from '../../projects/content-management/src/lib/question-approval-detail/question-approval-detail.component';
 
 export const routes: Routes = [
   {
@@ -67,6 +73,8 @@ export const routes: Routes = [
           { path: 'new', component: FragenKonfiguratorComponent },
           { path: 'edit/:id', component: EditQuestionComponent },
           { path: 'manage', component: QuestionManagerComponent },
+          { path: 'approve', component: QuestionApprovalListComponent },
+          { path: 'approve/:id', component: QuestionApprovalDetailComponent },
         ]
       },
 
