@@ -111,6 +111,7 @@ export class FragenKonfiguratorComponent implements OnInit {
       difficulty: [2],
       explanation: [''],
       isPublic: [false],
+      approvalRequested: [false],
       answers: this.fb.array([])
     });
   }
@@ -217,12 +218,24 @@ export class FragenKonfiguratorComponent implements OnInit {
     if (this.questionForm.valid) {
       const formValue = this.questionForm.getRawValue();
 
+      let isPublic = false;
+      let approvalRequested = false;
+
+      if (this.isAdmin) {
+        isPublic = formValue.isPublic || false;
+        approvalRequested = false;
+      } else {
+        isPublic = false;
+        approvalRequested = formValue.approvalRequested || false;
+      }
+
       const questionRequest: QuestionRequest = {
         text: formValue.text,
         explanation: formValue.explanation || '',
         type: formValue.type,
         difficulty: formValue.difficulty,
         isPublic: formValue.isPublic,
+        approvalRequested: approvalRequested,
         userId: this.currentUserId,
         topicPoolId: Number(formValue.topicPoolId),
         answers: formValue.answers || []

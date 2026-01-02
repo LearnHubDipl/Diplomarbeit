@@ -3,12 +3,13 @@ import { KeycloakOperationService } from '../../../../shared/src/lib/auth';
 import { UserInitializationService } from '../../../../shared/src/lib/services/user-initialization.service';
 import { UserSlim } from '../../../../shared/src/lib/interfaces/userSlim';
 import { NgIf } from '@angular/common';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'lib-personal-place',
   standalone: true,
   templateUrl: './personal-place.component.html',
-  imports: [NgIf],
+  imports: [NgIf, RouterLink],
   styleUrls: ['./personal-place.component.css']
 })
 export class PersonalPlaceComponent implements OnInit {

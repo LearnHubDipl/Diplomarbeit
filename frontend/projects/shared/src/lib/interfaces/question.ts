@@ -16,6 +16,7 @@ export interface Question {
   type: QuestionType;
   difficulty: number;
   isPublic: boolean;
+  approvalRequested?: boolean;
   answers: Answer[];
   topicPool: TopicPool;
   media: Media;
@@ -29,4 +30,5 @@ export interface QuestionUpdateRequest{
   type?: QuestionType;
   answers?: AnswerUpdateRequest[];
   isPublic?: boolean;
+  approvalRequested?: boolean;
 }

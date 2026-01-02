@@ -14,19 +14,16 @@
     </ol>
   </nav>
 
-  <!-- Header -->
   <h2 class="fw-bold text-warning">Fragen von Schülern genehmigen</h2>
   <p class="text-muted">
     Prüfe und genehmige private Fragen, um sie öffentlich zu machen
   </p>
 
-  <!-- Error Message -->
   <div *ngIf="loadError" class="alert alert-danger mt-3">
     <strong>Fehler</strong><br>
     {{ errorMessage }}
   </div>
 
-  <!-- Loading State -->
   <div *ngIf="isLoading && !loadError" class="text-center mt-5">
     <div class="spinner-border text-warning" role="status">
       <span class="visually-hidden">Laden...</span>
@@ -34,17 +31,13 @@
     <p class="text-muted mt-2">Fragen werden geladen...</p>
   </div>
 
-  <!-- No Admin Access -->
   <div *ngIf="!isAdmin && !isLoading" class="alert alert-warning mt-3">
     <i class="bi bi-shield-lock me-2"></i>
     <strong>Zugriff verweigert</strong><br>
     Nur Admins können Fragen genehmigen.
   </div>
 
-  <!-- Main Content -->
   <div *ngIf="isAdmin && !isLoading && !loadError">
-
-    <!-- Filters -->
     <div class="row mb-4">
       <div class="col-md-6">
         <label for="sortOrder" class="form-label fw-semibold">Sortierung</label>
@@ -73,14 +66,12 @@
       </div>
     </div>
 
-    <!-- No Questions Message -->
     <div *ngIf="filteredQuestions.length === 0" class="text-center mt-5">
       <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
       <h4 class="mt-3 fw-bold">Keine offenen Fragen</h4>
       <p class="text-muted">Alle Fragen wurden bereits bearbeitet oder es gibt keine privaten Fragen.</p>
     </div>
 
-    <!-- Questions List -->
     <div *ngIf="filteredQuestions.length > 0" class="list-group">
       <div
         *ngFor="let question of filteredQuestions"
@@ -89,10 +80,8 @@
         (click)="viewQuestionDetails(question.id)">
         <div class="flex-grow-1">
           <div class="d-flex align-items-start gap-3">
-            <!-- Question Icon -->
             <i class="bi bi-question-circle text-warning fs-4"></i>
 
-            <!-- Question Info -->
             <div class="flex-grow-1">
               <h6 class="mb-1 fw-semibold">{{ getFirstCharacters(question.text, 80) }}</h6>
               <div class="small text-muted">
@@ -116,8 +105,6 @@
             </div>
           </div>
         </div>
-
-        <!-- View Details Button -->
         <button
           class="btn btn-outline-warning btn-sm ms-3"
           (click)="viewQuestionDetails(question.id); $event.stopPropagation()"

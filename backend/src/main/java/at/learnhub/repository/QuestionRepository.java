@@ -183,6 +183,9 @@ public class QuestionRepository {
         if (dto.isPublic() != null) {
             existing.setPublic(dto.isPublic());
         }
+        if (dto.approvalRequested() != null) {
+            existing.setApprovalRequested(dto.approvalRequested());
+        }
 
         if (dto.answers() != null) {
             existing.getAnswers().clear();
@@ -207,6 +210,19 @@ public class QuestionRepository {
             throw new EntityNotFoundException("Question with id " + id + " not found.");
         }
         em.remove(question);
+    }
+
+    /**
+     * Retrieves all questions where approval is requested
+     *
+     * @return list of questions with approvalRequested = true
+     */
+    public List<QuestionDto> findAllQuestionsWithApprovalRequested() {
+        return em.createQuery("select q from Question q where q.approvalRequested = true and q.isPublic = false", Question.class)
+                .getResultList()
+                .stream()
+                .map(QuestionMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 
