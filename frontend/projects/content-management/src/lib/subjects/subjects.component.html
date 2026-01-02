@@ -1,7 +1,13 @@
 <div class="container py-3">
   <div class="d-flex align-items-center justify-content-between mb-3">
     <h2 class="mb-0">Fächer</h2>
-    <button class="btn btn-dark" (click)="openCreate()">Neues Fach hinzufügen</button>
+
+    <button
+      *ngIf="canManageSubjects"
+      class="btn btn-dark"
+      (click)="openCreate()">
+      Neues Fach hinzufügen
+    </button>
   </div>
 
   <div *ngIf="loading" class="alert alert-secondary">Lade Fächer ...</div>
@@ -11,6 +17,7 @@
     <div class="col" *ngFor="let s of subjects; trackBy: trackSubject">
       <lib-subject-card
         [subject]="s"
+        [canManage]="canManageSubjects"
         (edit)="onEdit($event)"
         (remove)="onDelete($event)">
       </lib-subject-card>
@@ -18,8 +25,12 @@
   </div>
 </div>
 
-<!-- Modal: Neues Fach hinzufügen -->
-<div class="modal fade show" tabindex="-1" style="display:block; background: rgba(0,0,0,.35);" *ngIf="createOpen">
+
+<div
+  class="modal fade show"
+  tabindex="-1"
+  style="display:block; background: rgba(0,0,0,.35);"
+  *ngIf="createOpen && canManageSubjects">
   <div class="modal-dialog">
     <div class="modal-content">
 
@@ -79,8 +90,12 @@
   </div>
 </div>
 
-<!-- Modal: Fach bearbeiten -->
-<div class="modal fade show" tabindex="-1" style="display:block; background: rgba(0,0,0,.35);" *ngIf="editOpen">
+<!-- ✅ Modal: Fach bearbeiten (nur Lehrer/Admin) -->
+<div
+  class="modal fade show"
+  tabindex="-1"
+  style="display:block; background: rgba(0,0,0,.35);"
+  *ngIf="editOpen && canManageSubjects">
   <div class="modal-dialog">
     <div class="modal-content">
 

@@ -13,10 +13,19 @@
       <p class="card-text text-muted mb-0">{{ subject.description || '' }}</p>
     </div>
 
-    <div class="dropdown ms-2" (click)="$event.stopPropagation()">
-      <button class="btn btn-outline-secondary btn-sm" (click)="toggleMenu($event)" aria-label="Optionen">
+    <div
+      class="dropdown ms-2"
+      *ngIf="canManage"
+      (click)="$event.stopPropagation()"
+    >
+      <button
+        class="btn btn-outline-secondary btn-sm"
+        (click)="toggleMenu($event)"
+        aria-label="Optionen"
+      >
         &#x22EE;
       </button>
+
       <ul
         class="dropdown-menu dropdown-menu-end show"
         *ngIf="menuOpen"

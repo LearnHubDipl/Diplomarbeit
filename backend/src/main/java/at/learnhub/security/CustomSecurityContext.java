@@ -101,12 +101,18 @@ public class CustomSecurityContext implements SecurityContext {
         return "";
     }
 
-    public boolean isStudent() {
+    /**public boolean isStudent() {
         if (distinguishedName == null || distinguishedName.isEmpty()) {
             return false;
         }
         return distinguishedName.toUpperCase().contains("OU=STUDENTS");
+    }**/
+
+
+    public boolean isStudent() {
+        return false;
     }
+
 
     public boolean isTeacher() {
         return !isStudent();

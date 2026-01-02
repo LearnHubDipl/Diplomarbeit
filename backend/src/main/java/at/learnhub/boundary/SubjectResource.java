@@ -8,16 +8,15 @@ import at.learnhub.model.MediaFile;
 import at.learnhub.model.Subject;
 import at.learnhub.repository.MediaFileRepository;
 import at.learnhub.repository.SubjectRepository;
+import at.learnhub.security.CustomSecurityContext;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceException;
 import jakarta.transaction.Transactional;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 
-import java.net.URI;
 import java.util.List;
 
 @Path("/api/subjects")
@@ -31,6 +30,22 @@ public class SubjectResource {
     @Inject
     MediaFileRepository mediaFileRepo;
 
+    @Context
+    SecurityContext securityContext;
+
+    private boolean isStudentFromToken() {
+        return false;
+    }
+
+    private void requireTeacherOrAdmin() {
+        if (isStudentFromToken()) {
+            throw new WebApplicationException(
+                    "Not authorized to manage subjects",
+                    Response.Status.FORBIDDEN
+            );
+        }
+    }
+
     @GET
     public List<SubjectDto> getAllSubjects() {
         return subjectRepo.findAllOrderedByName();
@@ -43,10 +58,12 @@ public class SubjectResource {
         return SubjectMapper.toDto(s);
     }
 
-
     @POST
     @Transactional
     public SubjectDto create(CreateSubjectRequestDto dto) {
+
+        requireTeacherOrAdmin();
+
         MediaFile img = (dto.imgId() != null) ? mediaFileRepo.getById(dto.imgId()) : null;
         Subject s = SubjectMapper.fromCreateDto(dto, img);
         subjectRepo.create(s);
@@ -57,6 +74,8 @@ public class SubjectResource {
     @Path("/{id}")
     @Transactional
     public SubjectDto update(@PathParam("id") Long id, UpdateSubjectRequestDto dto) {
+        requireTeacherOrAdmin();
+
         Subject s = subjectRepo.getById(id);
         MediaFile img = (dto.imgId() != null) ? mediaFileRepo.getById(dto.imgId()) : null;
         SubjectMapper.applyUpdate(s, dto, img);
@@ -68,6 +87,8 @@ public class SubjectResource {
     @Path("/{id}")
     @Transactional
     public void delete(@PathParam("id") Long id) {
+        requireTeacherOrAdmin();
+
         subjectRepo.delete(id);
     }
 }

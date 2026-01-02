@@ -22,34 +22,47 @@
     </ol>
   </nav>
 
-
-
   <ul class="list-group">
-    <li class="list-group-item d-flex justify-content-between align-items-center"
-        *ngFor="let p of pools; trackBy: trackPool">
-
-      <a class="flex-grow-1 text-dark text-decoration-none"
-         [routerLink]="['/subjects', subjectId, 'pools', p.id]"
-         [queryParams]="{ poolName: p.name }">
+    <li
+      class="list-group-item d-flex justify-content-between align-items-center"
+      *ngFor="let p of pools; trackBy: trackPool"
+    >
+      <a
+        class="flex-grow-1 text-dark text-decoration-none"
+        [routerLink]="['/subjects', subjectId, 'pools', p.id]"
+        [queryParams]="{ poolName: p.name }"
+      >
         {{ p.name }}
       </a>
 
-
-      <span class="btn-group btn-group-sm" (click)="$event.stopPropagation()">
-      <div class="d-flex gap-2">
-        <i class="bi bi-trash-fill text-danger fs-5" style="cursor:pointer;"
-           (click)="deletePool(p, $event)"></i>
-        <i class="bi bi-pencil-fill text-success fs-5" style="cursor:pointer;"
-           (click)="renamePool(p, $event)"></i>
-      </div>
-    </span>
+      <span
+        class="btn-group btn-group-sm"
+        *ngIf="canManagePools"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="d-flex gap-2">
+          <i
+            class="bi bi-trash-fill text-danger fs-5"
+            style="cursor:pointer;"
+            (click)="deletePool(p, $event)"
+          ></i>
+          <i
+            class="bi bi-pencil-fill text-success fs-5"
+            style="cursor:pointer;"
+            (click)="renamePool(p, $event)"
+          ></i>
+        </div>
+      </span>
     </li>
   </ul>
 
 
-  <div class="input-group mt-3">
-    <input class="form-control" [(ngModel)]="newPoolName" placeholder="Neuen Themenpool..." />
+  <div class="input-group mt-3" *ngIf="canManagePools">
+    <input
+      class="form-control"
+      [(ngModel)]="newPoolName"
+      placeholder="Neuen Themenpool..."
+    />
     <button class="btn btn-primary" (click)="quickCreatePool()">➕ Hinzufügen</button>
   </div>
-
 </div>

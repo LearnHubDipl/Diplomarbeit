@@ -11,6 +11,9 @@ import { Subject } from '../../../../shared/src/lib/interfaces/subject';
 })
 export class SubjectCardComponent {
   @Input() subject!: Subject;
+
+  @Input() canManage = false;
+
   @Output() edit = new EventEmitter<Subject>();
   @Output() remove = new EventEmitter<Subject>();
 
@@ -18,6 +21,7 @@ export class SubjectCardComponent {
 
   toggleMenu(ev: MouseEvent) {
     ev.stopPropagation();
+    if (!this.canManage) return;
     this.menuOpen = !this.menuOpen;
   }
 
@@ -28,6 +32,7 @@ export class SubjectCardComponent {
   onEdit(ev: MouseEvent) {
     ev.preventDefault();
     ev.stopPropagation();
+    if (!this.canManage) return;
     this.edit.emit(this.subject);
     this.closeMenu();
   }
@@ -35,6 +40,7 @@ export class SubjectCardComponent {
   onDelete(ev: MouseEvent) {
     ev.preventDefault();
     ev.stopPropagation();
+    if (!this.canManage) return;
     this.remove.emit(this.subject);
     this.closeMenu();
   }

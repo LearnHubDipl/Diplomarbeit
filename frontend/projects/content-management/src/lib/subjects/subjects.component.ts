@@ -1,14 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {Component, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {Subject} from '../../../../shared/src/lib/interfaces/subject';
+import {SubjectService} from '../../../../shared/src/lib/services/subject.service';
+import {TopicPoolService} from '../../../../shared/src/lib/services/topic-pool.service';
+import {MediaService} from '../../../../shared/src/lib/services/media-service';
+import {firstValueFrom} from 'rxjs';
+import {SubjectCardComponent} from '../subject-card/subject-card.component';
+import {KeycloakOperationService} from '../../../../shared/src/lib/auth';
+import {AuthContextService} from '../../../../shared/src/lib/auth/AuthContextService';
 
-import { Subject } from '../../../../shared/src/lib/interfaces/subject';
-import { SubjectService } from '../../../../shared/src/lib/services/subject.service';
-import { TopicPoolService } from '../../../../shared/src/lib/services/topic-pool.service';
-import { MediaService } from '../../../../shared/src/lib/services/media-service';
-import { firstValueFrom } from 'rxjs';
-
-import { SubjectCardComponent } from '../subject-card/subject-card.component';
 
 @Component({
   selector: 'lib-subjects',
@@ -20,7 +21,9 @@ export class SubjectsComponent implements OnInit {
   subjects: Subject[] = [];
   loading = false;
   error: string | null = null;
-  
+
+  canManageSubjects = false;
+
   createOpen = false;
   newName = '';
   newDescription = '';
@@ -40,10 +43,15 @@ export class SubjectsComponent implements OnInit {
   constructor(
     private subjectsApi: SubjectService,
     private poolsApi: TopicPoolService,
-    private mediaApi: MediaService
-  ) {}
+    private mediaApi: MediaService,
+    private keycloakOps: KeycloakOperationService,
+    private authCtx: AuthContextService
+  ) {
+  }
 
-  ngOnInit(): void {
+   async ngOnInit() {
+    await this.authCtx.loadMe();
+    this.canManageSubjects = this.authCtx.canManage();
     this.load();
   }
 
@@ -63,6 +71,7 @@ export class SubjectsComponent implements OnInit {
   }
 
   openCreate(): void {
+    if (!this.canManageSubjects) return;
     this.createOpen = true;
   }
 
@@ -77,6 +86,8 @@ export class SubjectsComponent implements OnInit {
   }
 
   async submitCreate(): Promise<void> {
+    if (!this.canManageSubjects) return;
+
     const name = this.newName.trim();
     if (!name) return;
 
@@ -107,7 +118,7 @@ export class SubjectsComponent implements OnInit {
       const body: any = {
         name,
         description,
-        ...(imgId !== undefined ? { imgId } : {})
+        ...(imgId !== undefined ? {imgId} : {})
       };
 
       const created = await firstValueFrom(this.subjectsApi.create(body));
@@ -127,6 +138,8 @@ export class SubjectsComponent implements OnInit {
   }
 
   onEdit(s: Subject): void {
+    if (!this.canManageSubjects) return;
+
     this.editId = s.id;
     this.editName = s.name;
     this.editDescription = s.description || '';
@@ -146,6 +159,8 @@ export class SubjectsComponent implements OnInit {
   }
 
   async submitEdit(): Promise<void> {
+    if (!this.canManageSubjects) return;
+
     if (this.editId == null) return;
     const name = this.editName.trim();
     if (!name) return;
@@ -169,7 +184,7 @@ export class SubjectsComponent implements OnInit {
         this.subjectsApi.update(this.editId, {
           name,
           description: this.editDescription || '',
-          ...(imgId !== undefined ? { imgId } : {})
+          ...(imgId !== undefined ? {imgId} : {})
         })
       );
 
@@ -182,6 +197,8 @@ export class SubjectsComponent implements OnInit {
   }
 
   onDelete(s: Subject): void {
+    if (!this.canManageSubjects) return;
+
     if (!confirm(`Fach "${s.name}" wirklich löschen?`)) return;
     this.subjectsApi.delete(s.id).subscribe({
       next: () => this.load(),

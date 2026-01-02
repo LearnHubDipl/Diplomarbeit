@@ -1,18 +1,15 @@
-import {Component, OnInit} from '@angular/core';
-import {CommonModule, NgFor, NgIf} from '@angular/common';
-import {FormsModule} from '@angular/forms';
-import {ActivatedRoute, Router, RouterModule} from '@angular/router';
-import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
-import {Subject as SchoolSubject} from '../../../../shared/src/lib/interfaces/subject';
-import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
+import { Subject as SchoolSubject } from '../../../../shared/src/lib/interfaces/subject';
+import { TopicPool } from '../../../../shared/src/lib/interfaces/topic-pool';
 
-import {SubjectService} from '../../../../shared/src/lib/services/subject.service';
-import {TopicContentService} from '../../../../shared/src/lib/services/topic-content.service';
-import {TopicPoolService} from '../../../../shared/src/lib/services/topic-pool.service';
-import {FileService} from '../../../../shared/src/lib/services/file-service';
-import {finalize} from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
+import { SubjectService } from '../../../../shared/src/lib/services/subject.service';
+import { TopicPoolService } from '../../../../shared/src/lib/services/topic-pool.service';
+import {KeycloakOperationService} from '../../../../shared/src/lib/auth';
+import {AuthContextService} from '../../../../shared/src/lib/auth/AuthContextService';
 
 @Component({
   selector: 'lib-subject-detail',
@@ -26,24 +23,25 @@ export class SubjectDetailComponent implements OnInit {
   pools: TopicPool[] = [];
   selectedPoolId?: number;
 
-  title = '';
-  uploaderName = '';
-  file: File | null = null;
-  poolForUpload: number | null = null;
   newPoolName = '';
   loading = false;
   error: string | null = null;
-  private lastDataUrl: string | null = null;
+
+  canManagePools = false;
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly subjectsApi: SubjectService,
     private readonly poolsApi: TopicPoolService,
-  ) {
-  }
+    private readonly keycloakOps: KeycloakOperationService,
+    private authCtx: AuthContextService
+  ) {}
 
-  ngOnInit(): void {
+  async ngOnInit() {
+    await this.authCtx.loadMe();
+    this.canManagePools = this.authCtx.canManage();
+
     this.route.paramMap.subscribe(pm => {
       const idParam = pm.get('id');
       const poolParam = pm.get('poolId');
@@ -57,7 +55,6 @@ export class SubjectDetailComponent implements OnInit {
       this.loadData();
     });
   }
-
 
   getPoolId(p: any): number | undefined {
     return p?.id ?? p?.poolId ?? p?.topicPoolId ?? p?.contentId ?? p?.topic_pool_id;
@@ -84,10 +81,9 @@ export class SubjectDetailComponent implements OnInit {
           this.router.navigate(['/subjects', this.subjectId]);
         }
       },
-      error: (e) => { /* … */ }
+      error: () => { }
     });
   }
-
 
   private loadData(): void {
     this.error = null;
@@ -98,9 +94,6 @@ export class SubjectDetailComponent implements OnInit {
         this.subject = s;
         this.loading = false;
         this.reloadPools();
-        if (!this.poolForUpload) {
-          this.poolForUpload = this.pools?.[0]?.id ?? null;
-        }
       },
       error: () => {
         this.error = 'Fach konnte nicht geladen werden.';
@@ -110,8 +103,11 @@ export class SubjectDetailComponent implements OnInit {
   }
 
   quickCreatePool(): void {
+    if (!this.canManagePools) return;
+
     const name = this.newPoolName.trim();
     if (!name) return;
+
     this.poolsApi.createOne(this.subjectId, name).subscribe({
       next: () => {
         this.newPoolName = '';
@@ -126,27 +122,29 @@ export class SubjectDetailComponent implements OnInit {
 
   renamePool(p: TopicPool, ev?: MouseEvent) {
     ev?.stopPropagation();
+    if (!this.canManagePools) return;
+
     const current = p.name ?? '';
     const name = prompt('Neuer Name für Themenpool:', current)?.trim();
     if (!name || name === current) return;
-    console.log('PUT', `/api/subjects/${p}/topics/${p.id}`, {name});
 
     if (this.renamingId === p.id) return;
     this.renamingId = p.id;
 
     const idx = this.pools.findIndex(x => x.id === p.id);
-    const old = {...this.pools[idx]};
-    const updatedLocal = {...old, name};
+    const old = { ...this.pools[idx] };
+    const updatedLocal = { ...old, name };
+
     this.pools = [
       ...this.pools.slice(0, idx),
       updatedLocal,
       ...this.pools.slice(idx + 1)
     ];
 
-    this.poolsApi.updateOne(this.subjectId, p.id, {name})
+    this.poolsApi.updateOne(this.subjectId, p.id, { name })
       .subscribe({
         next: (server) => {
-          const fixed = {...updatedLocal, ...server};
+          const fixed = { ...updatedLocal, ...server };
           this.pools = [
             ...this.pools.slice(0, idx),
             fixed,
@@ -154,14 +152,14 @@ export class SubjectDetailComponent implements OnInit {
           ];
           this.renamingId = undefined;
         },
-        error: (err: { url: any; status: any; error: any; }) => {
+        error: (err: any) => {
           this.pools = [
             ...this.pools.slice(0, idx),
             old,
             ...this.pools.slice(idx + 1)
           ];
           this.renamingId = undefined;
-          console.error('Rename error detail:', {url: err.url, status: err.status, body: err.error});
+          console.error('Rename error detail:', { url: err?.url, status: err?.status, body: err?.error });
           alert('Themenpool konnte nicht umbenannt werden.');
         }
       });
@@ -169,6 +167,8 @@ export class SubjectDetailComponent implements OnInit {
 
   deletePool(p: TopicPool, ev?: MouseEvent) {
     ev?.stopPropagation();
+    if (!this.canManagePools) return;
+
     if (!confirm(`Themenpool "${p.name}" wirklich löschen?`)) return;
     if (this.deletingId === p.id) return;
 
@@ -176,6 +176,7 @@ export class SubjectDetailComponent implements OnInit {
 
     const idx = this.pools.findIndex(x => x.id === p.id);
     const removed = this.pools[idx];
+
     this.pools = [...this.pools.slice(0, idx), ...this.pools.slice(idx + 1)];
     if (this.selectedPoolId === p.id) this.selectedPoolId = undefined;
 
@@ -184,14 +185,14 @@ export class SubjectDetailComponent implements OnInit {
         next: () => {
           this.deletingId = undefined;
         },
-        error: (err) => {
+        error: (err: any) => {
           this.pools = [
             ...this.pools.slice(0, idx),
             removed,
             ...this.pools.slice(idx + 1)
           ];
           this.deletingId = undefined;
-          console.error('Delete error detail:', {url: err.url, status: err.status, body: err.error});
+          console.error('Delete error detail:', { url: err?.url, status: err?.status, body: err?.error });
           alert('Themenpool konnte nicht gelöscht werden.');
         }
       });
