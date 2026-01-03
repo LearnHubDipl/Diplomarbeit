@@ -12,4 +12,8 @@ export interface TopicNoteDto {
   fileName?: string;
   url?: string;
   publicUrl?: string;
+
+  uploaderSub?: string;
+  status?: string;
+  approved?: boolean;
 }

@@ -2,18 +2,21 @@ import {Component, inject, OnInit} from '@angular/core';
 import { KeycloakOperationService } from '../../../../shared/src/lib/auth';
 import { UserInitializationService } from '../../../../shared/src/lib/services/user-initialization.service';
 import { UserSlim } from '../../../../shared/src/lib/interfaces/userSlim';
-import { NgIf } from '@angular/common';
+import {DatePipe, NgForOf, NgIf} from '@angular/common';
+import {PendingNotesService} from '../../../../shared/src/lib/services/pending-notes.service';
+import {PendingNoteDto} from '../../../../shared/src/lib/interfaces/pendingNoteDto';
 
 @Component({
   selector: 'lib-personal-place',
   standalone: true,
   templateUrl: './personal-place.component.html',
-  imports: [NgIf],
+  imports: [NgIf, NgForOf, DatePipe],
   styleUrls: ['./personal-place.component.css']
 })
 export class PersonalPlaceComponent implements OnInit {
   keycloakService = inject(KeycloakOperationService);
   userInitService = inject(UserInitializationService);
+  pendingNotesService = inject(PendingNotesService);
   givenName = '';
   familyName = '';
   displayName = '';
@@ -26,10 +29,19 @@ export class PersonalPlaceComponent implements OnInit {
   backendUser: UserSlim | null = null;
   isLoadingUser = true;
 
+  pendingNotes: PendingNoteDto[] = [];
+  isLoadingPending = false;
+  pendingError: string | null = null;
+
+
 
   async ngOnInit() {
     this.loadKeycloakData();
     await this.loadBackendUser();
+
+    if (this.canSeeTeacherArea()) {
+      this.loadPendingNotes();
+    }
   }
 
   /**
@@ -88,6 +100,59 @@ export class PersonalPlaceComponent implements OnInit {
     } finally {
       this.isLoadingUser = false;
     }
+  }
+
+  canSeeTeacherArea(): boolean {
+    // Du nutzt aktuell backendUser?.isAdmin + Keycloak isTeacher
+    return !!this.backendUser?.isAdmin || this.isTeacher;
+  }
+
+  loadPendingNotes() {
+    this.isLoadingPending = true;
+    this.pendingError = null;
+
+    this.pendingNotesService.listMyPending().subscribe({
+      next: (list) => {
+        this.pendingNotes = list ?? [];
+        console.log('[PendingNotes] loaded', this.pendingNotes);
+        this.isLoadingPending = false;
+      },
+      error: (err) => {
+        console.error('[PendingNotes] load failed', err);
+        this.pendingError =
+          err?.error?.error ||
+          err?.message ||
+          'Pending Mitschriften konnten nicht geladen werden.';
+        this.isLoadingPending = false;
+      }
+    });
+  }
+
+  approveNote(n: PendingNoteDto) {
+    if (!n?.topicPoolId || !n?.fileName) return;
+
+    this.pendingNotesService.approve(n.topicPoolId, n.fileName).subscribe({
+      next: () => this.loadPendingNotes(),
+      error: (err) => {
+        console.error('[PendingNotes] approve failed', err);
+        alert('Freigeben ist fehlgeschlagen.');
+      }
+    });
+  }
+
+  rejectNote(n: PendingNoteDto) {
+    if (!n?.topicPoolId || !n?.fileName) return;
+
+    const ok = confirm('Mitschrift wirklich ablehnen? (Sie wird gelöscht)');
+    if (!ok) return;
+
+    this.pendingNotesService.reject(n.topicPoolId, n.fileName).subscribe({
+      next: () => this.loadPendingNotes(),
+      error: (err) => {
+        console.error('[PendingNotes] reject failed', err);
+        alert('Ablehnen ist fehlgeschlagen.');
+      }
+    });
   }
 
   async doLogout() {

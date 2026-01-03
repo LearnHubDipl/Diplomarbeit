@@ -7,16 +7,9 @@ import java.util.List;
 /**
  * Custom Security Context that holds user information from Keycloak JWT token
  */
-public class CustomSecurityContext implements SecurityContext {
-    private final String username;
-    private final List<String> roles;
-    private final String fullName;
-    private final String keycloakSub;
-    private final String email;
-    private final String givenName;
-    private final String familyName;
-    private final String distinguishedName;
-
+public record CustomSecurityContext(String username, List<String> roles, String fullName, String keycloakSub,
+                                    String email, String givenName, String familyName,
+                                    String distinguishedName) implements SecurityContext {
     public CustomSecurityContext(String username, List<String> roles, String fullName,
                                  String keycloakSub, String email, String givenName,
                                  String familyName, String distinguishedName) {
@@ -33,38 +26,6 @@ public class CustomSecurityContext implements SecurityContext {
     @Override
     public Principal getUserPrincipal() {
         return () -> keycloakSub;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public String getKeycloakSub() {
-        return keycloakSub;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getGivenName() {
-        return givenName;
-    }
-
-    public String getFamilyName() {
-        return familyName;
-    }
-
-    public String getDistinguishedName() {
-        return distinguishedName;
-    }
-
-    public List<String> getRoles() {
-        return roles;
     }
 
     @Override
@@ -101,17 +62,17 @@ public class CustomSecurityContext implements SecurityContext {
         return "";
     }
 
-    /**public boolean isStudent() {
+    public boolean isStudent() {
         if (distinguishedName == null || distinguishedName.isEmpty()) {
             return false;
         }
         return distinguishedName.toUpperCase().contains("OU=STUDENTS");
-    }**/
-
-
-    public boolean isStudent() {
-        return false;
     }
+
+
+    /**public boolean isStudent() {
+     return false;
+     }**/
 
 
     public boolean isTeacher() {

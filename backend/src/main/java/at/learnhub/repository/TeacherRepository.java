@@ -1,4 +1,3 @@
-// src/main/java/at/learnhub/repository/TeacherRepository.java
 package at.learnhub.repository;
 
 import at.learnhub.model.Teacher;

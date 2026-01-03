@@ -21,4 +21,6 @@ export interface TopicContent {
   approved?: boolean;
   fileName: string;
   teacherId?: number;
+  uploaderSub?: string;
+  status?: string;
 }

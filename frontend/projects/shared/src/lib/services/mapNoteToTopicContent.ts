@@ -22,5 +22,8 @@ export function mapNoteToTopicContent(n: Partial<TopicNoteDto> & any): TopicCont
     fileName: fileName || '',
 
     teacherId: n.teacherId ?? undefined,
+
+    uploaderSub: n.uploaderSub,
+    status: n.status,
   };
 }

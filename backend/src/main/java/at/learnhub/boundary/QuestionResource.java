@@ -89,7 +89,7 @@ public class QuestionResource {
         String keycloakSub = null;
 
         if (customContext != null) {
-            keycloakSub = customContext.getKeycloakSub();
+            keycloakSub = customContext.keycloakSub();
             //System.out.println("[getCurrentUser] Got keycloakSub from CustomContext: " + keycloakSub);
         } else {
             Principal principal = securityContext.getUserPrincipal();

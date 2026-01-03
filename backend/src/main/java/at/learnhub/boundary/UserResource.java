@@ -140,7 +140,7 @@ public class UserResource {
             }
         }
 
-        String keycloakSub = customContext.getKeycloakSub();
+        String keycloakSub = customContext.keycloakSub();
         //System.out.println("[UserResource /me] Keycloak Sub: " + keycloakSub);
         //System.out.println("[UserResource /me] Username: " + customContext.getUsername());
 

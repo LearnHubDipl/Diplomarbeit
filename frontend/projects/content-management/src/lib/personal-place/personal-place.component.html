@@ -72,6 +72,81 @@
     </div>
   </section>
 
+  <!-- Lehrkraft/Admin: Pending Mitschriften -->
+  <section class="mb-5" *ngIf="canSeeTeacherArea()">
+    <h5 class="fw-bold text-warning mb-3">
+      <i class="bi bi-file-earmark-text me-2"></i>
+      Wartende Mitschriften (Freigabe)
+    </h5>
+
+    <div class="card border-warning">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <small class="text-muted">
+            Hier siehst du Mitschriften, die auf deine Freigabe warten.
+          </small>
+          <button class="btn btn-outline-warning btn-sm" (click)="loadPendingNotes()">
+            <i class="bi bi-arrow-clockwise me-1"></i>
+            Aktualisieren
+          </button>
+        </div>
+
+        <div *ngIf="isLoadingPending" class="text-muted">
+          Lädt...
+        </div>
+
+        <div *ngIf="pendingError" class="alert alert-danger py-2 mb-3">
+          {{ pendingError }}
+        </div>
+
+        <div *ngIf="!isLoadingPending && !pendingError && pendingNotes.length === 0" class="text-muted">
+          Keine wartenden Mitschriften 🎉
+        </div>
+
+        <div *ngIf="pendingNotes.length > 0" class="list-group">
+          <div class="list-group-item" *ngFor="let n of pendingNotes">
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div class="flex-grow-1">
+                <div class="fw-semibold">
+                  {{ n.title || n.fileName }}
+                  <span class="badge bg-secondary ms-2">PENDING</span>
+                </div>
+                <div class="text-muted small">
+                  Von: {{ n.uploaderName || 'Unbekannt' }}
+                  <span class="mx-2">•</span>
+                  Pool-ID: {{ n.topicPoolId }}
+                  <span class="mx-2" *ngIf="n.createdAt">•</span>
+                  <span *ngIf="n.createdAt">Datum: {{ n.createdAt | date:'mediumDate' }}</span>
+                </div>
+
+                <div class="mt-2" *ngIf="n.publicUrl">
+                  <a class="btn btn-sm btn-outline-secondary" [href]="n.publicUrl" target="_blank" rel="noopener">
+                    <i class="bi bi-download me-1"></i>
+                    Öffnen/Download
+                  </a>
+                </div>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-success btn-sm" (click)="approveNote(n)">
+                  <i class="bi bi-check-lg me-1"></i>
+                  Freigeben
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="rejectNote(n)">
+                  <i class="bi bi-x-lg me-1"></i>
+                  Ablehnen
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <hr class="border-warning opacity-25 mb-4" />
+
   <hr class="border-warning opacity-25 mb-4">
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
     <div>

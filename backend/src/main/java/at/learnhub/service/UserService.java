@@ -54,7 +54,7 @@ public class UserService {
      */
     @Transactional
     public UserSlimDto findOrCreateUserFromContext(CustomSecurityContext context) {
-        String keycloakSub = context.getKeycloakSub();
+        String keycloakSub = context.keycloakSub();
 
         System.out.println("[UserService] Looking for user with keycloakSub: " + keycloakSub);
 
@@ -66,9 +66,9 @@ public class UserService {
 
         System.out.println("[UserService] Creating new user: " + keycloakSub);
 
-        String fullName = context.getFullName();
-        String givenName = context.getGivenName();
-        String familyName = context.getFamilyName();
+        String fullName = context.fullName();
+        String givenName = context.givenName();
+        String familyName = context.familyName();
 
         if (fullName == null || fullName.trim().isEmpty() || fullName.equals(keycloakSub)) {
             System.out.println("[UserService] fullName not useful, building from givenName + familyName");
@@ -84,7 +84,7 @@ public class UserService {
                 fullName = familyName.trim();
                 System.out.println("[UserService] Using familyName only: " + fullName);
             } else {
-                String username = context.getUsername();
+                String username = context.username();
                 if (username != null && !username.trim().isEmpty() && !username.equals(keycloakSub)) {
                     fullName = username;
                     System.out.println("[UserService] Using username: " + fullName);
@@ -100,8 +100,8 @@ public class UserService {
         UserCreateDto dto = new UserCreateDto(
                 keycloakSub,
                 fullName,
-                context.getEmail(),
-                context.getUsername(),
+                context.email(),
+                context.username(),
                 givenName,
                 familyName,
                 context.getClassName(),

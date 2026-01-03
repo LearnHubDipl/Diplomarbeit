@@ -2,6 +2,8 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 import { SubjectService } from '../../../../shared/src/lib/services/subject.service';
 import { TopicPoolService } from '../../../../shared/src/lib/services/topic-pool.service';
@@ -12,8 +14,18 @@ import { TopicContent } from '../../../../shared/src/lib/interfaces/topicContent
 import { Teacher } from '../../../../shared/src/lib/interfaces/teacher';
 import { TopicPool } from '../../../../shared/src/lib/interfaces/topic-pool';
 import { Subject as SchoolSubject } from '../../../../shared/src/lib/interfaces/subject';
+import { API_BASE_URL } from '../../../../shared/src/lib/services/globals';
 
-declare var bootstrap: any; // Bootstrap JS für Modal
+declare var bootstrap: any;
+
+type MeDto = {
+  keycloakSub: string;
+  name: string;
+  email: string;
+  isTeacher: boolean;
+  isAdmin: boolean;
+  profilePictureId?: number;
+};
 
 @Component({
   selector: 'app-subject-pool-detail',
@@ -40,6 +52,13 @@ export class SubjectPoolDetailComponent implements OnInit {
   editing = false;
   editingOldFileName: string | null = null;
 
+  // ✅ eingeloggter User (aus Backend /users/me)
+  me: MeDto | null = null;
+
+  // ✅ Rollen
+  isAdminOrTeacher = false;
+  isStudent = true;
+
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
@@ -48,17 +67,24 @@ export class SubjectPoolDetailComponent implements OnInit {
     private subjectsApi: SubjectService,
     private poolsApi: TopicPoolService,
     private notesApi: TopicContentService,
-    private teachersApi: TeachersService
+    private teachersApi: TeachersService,
+    private http: HttpClient
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    // ✅ User laden (DB-Wahrheit: isAdmin/isTeacher)
+    await this.loadMe();
+
     this.form = this.fb.group({
       title: ['', Validators.required],
       description: [''],
       uploaderName: [''],
-      teacherId: [null],
+      teacherId: [null], // Validator kommt gleich je nach Rolle
       file: [null, Validators.required],
     });
+
+    // ✅ Teacher Auswahl: für Schüler:innen Pflicht (für Freigabeprozess)
+    this.applyTeacherValidator();
 
     this.subjectId = Number(this.route.snapshot.paramMap.get('subjectId'));
     this.poolId    = Number(this.route.snapshot.paramMap.get('poolId'));
@@ -78,12 +104,39 @@ export class SubjectPoolDetailComponent implements OnInit {
     this.loadTeachers();
   }
 
+  private async loadMe(): Promise<void> {
+    try {
+      this.me = await firstValueFrom(this.http.get<MeDto>(`${API_BASE_URL}/users/me`));
+      this.isAdminOrTeacher = !!(this.me?.isAdmin || this.me?.isTeacher);
+      this.isStudent = !this.isAdminOrTeacher;
+    } catch {
+      // Wenn /users/me nicht erreichbar ist, fail-safe: wie Schüler behandeln
+      this.me = null;
+      this.isAdminOrTeacher = false;
+      this.isStudent = true;
+    }
+  }
+
+  private applyTeacherValidator(): void {
+    const ctrl = this.form?.get('teacherId');
+    if (!ctrl) return;
+
+    if (this.isStudent) {
+      ctrl.setValidators([Validators.required]);
+    } else {
+      ctrl.clearValidators(); // Lehrer/Admin brauchen keine Freigabe
+    }
+    ctrl.updateValueAndValidity();
+  }
+
   loadNotes(): void {
     this.loading = true;
     this.error = null;
+
     this.notesApi.listNotes(this.poolId).subscribe({
       next: list => {
-        this.notes = list ?? [];
+        const raw = list ?? [];
+        this.notes = this.filterNotesForVisibility(raw);
         this.loading = false;
       },
       error: () => {
@@ -99,6 +152,60 @@ export class SubjectPoolDetailComponent implements OnInit {
       error: () => (this.teachers = [])
     });
   }
+
+  // ---------- Rechte & Status Helfer ----------
+
+  private getStatus(n: any): string {
+    // akzeptiert mehrere mögliche Felder (robust)
+    return (
+      (n?.status as string) ||
+      (n?.noteStatus as string) ||
+      (n?.approvalStatus as string) ||
+      (n?.approved === true ? 'APPROVED' : null) ||
+      (n?.isApproved === true ? 'APPROVED' : null) ||
+      'APPROVED' // fallback: wenn Backend keinen Status liefert
+    );
+  }
+
+  isPending(n: any): boolean {
+    const s = (this.getStatus(n) || '').toUpperCase();
+    return s === 'PENDING' || s === 'WAITING' || s === 'IN_REVIEW';
+  }
+
+  isApproved(n: any): boolean {
+    const s = (this.getStatus(n) || '').toUpperCase();
+    return s === 'APPROVED' || s === 'PUBLIC' || s === 'PUBLISHED';
+  }
+
+  private getUploaderSub(n: any): string | null {
+    return n?.uploaderSub || n?.uploaderKeycloakSub || n?.ownerSub || null;
+  }
+
+  isOwnNote(n: any): boolean {
+    if (!this.me?.keycloakSub) return false;
+    const sub = this.getUploaderSub(n);
+    return !!sub && sub === this.me.keycloakSub;
+  }
+
+  canEditOrDelete(n: any): boolean {
+    // Lehrer/Admin dürfen alles, Schüler nur eigene
+    return this.isAdminOrTeacher || this.isOwnNote(n);
+  }
+
+  private filterNotesForVisibility(list: TopicContent[]): TopicContent[] {
+    return list.filter((n: any) => {
+      // Approved: alle sehen
+      if (this.isApproved(n)) return true;
+
+      // Pending: nur der Uploader sieht (ausgegraut)
+      if (this.isPending(n)) return this.isOwnNote(n) || this.isAdminOrTeacher;
+
+      // Alles andere: sicherheitshalber nur Owner/Teacher/Admin
+      return this.isOwnNote(n) || this.isAdminOrTeacher;
+    });
+  }
+
+  // ---------- Form / Upload ----------
 
   onFileChange(ev: Event): void {
     const input = ev.target as HTMLInputElement;
@@ -120,7 +227,16 @@ export class SubjectPoolDetailComponent implements OnInit {
 
   upload(): void {
     if (this.form.invalid || !this.form.value.file) return;
+
+    // Schüler müssen einen Lehrer auswählen (Freigabeprozess)
+    if (this.isStudent && (this.form.value.teacherId == null || this.form.value.teacherId === '')) {
+      this.error = 'Bitte wähle eine Lehrperson für die Freigabe aus.';
+      return;
+    }
+
     this.uploading = true;
+    this.error = null;
+
     const v = this.form.value;
 
     const params: any = {
@@ -145,8 +261,12 @@ export class SubjectPoolDetailComponent implements OnInit {
         this.editingOldFileName = null;
         this.loadNotes();
       },
-      error: () => {
-        this.error = 'Upload fehlgeschlagen (nur PDF erlaubt?)';
+      error: (err) => {
+        if (err?.status === 403) {
+          this.error = 'Du hast keine Berechtigung, diese Aktion auszuführen.';
+        } else {
+          this.error = 'Upload fehlgeschlagen (nur PDF erlaubt?)';
+        }
         this.uploading = false;
       }
     });
@@ -156,6 +276,11 @@ export class SubjectPoolDetailComponent implements OnInit {
     this.editing = false;
     this.editingOldFileName = null;
     this.form.reset();
+
+    // Teacher Pflicht nur für Schüler
+    this.applyTeacherValidator();
+
+    // file Pflicht
     this.form.get('file')?.setValidators([Validators.required]);
     this.form.get('file')?.updateValueAndValidity();
     this.resetFileInput();
@@ -170,20 +295,26 @@ export class SubjectPoolDetailComponent implements OnInit {
   editNote(n: TopicContent, ev: Event): void {
     ev.stopPropagation();
 
+    if (!this.canEditOrDelete(n)) return; // ✅ Schüler darf nur eigene bearbeiten
+
     this.editing = true;
-    this.editingOldFileName = n.fileName;
+    this.editingOldFileName = (n as any).fileName;
 
     this.form.patchValue({
-      title: n.title ?? n.fileName,
-      description: n.description ?? '',
-      uploaderName: n.uploaderName ?? '',
+      title: (n as any).title ?? (n as any).fileName,
+      description: (n as any).description ?? '',
+      uploaderName: (n as any).uploaderName ?? '',
       teacherId: (n as any).teacherId ?? null,
       file: null
     });
 
+    // beim Edit weiterhin PDF Pflicht (du ersetzt ja das File)
     this.form.get('file')?.setValidators([Validators.required]);
     this.form.get('file')?.updateValueAndValidity();
     this.resetFileInput();
+
+    // Schüler: Teacher bleibt Pflicht
+    this.applyTeacherValidator();
 
     const modalEl = document.getElementById('uploadModal');
     if (modalEl) {
@@ -195,22 +326,28 @@ export class SubjectPoolDetailComponent implements OnInit {
   deleteNote(n: TopicContent, ev: Event): void {
     ev.stopPropagation();
 
-    if (!n.fileName) {
+    if (!this.canEditOrDelete(n)) return; // ✅ Schüler darf nur eigene löschen
+
+    const fileName = (n as any).fileName;
+    if (!fileName) {
       console.error('Kein fileName im Objekt:', n);
       alert('Löschen geht nicht: Dateiname fehlt.');
       return;
     }
 
-    if (!confirm(`Soll die Mitschrift "${n.title ?? n.fileName}" wirklich gelöscht werden?`)) return;
+    if (!confirm(`Soll die Mitschrift "${(n as any).title ?? fileName}" wirklich gelöscht werden?`)) return;
 
-    this.notesApi.deleteNote(this.poolId, n.fileName)
-      .subscribe({
-        next: () => this.loadNotes(),
-        error: err => {
-          console.error('DELETE fehlgeschlagen', err);
-          alert('Löschen fehlgeschlagen.');
+    this.notesApi.deleteNote(this.poolId, fileName).subscribe({
+      next: () => this.loadNotes(),
+      error: err => {
+        console.error('DELETE fehlgeschlagen', err);
+        if (err?.status === 403) {
+          alert('Du hast keine Berechtigung, diese Mitschrift zu löschen.');
+          return;
         }
-      });
+        alert('Löschen fehlgeschlagen.');
+      }
+    });
   }
 
   private closeUploadModal(): void {
