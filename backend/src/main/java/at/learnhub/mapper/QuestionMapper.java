@@ -61,6 +61,7 @@ public class QuestionMapper {
                 question.getType(),
                 question.getDifficulty(),
                 question.getPublic(),
+                question.getApprovalRequested(),
                 UserMapper.toSlimDto(question.getUser()),
                 TopicPoolMapper.toSlimDto(question.getTopicPool()),
                 answerDtos,
@@ -94,6 +95,7 @@ public class QuestionMapper {
                 question.getType(),
                 question.getDifficulty(),
                 question.getPublic(),
+                question.getApprovalRequested(),
                 answerDtos
         );
     }
@@ -113,6 +115,7 @@ public class QuestionMapper {
         question.setType(questionDto.type());
         question.setDifficulty(questionDto.difficulty());
         question.setPublic(questionDto.isPublic());
+        question.setApprovalRequested(questionDto.approvalRequested());
         return question;
     }
 

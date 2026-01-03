@@ -5,12 +5,13 @@ import { UserSlim } from '../../../../shared/src/lib/interfaces/userSlim';
 import {DatePipe, NgForOf, NgIf} from '@angular/common';
 import {PendingNotesService} from '../../../../shared/src/lib/services/pending-notes.service';
 import {PendingNoteDto} from '../../../../shared/src/lib/interfaces/pendingNoteDto';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'lib-personal-place',
   standalone: true,
   templateUrl: './personal-place.component.html',
-  imports: [NgIf, NgForOf, DatePipe],
+  imports: [NgIf, RouterLink],
   styleUrls: ['./personal-place.component.css']
 })
 export class PersonalPlaceComponent implements OnInit {

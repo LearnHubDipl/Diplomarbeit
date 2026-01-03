@@ -6,6 +6,7 @@ export interface QuestionRequest {
   type: QuestionType;
   difficulty: number;
   isPublic: boolean;
+  approvalRequested?: boolean;
   userId: number;
   topicPoolId: number;
   answers: AnswerCreationRequest[];

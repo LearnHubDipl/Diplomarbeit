@@ -39,6 +39,12 @@ export class EditQuestionComponent implements OnInit {
 
   readonly QuestionType = QuestionType;
   readonly maxAnswers = 7;
+  readonly minAnswers = 2;
+
+  readonly questionTypes = [
+    { value: QuestionType.FREETEXT, label: 'Freitext' },
+    { value: QuestionType.MULTIPLE_CHOICE, label: 'Multiple Choice' }
+  ];
 
   async ngOnInit() {
     this.questionId = Number(this.route.snapshot.paramMap.get('id'));
@@ -156,7 +162,9 @@ export class EditQuestionComponent implements OnInit {
   }
 
   removeAnswer(index: number) {
-    this.answersArray.removeAt(index);
+    if (this.answersArray.length > this.minAnswers) {
+      this.answersArray.removeAt(index);
+    }
   }
 
   private updateAnswersArray(type: QuestionType) {

@@ -55,6 +55,13 @@ public record QuestionCreationRequestDto(
         )
         Boolean isPublic,
 
+
+        @Schema(
+                description = "Whether the student requests approval for this question.",
+                example = "true"
+        )
+        Boolean approvalRequested,
+
         @Schema(
                 description = "ID of user who created the question",
                 example = "1"

@@ -147,7 +147,7 @@
                     placeholder="Optionale Erklärung zur richtigen Antwort..."></textarea>
         </div>
 
-        <!-- https://getbootstrap.com/docs/5.1/forms/checks-radios/#switches -->
+        <!-- https://getbootstrap.com/docs/5.1/forms/checks-radios/#switches
         <div class="form-check form-switch mt-3">
           <input class="form-check-input"
                  type="checkbox"
@@ -161,8 +161,45 @@
             {{ questionForm.get('isPublic')?.value ? 'Öffentlich' : 'Privat' }}
             <small *ngIf="!isAdmin" class="text-muted d-block">(Nur für Admins)</small>
           </label>
-        </div>
+        </div>-->
       </div>
+    </div>
+
+    <div class="form-check form-switch mt-3" *ngIf="!isAdmin">
+      <input class="form-check-input"
+             type="checkbox"
+             id="requestApproval"
+             formControlName="approvalRequested"
+             [title]="'Freigabe durch Admin anfordern'">
+      <label class="form-check-label" for="requestApproval">
+        <i class="bi bi-send-check me-2" *ngIf="questionForm.get('approvalRequested')?.value"></i>
+        <i class="bi bi-pencil-square me-2" *ngIf="!questionForm.get('approvalRequested')?.value"></i>
+        {{ questionForm.get('approvalRequested')?.value ? 'Freigabe angefordert' : 'Private Frage' }}
+        <small class="text-muted d-block mt-1">
+          <i class="bi bi-info-circle me-1"></i>
+          {{ questionForm.get('approvalRequested')?.value
+          ? 'Ein Admin wird die Frage prüfen und freigeben'
+          : 'Nur du kannst diese Frage verwenden' }}
+        </small>
+      </label>
+    </div>
+
+    <div class="form-check form-switch mt-3" *ngIf="isAdmin">
+      <input class="form-check-input"
+             type="checkbox"
+             id="isPublic"
+             formControlName="isPublic">
+      <label class="form-check-label" for="isPublic">
+        <i class="bi bi-globe me-2" *ngIf="questionForm.get('isPublic')?.value"></i>
+        <i class="bi bi-lock me-2" *ngIf="!questionForm.get('isPublic')?.value"></i>
+        {{ questionForm.get('isPublic')?.value ? 'Öffentlich' : 'Privat' }}
+        <small class="text-muted d-block mt-1">
+          <i class="bi bi-info-circle me-1"></i>
+          {{ questionForm.get('isPublic')?.value
+          ? 'Alle Schüler können diese Frage verwenden'
+          : 'Nur du kannst diese Frage verwenden' }}
+        </small>
+      </label>
     </div>
 
     <button type="submit" class="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm text-white"

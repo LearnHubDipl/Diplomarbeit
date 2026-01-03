@@ -52,6 +52,13 @@ public class Question {
      */
     @Column(name = "is_public")
     private Boolean isPublic;
+    /**
+     * Indicates whether the student has requested approval from an admin.
+     * This is only relevant for non-public questions created by students.
+     */
+    @Column(name = "approval_requested")
+    private Boolean approvalRequested;
+
 
     /**
      * The topic pool this question belongs to.
@@ -103,6 +110,13 @@ public class Question {
     private List<Solution> solutions;
 
     // Getters and setters
+    public Boolean getApprovalRequested() {
+        return approvalRequested;
+    }
+
+    public void setApprovalRequested(Boolean approvalRequested) {
+        this.approvalRequested = approvalRequested;
+    }
 
     public Long getId() {
         return id;

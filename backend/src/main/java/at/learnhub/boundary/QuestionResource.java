@@ -248,8 +248,6 @@ public class QuestionResource {
             @APIResponse(responseCode = "500", description = "Internal server error")
     })
     public Response getAllPrivateQuestions(@Context SecurityContext securityContext) {
-        System.out.println("\n[QuestionResource] Getting all private questions");
-
         try {
             User currentUser = getCurrentUser(securityContext);
 
@@ -261,7 +259,44 @@ public class QuestionResource {
             }
 
             List<QuestionDto> questions = questionRepository.findAllPrivateQuestions();
-            //System.out.println("[QuestionResource] Found " + questions.size() + " private questions");
+            return Response.ok(questions).build();
+
+        } catch (NotAuthorizedException | NotFoundException e) {
+            System.err.println("[QuestionResource] Auth error: " + e.getMessage());
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(Map.of("error", e.getMessage()))
+                    .build();
+        } catch (Exception e) {
+            System.err.println("[QuestionResource] Error: " + e.getMessage());
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(Map.of("error", "Error loading private questions", "message", e.getMessage()))
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/awaiting-approval")
+    @Operation(summary = "Get all private questions (admin only)",
+            description = "Returns all questions where isPublic = false. Only accessible by admins.")
+    @APIResponses({
+            @APIResponse(responseCode = "200", description = "List of private questions",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(type = SchemaType.ARRAY, implementation = QuestionDto.class))),
+            @APIResponse(responseCode = "403", description = "Forbidden - Only admins can access"),
+            @APIResponse(responseCode = "500", description = "Internal server error")
+    })
+    public Response findAllQuestionsWithApprovalRequested(@Context SecurityContext securityContext) {
+        try {
+            User currentUser = getCurrentUser(securityContext);
+
+            if (!Boolean.TRUE.equals(currentUser.getAdmin())) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(Map.of("error", "Only admins can view all private questions"))
+                        .build();
+            }
+
+            List<QuestionDto> questions = questionRepository.findAllQuestionsWithApprovalRequested();
             return Response.ok(questions).build();
 
         } catch (NotAuthorizedException | NotFoundException e) {
@@ -506,6 +541,10 @@ public class QuestionResource {
             }
 
             question.setPublic(isPublic);
+
+            if (isPublic) {
+                question.setApprovalRequested(false);
+            }
 
             QuestionDto resultDto = QuestionMapper.toDto(question);
 

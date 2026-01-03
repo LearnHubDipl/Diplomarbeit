@@ -57,6 +57,12 @@ public record QuestionDto(
         Boolean isPublic,
 
         @Schema(
+                description = "Whether the student has requested admin approval for this question.",
+                example = "true"
+        )
+        Boolean approvalRequested,
+
+        @Schema(
                 description = "User who created the question"
         )
         UserSlimDto user,

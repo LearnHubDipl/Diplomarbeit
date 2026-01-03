@@ -54,7 +54,9 @@
         <label for="type" class="form-label">Fragentyp</label>
         <select id="type" class="form-select border-warning" formControlName="type">
           <option value="" disabled>Bitte wählen</option>
-          <option *ngFor="let type of QuestionType | keyvalue" [value]="type.value">{{ type.value }}</option>
+          <option *ngFor="let type of questionTypes" [value]="type.value">
+            {{ type.label }}
+          </option>
         </select>
       </div>
 

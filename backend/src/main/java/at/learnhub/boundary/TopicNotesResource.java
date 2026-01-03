@@ -63,9 +63,6 @@ public class TopicNotesResource {
         }
     }
 
-    // =========================================================
-    // Storage helpers (ohne nio)
-    // =========================================================
 
     private String uploadBaseDir() {
         return System.getProperty("app.upload.dir", "/app/uploads");
@@ -105,9 +102,7 @@ public class TopicNotesResource {
         return (f != null) ? f.length() : 0L;
     }
 
-    // =========================================================
-    // Meta (.meta.json)
-    // =========================================================
+
 
     private Map<String, Object> readMeta(File dir, String pdfFileName, long fallbackCreatedAt) {
         Map<String, Object> meta = new LinkedHashMap<>();
@@ -170,9 +165,7 @@ public class TopicNotesResource {
         }
     }
 
-    // =========================================================
-    // GET list
-    // =========================================================
+
 
     @GET
     public Response list(@PathParam("topicPoolId") Long topicPoolId) {
@@ -194,9 +187,7 @@ public class TopicNotesResource {
                 Map<String, Object> meta = readMeta(dir, fileName, lm);
                 boolean approved = isApproved(meta);
 
-                // Sichtbarkeit:
-                // approved => alle
-                // pending => nur owner oder teacher/admin
+
                 if (!approved && !(teacherOrAdmin || isOwner(meta))) {
                     continue;
                 }
@@ -233,9 +224,6 @@ public class TopicNotesResource {
         }
     }
 
-    // =========================================================
-    // POST upload (pending/approved)
-    // =========================================================
 
     @POST
     @Path("/upload")

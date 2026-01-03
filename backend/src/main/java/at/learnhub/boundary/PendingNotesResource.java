@@ -24,9 +24,6 @@ public class PendingNotesResource {
     @Context
     SecurityContext securityContext;
 
-    // ---------------------------------------------
-    // DTO
-    // ---------------------------------------------
     public static class PendingNoteDto {
         public Long topicPoolId;
         public String fileName;
@@ -40,13 +37,10 @@ public class PendingNotesResource {
         public String publicUrl;
     }
 
-    // ---------------------------------------------
-    // GET /api/notes/pending
-    // ---------------------------------------------
     @GET
     @Path("/pending")
     public Response myPendingNotes() {
-        // ✅ nur Teacher/Admin
+
         if (!isTeacherOrAdmin()) {
             return Response.status(Response.Status.FORBIDDEN)
                     .entity(java.util.Map.of("error", "Only teacher/admin can access pending notes"))
@@ -79,7 +73,6 @@ public class PendingNotesResource {
 
             final String baseUrl = System.getProperty("app.public.base", "https://vm91.htl-leonding.ac.at");
 
-            // topic-notes/<poolId>/
             try (java.util.stream.Stream<java.nio.file.Path> pools = java.nio.file.Files.list(topicNotesRoot)) {
                 pools.filter(java.nio.file.Files::isDirectory).forEach(poolDir -> {
                     Long poolId = parseLongOrNull(poolDir.getFileName().toString());
@@ -97,10 +90,8 @@ public class PendingNotesResource {
                                         String status = node.hasNonNull("status") ? node.get("status").asText() : null;
                                         boolean approved = node.hasNonNull("approved") && node.get("approved").asBoolean();
 
-                                        // ✅ filter: teacherId == me.id AND pending
                                         if (teacherId == null || !teacherId.equals(me.getId())) return;
 
-                                        // pending erkennen (status oder approved)
                                         boolean isPending = "PENDING".equalsIgnoreCase(status) || (!approved);
                                         if (!isPending) return;
 
@@ -143,10 +134,6 @@ public class PendingNotesResource {
             return Response.serverError().entity(java.util.Map.of("error", e.getMessage())).build();
         }
     }
-
-    // ---------------------------------------------
-    // Helpers
-    // ---------------------------------------------
 
     private boolean isTeacherOrAdmin() {
         try {

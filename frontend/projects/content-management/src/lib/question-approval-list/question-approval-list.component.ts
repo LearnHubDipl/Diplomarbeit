@@ -57,15 +57,16 @@ export class QuestionApprovalListComponent implements OnInit {
       }
     }
 
-    if (!this.isAdmin) {
+     if (!this.isAdmin) {
       this.router.navigate(['/']);
-      this.snackBar.open('Zugriff verweigert: Nur Admins können Fragen genehmigen', 'Schließen', {
+      /**this.snackBar.open('Zugriff verweigert: Nur Admins können Fragen genehmigen', 'Schließen', {
         duration: 5000,
         horizontalPosition: 'right',
         verticalPosition: 'top',
         panelClass: ['error-snackbar']
-      });
+      });**/
     }
+
   }
 
   private loadSubjects(): void {
@@ -81,7 +82,7 @@ export class QuestionApprovalListComponent implements OnInit {
 
   private loadPrivateQuestions(): void {
     this.isLoading = true;
-    this.questionService.getAllPrivateQuestions().subscribe({
+    this.questionService.getAllQuestionsWithApprovalRequest().subscribe({
       next: (questions) => {
         this.allQuestions = questions;
         this.applyFilters();

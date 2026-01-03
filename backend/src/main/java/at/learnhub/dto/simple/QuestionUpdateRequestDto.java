@@ -20,6 +20,9 @@ public record QuestionUpdateRequestDto(
         List<AnswerUpdateRequestDto> answers,
 
         @Schema(description = "Whether the question is public or not", example = "true")
-        Boolean isPublic
+        Boolean isPublic,
+
+        @Schema(description = "Updated approval request status")
+        Boolean approvalRequested
 ) {
 }
