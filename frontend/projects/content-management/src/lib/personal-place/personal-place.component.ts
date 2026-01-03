@@ -11,7 +11,7 @@ import {RouterLink} from '@angular/router';
   selector: 'lib-personal-place',
   standalone: true,
   templateUrl: './personal-place.component.html',
-  imports: [NgIf, RouterLink],
+  imports: [NgIf, RouterLink, DatePipe],
   styleUrls: ['./personal-place.component.css']
 })
 export class PersonalPlaceComponent implements OnInit {
