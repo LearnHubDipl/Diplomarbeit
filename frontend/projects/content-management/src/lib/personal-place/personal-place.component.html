@@ -1,9 +1,12 @@
 <div class="container mt-5" style="min-height: 85vh">
+
+  <!-- Header -->
   <div class="d-flex align-items-center gap-3 mb-4">
     <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center"
          style="width: 56px; height: 56px;">
       <i class="bi bi-person-fill fs-3"></i>
     </div>
+
     <div>
       <h1 class="fw-bold mb-0">Persönlicher Bereich</h1>
       <p class="text-muted mb-0" *ngIf="displayName; else helloFallback">
@@ -16,42 +19,46 @@
       </ng-template>
     </div>
   </div>
+
   <hr class="border-warning opacity-50 mb-4">
+
+  <!-- Persönliche Infos -->
   <section class="mb-5">
     <h5 class="fw-bold text-warning mb-3">
       <i class="bi bi-info-circle me-2"></i>
       Persönliche Informationen
     </h5>
+
     <div class="row gy-3">
       <div class="col-md-6">
         <div class="d-flex align-items-center gap-3">
           <i class="bi bi-person-badge fs-4 text-warning"></i>
           <div>
             <div class="text-muted small">Name</div>
-            <div class="fw-semibold fs-5">
-              {{ displayName }}
-            </div>
+            <div class="fw-semibold fs-5">{{ displayName }}</div>
           </div>
         </div>
       </div>
+
       <div class="col-md-6" *ngIf="isStudent">
         <div class="d-flex align-items-center gap-3">
           <i class="bi bi-mortarboard fs-4 text-warning"></i>
           <div>
             <div class="text-muted small">Klasse</div>
-            <div class="fw-semibold fs-5">
-              {{ klasse }}
-            </div>
+            <div class="fw-semibold fs-5">{{ klasse }}</div>
           </div>
         </div>
       </div>
     </div>
   </section>
-  <section class="mb-5" *ngIf="backendUser?.isAdmin">
+
+  <!-- Admin Bereich (Fragen genehmigen) -->
+  <section class="mb-5" *ngIf="isAdmin">
     <h5 class="fw-bold text-warning mb-3">
       <i class="bi bi-shield-check me-2"></i>
       Administrator-Bereich
     </h5>
+
     <div class="card border-warning">
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
@@ -61,6 +68,7 @@
               Prüfe und genehmige private Fragen, um sie öffentlich zu machen
             </small>
           </div>
+
           <a
             routerLink="/questions/approve"
             class="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm text-white">
@@ -72,7 +80,83 @@
     </div>
   </section>
 
-  <!-- Lehrkraft/Admin: Pending Mitschriften -->
+  <!-- Notifications (Schüler + Lehrer, NICHT Admin) -->
+  <section class="mb-5" *ngIf="canSeeNotifications()">
+    <h5 class="fw-bold text-warning mb-3">
+      <i class="bi bi-bell-fill me-2"></i>
+      Benachrichtigungen
+      <span *ngIf="unreadCount > 0" class="badge bg-danger ms-2">{{ unreadCount }}</span>
+    </h5>
+
+    <div class="card border-warning">
+      <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <small class="text-muted">
+            Freigaben/Ablehnungen & Status deiner Mitschriften.
+          </small>
+
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-warning btn-sm" (click)="loadNotifications()">
+              <i class="bi bi-arrow-clockwise me-1"></i> Aktualisieren
+            </button>
+
+            <button class="btn btn-warning btn-sm text-white"
+                    (click)="markAllNotificationsRead()"
+                    [disabled]="unreadCount === 0">
+              <i class="bi bi-check2-all me-1"></i> Alle gelesen
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="isLoadingNotifications" class="text-muted">Lädt...</div>
+
+        <div *ngIf="notifError" class="alert alert-danger py-2 mb-3">
+          {{ notifError }}
+        </div>
+
+        <div *ngIf="!isLoadingNotifications && !notifError && notifications.length === 0" class="text-muted">
+          Keine Benachrichtigungen 🎉
+        </div>
+
+        <div *ngIf="notifications.length > 0" class="list-group">
+          <div class="list-group-item"
+               *ngFor="let n of notifications"
+               [class.opacity-50]="n.read">
+
+            <div class="d-flex justify-content-between align-items-start gap-3">
+              <div class="flex-grow-1">
+                <div class="fw-semibold">
+                  {{ n.title }}
+                  <span *ngIf="!n.read" class="badge bg-danger ms-2">NEU</span>
+                </div>
+
+                <div class="text-muted small" *ngIf="n.createdAt">
+                  {{ n.createdAt | date:'medium' }}
+                </div>
+
+                <div class="mt-2">
+                  {{ n.message }}
+                </div>
+              </div>
+
+              <div>
+                <button class="btn btn-outline-secondary btn-sm"
+                        (click)="markNotificationRead(n)"
+                        [disabled]="n.read">
+                  <i class="bi bi-check-lg me-1"></i> Gelesen
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Pending Mitschriften (nur Lehrer, NICHT Admin) -->
   <section class="mb-5" *ngIf="canSeeTeacherArea()">
     <h5 class="fw-bold text-warning mb-3">
       <i class="bi bi-file-earmark-text me-2"></i>
@@ -81,19 +165,18 @@
 
     <div class="card border-warning">
       <div class="card-body">
+
         <div class="d-flex justify-content-between align-items-center mb-3">
           <small class="text-muted">
-            Hier siehst du Mitschriften, die auf deine Freigabe warten.
+            Mitschriften, die auf deine Freigabe warten.
           </small>
+
           <button class="btn btn-outline-warning btn-sm" (click)="loadPendingNotes()">
-            <i class="bi bi-arrow-clockwise me-1"></i>
-            Aktualisieren
+            <i class="bi bi-arrow-clockwise me-1"></i> Aktualisieren
           </button>
         </div>
 
-        <div *ngIf="isLoadingPending" class="text-muted">
-          Lädt...
-        </div>
+        <div *ngIf="isLoadingPending" class="text-muted">Lädt...</div>
 
         <div *ngIf="pendingError" class="alert alert-danger py-2 mb-3">
           {{ pendingError }}
@@ -106,11 +189,13 @@
         <div *ngIf="pendingNotes.length > 0" class="list-group">
           <div class="list-group-item" *ngFor="let n of pendingNotes">
             <div class="d-flex justify-content-between align-items-start gap-3">
+
               <div class="flex-grow-1">
                 <div class="fw-semibold">
                   {{ n.title || n.fileName }}
                   <span class="badge bg-secondary ms-2">PENDING</span>
                 </div>
+
                 <div class="text-muted small">
                   Von: {{ n.uploaderName || 'Unbekannt' }}
                   <span class="mx-2">•</span>
@@ -120,23 +205,25 @@
                 </div>
 
                 <div class="mt-2" *ngIf="n.publicUrl">
-                  <a class="btn btn-sm btn-outline-secondary" [href]="n.publicUrl" target="_blank" rel="noopener">
-                    <i class="bi bi-download me-1"></i>
-                    Öffnen/Download
+                  <a class="btn btn-sm btn-outline-secondary"
+                     [href]="n.publicUrl"
+                     target="_blank"
+                     rel="noopener">
+                    <i class="bi bi-download me-1"></i> Öffnen/Download
                   </a>
                 </div>
               </div>
 
               <div class="d-flex gap-2">
                 <button class="btn btn-success btn-sm" (click)="approveNote(n)">
-                  <i class="bi bi-check-lg me-1"></i>
-                  Freigeben
+                  <i class="bi bi-check-lg me-1"></i> Freigeben
                 </button>
+
                 <button class="btn btn-danger btn-sm" (click)="rejectNote(n)">
-                  <i class="bi bi-x-lg me-1"></i>
-                  Ablehnen
+                  <i class="bi bi-x-lg me-1"></i> Ablehnen
                 </button>
               </div>
+
             </div>
           </div>
         </div>
@@ -145,16 +232,15 @@
     </div>
   </section>
 
-  <hr class="border-warning opacity-25 mb-4" />
-
   <hr class="border-warning opacity-25 mb-4">
+
+  <!-- Logout -->
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
     <div>
       <h6 class="fw-bold mb-1">Abmelden</h6>
-      <small class="text-muted">
-        Du wirst sicher von deinem Konto abgemeldet
-      </small>
+      <small class="text-muted">Du wirst sicher von deinem Konto abgemeldet</small>
     </div>
+
     <button type="button"
             class="btn btn-warning rounded-pill px-4 py-2 fw-semibold shadow-sm text-white"
             (click)="doLogout()">
@@ -162,4 +248,5 @@
       Logout
     </button>
   </div>
+
 </div>

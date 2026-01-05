@@ -31,7 +31,7 @@ type MeDto = {
   selector: 'app-subject-pool-detail',
   standalone: true,
   imports: [CommonModule, RouterLink, ReactiveFormsModule],
-  templateUrl: './subject-pool-detail.component.html'
+  templateUrl: 'subject-pool-detail.component.html'
 })
 export class SubjectPoolDetailComponent implements OnInit {
   subjectId!: number;
@@ -48,14 +48,11 @@ export class SubjectPoolDetailComponent implements OnInit {
 
   form!: FormGroup;
 
-  // Edit-Status
   editing = false;
   editingOldFileName: string | null = null;
 
-  // ✅ eingeloggter User (aus Backend /users/me)
   me: MeDto | null = null;
 
-  // ✅ Rollen
   isAdminOrTeacher = false;
   isStudent = true;
 
@@ -72,18 +69,16 @@ export class SubjectPoolDetailComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    // ✅ User laden (DB-Wahrheit: isAdmin/isTeacher)
     await this.loadMe();
 
     this.form = this.fb.group({
       title: ['', Validators.required],
       description: [''],
       uploaderName: [''],
-      teacherId: [null], // Validator kommt gleich je nach Rolle
+      teacherId: [null],
       file: [null, Validators.required],
     });
 
-    // ✅ Teacher Auswahl: für Schüler:innen Pflicht (für Freigabeprozess)
     this.applyTeacherValidator();
 
     this.subjectId = Number(this.route.snapshot.paramMap.get('subjectId'));
@@ -110,7 +105,6 @@ export class SubjectPoolDetailComponent implements OnInit {
       this.isAdminOrTeacher = !!(this.me?.isAdmin || this.me?.isTeacher);
       this.isStudent = !this.isAdminOrTeacher;
     } catch {
-      // Wenn /users/me nicht erreichbar ist, fail-safe: wie Schüler behandeln
       this.me = null;
       this.isAdminOrTeacher = false;
       this.isStudent = true;
@@ -124,7 +118,7 @@ export class SubjectPoolDetailComponent implements OnInit {
     if (this.isStudent) {
       ctrl.setValidators([Validators.required]);
     } else {
-      ctrl.clearValidators(); // Lehrer/Admin brauchen keine Freigabe
+      ctrl.clearValidators();
     }
     ctrl.updateValueAndValidity();
   }
@@ -153,17 +147,15 @@ export class SubjectPoolDetailComponent implements OnInit {
     });
   }
 
-  // ---------- Rechte & Status Helfer ----------
 
   private getStatus(n: any): string {
-    // akzeptiert mehrere mögliche Felder (robust)
     return (
       (n?.status as string) ||
       (n?.noteStatus as string) ||
       (n?.approvalStatus as string) ||
       (n?.approved === true ? 'APPROVED' : null) ||
       (n?.isApproved === true ? 'APPROVED' : null) ||
-      'APPROVED' // fallback: wenn Backend keinen Status liefert
+      'APPROVED'
     );
   }
 
@@ -187,25 +179,24 @@ export class SubjectPoolDetailComponent implements OnInit {
     return !!sub && sub === this.me.keycloakSub;
   }
 
-  canEditOrDelete(n: any): boolean {
-    // Lehrer/Admin dürfen alles, Schüler nur eigene
-    return this.isAdminOrTeacher || this.isOwnNote(n);
+  canEdit(n: any): boolean {
+    if (this.isAdminOrTeacher) return true;
+    return this.isOwnNote(n) && this.isPending(n);
+  }
+
+  canDelete(n: any): boolean {
+    if (this.isAdminOrTeacher) return true;
+    return this.isOwnNote(n);
   }
 
   private filterNotesForVisibility(list: TopicContent[]): TopicContent[] {
     return list.filter((n: any) => {
-      // Approved: alle sehen
       if (this.isApproved(n)) return true;
-
-      // Pending: nur der Uploader sieht (ausgegraut)
       if (this.isPending(n)) return this.isOwnNote(n) || this.isAdminOrTeacher;
-
-      // Alles andere: sicherheitshalber nur Owner/Teacher/Admin
       return this.isOwnNote(n) || this.isAdminOrTeacher;
     });
   }
 
-  // ---------- Form / Upload ----------
 
   onFileChange(ev: Event): void {
     const input = ev.target as HTMLInputElement;
@@ -228,7 +219,6 @@ export class SubjectPoolDetailComponent implements OnInit {
   upload(): void {
     if (this.form.invalid || !this.form.value.file) return;
 
-    // Schüler müssen einen Lehrer auswählen (Freigabeprozess)
     if (this.isStudent && (this.form.value.teacherId == null || this.form.value.teacherId === '')) {
       this.error = 'Bitte wähle eine Lehrperson für die Freigabe aus.';
       return;
@@ -277,10 +267,8 @@ export class SubjectPoolDetailComponent implements OnInit {
     this.editingOldFileName = null;
     this.form.reset();
 
-    // Teacher Pflicht nur für Schüler
     this.applyTeacherValidator();
 
-    // file Pflicht
     this.form.get('file')?.setValidators([Validators.required]);
     this.form.get('file')?.updateValueAndValidity();
     this.resetFileInput();
@@ -294,8 +282,7 @@ export class SubjectPoolDetailComponent implements OnInit {
 
   editNote(n: TopicContent, ev: Event): void {
     ev.stopPropagation();
-
-    if (!this.canEditOrDelete(n)) return; // ✅ Schüler darf nur eigene bearbeiten
+    if (!this.canEdit(n)) return;
 
     this.editing = true;
     this.editingOldFileName = (n as any).fileName;
@@ -308,12 +295,10 @@ export class SubjectPoolDetailComponent implements OnInit {
       file: null
     });
 
-    // beim Edit weiterhin PDF Pflicht (du ersetzt ja das File)
     this.form.get('file')?.setValidators([Validators.required]);
     this.form.get('file')?.updateValueAndValidity();
     this.resetFileInput();
 
-    // Schüler: Teacher bleibt Pflicht
     this.applyTeacherValidator();
 
     const modalEl = document.getElementById('uploadModal');
@@ -326,7 +311,7 @@ export class SubjectPoolDetailComponent implements OnInit {
   deleteNote(n: TopicContent, ev: Event): void {
     ev.stopPropagation();
 
-    if (!this.canEditOrDelete(n)) return; // ✅ Schüler darf nur eigene löschen
+    if (!this.canDelete(n)) return;
 
     const fileName = (n as any).fileName;
     if (!fileName) {

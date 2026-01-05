@@ -1,29 +1,34 @@
 import { TopicContent } from '../interfaces/topicContent';
 import { TopicNoteDto } from '../interfaces/topicNoteDto';
 
-export function mapNoteToTopicContent(n: Partial<TopicNoteDto> & any): TopicContent {
-  const url = n.publicUrl ?? n.url ?? n.pdfUrl ?? '';
-  const fileName = n.fileName ?? (url ? url.split('/').pop() : '');
+export function mapNoteToTopicContent(dto: TopicNoteDto): TopicContent {
+  // Fallbacks damit Frontend-Logik zuverlässig klappt:
+  const approved =
+    (dto as any).approved === true ||
+    (dto as any).isApproved === true ||
+    (dto as any).is_approved === true;
+
+  const status =
+    (dto as any).status ||
+    (approved ? 'APPROVED' : 'PENDING');
 
   return {
-    id: n.id,
-    title: n.title ?? (fileName || 'PDF'),
-    description: n.description ?? undefined,
-    subjectId: n.subjectId ?? undefined,
-    topicPoolId: n.topicPoolId ?? undefined,
-    media: url ? ({ id: 0, path: url, type: 'pdf' } as any) : undefined,
-    uploaderName: n.uploaderName ?? undefined,
+    ...(dto as any),
 
-    createdAt: n.createdAt ? new Date(n.createdAt) : undefined,
-    date: n.createdAt ? new Date(n.createdAt) : (n.date ? new Date(n.date) : undefined),
+    fileName: (dto as any).fileName ?? (dto as any).filename ?? '',
+    pdfUrl: (dto as any).pdfUrl ?? (dto as any).publicUrl ?? '',
 
-    pdfUrl: url || undefined,
-    approved: true,
-    fileName: fileName || '',
+    title: (dto as any).title ?? '',
+    description: (dto as any).description ?? '',
 
-    teacherId: n.teacherId ?? undefined,
+    uploaderName: (dto as any).uploaderName ?? '',
+    uploaderSub: (dto as any).uploaderSub ?? (dto as any).uploaderKeycloakSub ?? (dto as any).ownerSub ?? '',
 
-    uploaderSub: n.uploaderSub,
-    status: n.status,
-  };
+    teacherId: (dto as any).teacherId ?? null,
+
+    approved,
+    status,
+
+    createdAt: (dto as any).createdAt ?? (dto as any).date ?? undefined,
+  } as any;
 }

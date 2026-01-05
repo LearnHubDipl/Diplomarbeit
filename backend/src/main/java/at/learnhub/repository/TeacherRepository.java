@@ -145,6 +145,7 @@ public class TeacherRepository {
         save(new Teacher(null, "Siegfried Wenigwieser", "s.wenigwieser@htl-leonding.ac.at"));
         save(new Teacher(null, "Alfred Wiedermann", "a.wiedermann@htl-leonding.ac.at"));
         save(new Teacher(null, "Edwin Wingert", "e.wingert@htl-leonding.ac.at"));
+        save(new Teacher(null, "Lien Hochbichler", "l.hochbichler@students.htl-leonding.ac.at"));
     }
 
     public List<Teacher> listAll() {

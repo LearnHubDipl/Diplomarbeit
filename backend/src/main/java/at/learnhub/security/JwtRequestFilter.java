@@ -25,7 +25,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
-
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class JwtRequestFilter implements ContainerRequestFilter {
@@ -38,7 +37,6 @@ public class JwtRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        String path = requestContext.getUriInfo().getPath();
         String method = requestContext.getMethod();
 
         if ("OPTIONS".equalsIgnoreCase(method)) {
@@ -70,10 +68,9 @@ public class JwtRequestFilter implements ContainerRequestFilter {
                     );
 
                     requestContext.setSecurityContext(securityContext);
-
                     SecurityContextHolder.setContext(securityContext);
 
-                    System.out.println("[JwtRequestFilter] ✓ Context set for @PermitAll: " + fullName);
+                    System.out.println("[JwtRequestFilter] ✓ Context set for @PermitAll: " + fullName + " sub=" + keycloakSub);
 
                 } catch (Exception e) {
                     System.err.println("[JwtRequestFilter] Token verification failed: " + e.getMessage());
@@ -129,8 +126,13 @@ public class JwtRequestFilter implements ContainerRequestFilter {
                     email, givenName, familyName, distinguishedName
             );
 
-            requestContext.setSecurityContext(securityContext);
+            // DEBUG:
+            System.out.println("[JWT] email=" + email);
+            System.out.println("[JWT] dn=" + distinguishedName);
+            System.out.println("[JWT] sub=" + keycloakSub);
+            System.out.println("[JWT] isStudent=" + securityContext.isStudent());
 
+            requestContext.setSecurityContext(securityContext);
             SecurityContextHolder.setContext(securityContext);
 
         } catch (JWTVerificationException e) {

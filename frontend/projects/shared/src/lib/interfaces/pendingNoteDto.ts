@@ -13,4 +13,5 @@ export interface PendingNoteDto {
   approved?: boolean;
 
   publicUrl?: string;
+
 }

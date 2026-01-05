@@ -63,10 +63,20 @@ public record CustomSecurityContext(String username, List<String> roles, String 
     }
 
     public boolean isStudent() {
-        if (distinguishedName == null || distinguishedName.isEmpty()) {
-            return false;
+        if (distinguishedName != null && !distinguishedName.isBlank()) {
+            String dnUp = distinguishedName.toUpperCase();
+            if (dnUp.contains("OU=STUDENTS") || dnUp.contains("STUDENTS")) {
+                return true;
+            }
         }
-        return distinguishedName.toUpperCase().contains("OU=STUDENTS");
+        if (email != null && !email.isBlank()) {
+            String mail = email.toLowerCase().trim();
+            if (mail.endsWith("@students.htl-leonding.ac.at")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 

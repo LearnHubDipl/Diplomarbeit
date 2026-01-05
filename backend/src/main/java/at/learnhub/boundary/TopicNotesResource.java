@@ -1,11 +1,14 @@
 package at.learnhub.boundary;
 
+import at.learnhub.dto.NotficationDto;
+import at.learnhub.model.User;
+import at.learnhub.repository.UserRepository;
 import at.learnhub.security.CustomSecurityContext;
+import at.learnhub.security.SecurityContextHolder;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.*;
 
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -13,7 +16,6 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import java.io.*;
 import java.security.Principal;
 import java.util.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Path("/api/topic-pools/{topicPoolId}/notes")
 @Produces(MediaType.APPLICATION_JSON)
@@ -22,38 +24,31 @@ public class TopicNotesResource {
     @Context
     SecurityContext securityContext;
 
+    @Inject
+    UserRepository userRepository;
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     // =========================================================
-    // ✅ Technik wie SubjectResource: zentrale Checks
+    // Context / Auth helpers
     // =========================================================
+    private CustomSecurityContext currentCscOrNull() {
+        if (securityContext instanceof CustomSecurityContext csc) return csc;
 
-    private boolean isStudentFromToken() {
-        if (securityContext instanceof CustomSecurityContext csc) {
-            return csc.isStudent();
-        }
-        return false; // fallback
-    }
+        SecurityContext sc = SecurityContextHolder.getContext();
+        if (sc instanceof CustomSecurityContext csc2) return csc2;
 
-    private boolean isTeacherOrAdminFromToken() {
-        return !isStudentFromToken();
-    }
-
-    private void requireTeacherOrAdmin() {
-        if (!isTeacherOrAdminFromToken()) {
-            throw new WebApplicationException(
-                    "Du hast keine Berechtigung, diese Aktion auszuführen.",
-                    Response.Status.FORBIDDEN
-            );
-        }
+        return null;
     }
 
     private String currentSubOrNull() {
         try {
-            if (securityContext instanceof CustomSecurityContext csc) {
+            CustomSecurityContext csc = currentCscOrNull();
+            if (csc != null) {
                 String sub = csc.keycloakSub();
                 return (sub != null && !sub.isBlank()) ? sub : null;
             }
+
             Principal p = (securityContext != null) ? securityContext.getUserPrincipal() : null;
             if (p == null) return null;
             String n = p.getName();
@@ -63,6 +58,44 @@ public class TopicNotesResource {
         }
     }
 
+    private User currentUserOrNull() {
+        String sub = currentSubOrNull();
+        if (sub == null) return null;
+        return userRepository.findUserEntityByKeycloakSub(sub).orElse(null);
+    }
+
+    private boolean isTeacherOrAdminDb() {
+        User me = currentUserOrNull();
+        if (me == null) return false;
+        return Boolean.TRUE.equals(me.getTeacher()) || Boolean.TRUE.equals(me.getAdmin());
+    }
+
+    private boolean isAdminDb() {
+        User me = currentUserOrNull();
+        if (me == null) return false;
+        return Boolean.TRUE.equals(me.getAdmin());
+    }
+
+    private void requireTeacherOrAdminDb() {
+        if (!isTeacherOrAdminDb()) {
+            throw new WebApplicationException(
+                    "Du hast keine Berechtigung, diese Aktion auszuführen.",
+                    Response.Status.FORBIDDEN
+            );
+        }
+    }
+
+    private String currentFullNameOrFallback() {
+        try {
+            CustomSecurityContext csc = currentCscOrNull();
+            if (csc != null) {
+                String n = csc.fullName();
+                if (n != null && !n.isBlank()) return n;
+                if (csc.givenName() != null && !csc.givenName().isBlank()) return csc.givenName();
+            }
+        } catch (Exception ignore) {}
+        return "Lehrkraft";
+    }
 
     private String uploadBaseDir() {
         return System.getProperty("app.upload.dir", "/app/uploads");
@@ -103,7 +136,6 @@ public class TopicNotesResource {
     }
 
 
-
     private Map<String, Object> readMeta(File dir, String pdfFileName, long fallbackCreatedAt) {
         Map<String, Object> meta = new LinkedHashMap<>();
         String base = baseNameOf(pdfFileName);
@@ -119,7 +151,7 @@ public class TopicNotesResource {
 
         meta.putIfAbsent("fileName", pdfFileName);
         meta.putIfAbsent("createdAt", fallbackCreatedAt);
-        meta.putIfAbsent("approved", Boolean.TRUE);
+        meta.putIfAbsent("approved", Boolean.FALSE);
         meta.putIfAbsent("status", Boolean.TRUE.equals(meta.get("approved")) ? "APPROVED" : "PENDING");
 
         return meta;
@@ -135,7 +167,7 @@ public class TopicNotesResource {
         Object a = meta.get("approved");
         if (a instanceof Boolean b) return b;
         if (a instanceof String s) return Boolean.parseBoolean(s);
-        return true;
+        return false;
     }
 
     private boolean isOwner(Map<String, Object> meta) {
@@ -146,7 +178,7 @@ public class TopicNotesResource {
     }
 
     private void requireCanEdit(Map<String, Object> meta) {
-        if (isTeacherOrAdminFromToken()) return;
+        if (isTeacherOrAdminDb()) return;
         if (!(isOwner(meta) && !isApproved(meta))) {
             throw new WebApplicationException(
                     "Du hast keine Berechtigung, diese Aktion auszuführen.",
@@ -156,7 +188,7 @@ public class TopicNotesResource {
     }
 
     private void requireCanDelete(Map<String, Object> meta) {
-        if (isTeacherOrAdminFromToken()) return;
+        if (isTeacherOrAdminDb()) return;
         if (!isOwner(meta)) {
             throw new WebApplicationException(
                     "Du hast keine Berechtigung, diese Aktion auszuführen.",
@@ -166,6 +198,53 @@ public class TopicNotesResource {
     }
 
 
+    private File notificationsDir() {
+        File dir = new File(uploadBaseDir(), "notifications");
+        if (!dir.exists()) dir.mkdirs();
+        return dir;
+    }
+
+    private File notificationFile(String userSub) {
+        return new File(notificationsDir(), userSub + ".json");
+    }
+
+    private List<NotficationDto> readNotifications(String userSub) {
+        try {
+            File f = notificationFile(userSub);
+            if (!f.exists()) return new ArrayList<>();
+            NotficationDto[] arr = mapper.readValue(f, NotficationDto[].class);
+            return new ArrayList<>(Arrays.asList(arr));
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
+    private void writeNotifications(String userSub, List<NotficationDto> list) throws Exception {
+        File f = notificationFile(userSub);
+        mapper.writerWithDefaultPrettyPrinter().writeValue(f, list);
+    }
+
+    private void pushNotificationToUserSub(String userSub, String type, String title, String message, Map<String, Object> meta) {
+        if (userSub == null || userSub.isBlank()) return;
+
+        try {
+            List<NotficationDto> list = readNotifications(userSub);
+
+            NotficationDto n = new NotficationDto();
+            n.id = UUID.randomUUID().toString();
+            n.type = type;
+            n.title = title;
+            n.message = message;
+            n.createdAt = System.currentTimeMillis();
+            n.read = false;
+            n.meta = meta;
+
+            list.add(n);
+            writeNotifications(userSub, list);
+        } catch (Exception e) {
+            System.err.println("[TopicNotesResource] Could not write notification: " + e.getMessage());
+        }
+    }
 
     @GET
     public Response list(@PathParam("topicPoolId") Long topicPoolId) {
@@ -174,7 +253,7 @@ public class TopicNotesResource {
             File[] files = dir.listFiles();
             if (files == null) return Response.ok(Collections.emptyList()).build();
 
-            boolean teacherOrAdmin = isTeacherOrAdminFromToken();
+            boolean teacherOrAdmin = isTeacherOrAdminDb();
             List<Map<String, Object>> out = new ArrayList<>();
 
             for (File f : files) {
@@ -187,10 +266,7 @@ public class TopicNotesResource {
                 Map<String, Object> meta = readMeta(dir, fileName, lm);
                 boolean approved = isApproved(meta);
 
-
-                if (!approved && !(teacherOrAdmin || isOwner(meta))) {
-                    continue;
-                }
+                if (!approved && !(teacherOrAdmin || isOwner(meta))) continue;
 
                 String url = publicBase() + "/uploads/topic-notes/" + topicPoolId + "/" + fileName;
 
@@ -223,7 +299,6 @@ public class TopicNotesResource {
             return Response.serverError().entity(Map.of("error", e.getMessage())).build();
         }
     }
-
 
     @POST
     @Path("/upload")
@@ -264,7 +339,6 @@ public class TopicNotesResource {
                 }
             }
 
-            // Datei speichern
             File targetFile = new File(dir, targetFileName);
             try (InputStream in = filePart.getBody(InputStream.class, null);
                  OutputStream out = new FileOutputStream(targetFile)) {
@@ -276,13 +350,12 @@ public class TopicNotesResource {
                 }
             }
 
-            // Felder
             String title = trimOrNull(field(map, "title"));
             String description = trimOrNull(field(map, "description"));
             String uploaderName = trimOrNull(field(map, "uploaderName"));
             Long teacherId = fieldLong(map, "teacherId");
 
-            boolean teacherOrAdmin = isTeacherOrAdminFromToken();
+            boolean teacherOrAdmin = isTeacherOrAdminDb();
 
             boolean approved;
             String status;
@@ -315,6 +388,22 @@ public class TopicNotesResource {
 
             writeMeta(dir, targetFileName, meta);
 
+            if (!teacherOrAdmin && teacherId != null) {
+                try {
+                    User teacher = userRepository.getUserById(teacherId);
+                    if (teacher != null && teacher.getKeycloakSub() != null) {
+                        String noteTitle = (String) meta.getOrDefault("title", targetFileName);
+                        pushNotificationToUserSub(
+                                teacher.getKeycloakSub(),
+                                "NOTE_PENDING",
+                                "Neue Mitschrift wartet",
+                                "Eine Mitschrift '" + noteTitle + "' wartet auf deine Freigabe.",
+                                Map.of("topicPoolId", topicPoolId, "fileName", targetFileName, "status", "PENDING")
+                        );
+                    }
+                } catch (Exception ignore) {}
+            }
+
             String url = publicBase() + "/uploads/topic-notes/" + topicPoolId + "/" + targetFileName;
 
             return Response.ok(Map.of(
@@ -332,10 +421,6 @@ public class TopicNotesResource {
             return Response.serverError().entity(Map.of("error", e.getMessage())).build();
         }
     }
-
-    // =========================================================
-    // DELETE
-    // =========================================================
 
     @DELETE
     @Path("/{fileName}")
@@ -366,27 +451,51 @@ public class TopicNotesResource {
         }
     }
 
-    // =========================================================
-    // Approve / Reject (nur Teacher/Admin)
-    // =========================================================
-
     @POST
     @Path("/{fileName}/approve")
     public Response approve(@PathParam("topicPoolId") Long topicPoolId,
                             @PathParam("fileName") String fileName) {
-        requireTeacherOrAdmin();
+
+        requireTeacherOrAdminDb();
 
         try {
             File dir = poolDir(topicPoolId);
             String safe = safeFileName(fileName);
-
             Map<String, Object> meta = readMeta(dir, safe, System.currentTimeMillis());
+
+            User me = currentUserOrNull();
+            if (me == null) return Response.status(Response.Status.UNAUTHORIZED).build();
+
+            if (!isAdminDb()) {
+                Object tid = meta.get("teacherId");
+                Long teacherId = null;
+                if (tid instanceof Number n) teacherId = n.longValue();
+                else if (tid != null) teacherId = Long.parseLong(String.valueOf(tid));
+                if (teacherId == null || !teacherId.equals(me.getId())) {
+                    throw new WebApplicationException("Nicht für dich bestimmt.", Response.Status.FORBIDDEN);
+                }
+            }
+
+            String uploaderSub = (meta.get("uploaderSub") != null) ? String.valueOf(meta.get("uploaderSub")) : null;
+            String noteTitle = (meta.get("title") != null) ? String.valueOf(meta.get("title")) : safe;
+            String teacherName = currentFullNameOrFallback();
+
+            pushNotificationToUserSub(
+                    uploaderSub,
+                    "NOTE_APPROVED",
+                    "Mitschrift freigegeben",
+                    "Deine Mitschrift '" + noteTitle + "' wurde von " + teacherName + " freigegeben.",
+                    Map.of("topicPoolId", topicPoolId, "fileName", safe, "status", "APPROVED")
+            );
+
             meta.put("approved", true);
             meta.put("status", "APPROVED");
-
             writeMeta(dir, safe, meta);
+
             return Response.ok(meta).build();
 
+        } catch (WebApplicationException wex) {
+            throw wex;
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().entity(Map.of("error", e.getMessage())).build();
@@ -397,13 +506,47 @@ public class TopicNotesResource {
     @Path("/{fileName}/reject")
     public Response reject(@PathParam("topicPoolId") Long topicPoolId,
                            @PathParam("fileName") String fileName) {
-        requireTeacherOrAdmin();
+
+        requireTeacherOrAdminDb();
+
+        try {
+            File dir = poolDir(topicPoolId);
+            String safe = safeFileName(fileName);
+
+            Map<String, Object> meta = readMeta(dir, safe, System.currentTimeMillis());
+
+            User me = currentUserOrNull();
+            if (me == null) return Response.status(Response.Status.UNAUTHORIZED).build();
+
+            if (!isAdminDb()) {
+                Object tid = meta.get("teacherId");
+                Long teacherId = null;
+                if (tid instanceof Number n) teacherId = n.longValue();
+                else if (tid != null) teacherId = Long.parseLong(String.valueOf(tid));
+                if (teacherId == null || !teacherId.equals(me.getId())) {
+                    throw new WebApplicationException("Nicht für dich bestimmt.", Response.Status.FORBIDDEN);
+                }
+            }
+
+            String uploaderSub = (meta.get("uploaderSub") != null) ? String.valueOf(meta.get("uploaderSub")) : null;
+            String noteTitle = (meta.get("title") != null) ? String.valueOf(meta.get("title")) : safe;
+            String teacherName = currentFullNameOrFallback();
+
+            pushNotificationToUserSub(
+                    uploaderSub,
+                    "NOTE_REJECTED",
+                    "Mitschrift abgelehnt",
+                    "Deine Mitschrift '" + noteTitle + "' wurde von " + teacherName + " abgelehnt und entfernt.",
+                    Map.of("topicPoolId", topicPoolId, "fileName", safe, "status", "REJECTED")
+            );
+
+        } catch (WebApplicationException wex) {
+            throw wex;
+        } catch (Exception ignore) {}
+
+        // Reject = Löschen
         return delete(topicPoolId, fileName);
     }
-
-    // =========================================================
-    // Multipart helper
-    // =========================================================
 
     private static InputPart first(Map<String, List<InputPart>> map, String key) {
         List<InputPart> list = map.get(key);
