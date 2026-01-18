@@ -103,4 +103,36 @@ public class QuestionPoolRepository {
         return findByUserId(userId);
     }
 
+
+    public List<Long> findQuestionIdsByTopicPools(Long userId, List<Long> topicPoolIds) {
+        return em.createQuery(
+                        "SELECT e.question.id FROM QuestionPoolEntry e " +
+                                "WHERE e.questionPool.user.id = :userId " +
+                                "AND e.question.topicPool.id IN :topicPoolIds " +
+                                "AND (" +
+                                "  e.answeredAt IS NULL OR " +
+                                "  e.lastAnsweredCorrectly = false OR " +
+                                "  (e.correctCount = 1 AND e.answeredAt <= CURRENT_TIMESTAMP - 1 DAY) OR " +
+                                "  (e.correctCount = 2 AND e.answeredAt <= CURRENT_TIMESTAMP - 7 DAY) OR " +
+                                "  (e.correctCount >= 3 AND e.answeredAt <= CURRENT_TIMESTAMP - 30 DAY)" +
+                                ")", Long.class)
+                .setParameter("userId", userId)
+                .setParameter("topicPoolIds", topicPoolIds)
+                .getResultList();
+    }
+
+    public List<Long> findAllQuestionIdsByUserId(Long userId) {
+        return em.createQuery(
+                        "SELECT e.question.id FROM QuestionPoolEntry e " +
+                                "WHERE e.questionPool.user.id = :userId " +
+                                "AND (" +
+                                "  e.answeredAt IS NULL OR " +
+                                "  e.lastAnsweredCorrectly = false OR " +
+                                "  (e.correctCount = 1 AND e.answeredAt <= CURRENT_TIMESTAMP - 1 DAY) OR " +
+                                "  (e.correctCount = 2 AND e.answeredAt <= CURRENT_TIMESTAMP - 7 DAY) OR " +
+                                "  (e.correctCount >= 3 AND e.answeredAt <= CURRENT_TIMESTAMP - 30 DAY)" +
+                                ")", Long.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
 }

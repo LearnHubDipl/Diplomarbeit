@@ -1,15 +1,13 @@
 package at.learnhub.mapper;
 
-import at.learnhub.dto.simple.ExamDto;
-import at.learnhub.dto.simple.QuestionDto;
-import at.learnhub.dto.simple.QuestionSlimDto;
-import at.learnhub.dto.simple.SolutionSlimDto;
+import at.learnhub.dto.simple.*;
 import at.learnhub.model.Exam;
 import at.learnhub.model.Question;
 import at.learnhub.model.QuestionType;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ExamMapper {
@@ -22,6 +20,22 @@ public class ExamMapper {
                 UserMapper.toSlimDto(exam.getUser()),
                 exam.getTopicPools().stream().map(TopicPoolMapper::toSlimDto).toList(),
                 exam.getQuestions().stream().map(ExamQuestionMapper::toSlimDto).toList()
+        );
+    }
+
+
+    public static ExamHistoryDto toHistoryDto(Exam entity) {
+        List<String> subjects = entity.getTopicPools().stream()
+                .map(tp -> tp.getSubject().getName())
+                .distinct().toList();
+
+        return new ExamHistoryDto(
+                entity.getId(),
+                entity.getScore(),
+                entity.getQuestionCount(),
+                entity.getStartedAt(),
+                entity.getFinishedAt(),
+                subjects
         );
     }
 }

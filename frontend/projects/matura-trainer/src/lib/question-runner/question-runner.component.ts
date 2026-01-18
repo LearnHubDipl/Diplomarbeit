@@ -1,29 +1,28 @@
-import {Component, EventEmitter, inject, Input, OnInit, Output} from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { Question } from '../../../../shared/src/lib/interfaces/question';
 import { QuestionService } from '../../../../shared/src/lib/services/question.service';
-import {NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
-import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {CheckAnswerRequest} from '../../../../shared/src/lib/interfaces/answer';
-import {AnswerService} from '../../../../shared/src/lib/services/answer.service';
-import {ActivatedRoute, Router} from '@angular/router';
-import {Location} from '@angular/common';
-import {Exam} from '../../../../shared/src/lib/interfaces/exam';
-import {QuestionPoolService} from '../../../../shared/src/lib/services/question-pool.service';
-import {StatsService} from '../../../../shared/src/lib/services/stats.service';
-import {SolutionService} from '../../../../shared/src/lib/services/solution.service';
-import {Solution} from '../../../../shared/src/lib/interfaces/solution';
-import {Observable} from 'rxjs';
-import {CreatedExamResponse, ExamService} from '../../../../shared/src/lib/services/exam.service';
-
+import { NgClass, NgForOf, NgIf, NgStyle, Location } from '@angular/common';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { CheckAnswerRequest } from '../../../../shared/src/lib/interfaces/answer';
+import { AnswerService } from '../../../../shared/src/lib/services/answer.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Exam } from '../../../../shared/src/lib/interfaces/exam';
+import { QuestionPoolService } from '../../../../shared/src/lib/services/question-pool.service';
+import { SolutionService } from '../../../../shared/src/lib/services/solution.service';
+import { Solution } from '../../../../shared/src/lib/interfaces/solution';
+import { ExamService } from '../../../../shared/src/lib/services/exam.service';
+import { CreateSolutionComponent } from '../create-solution/create-solution.component';
 
 @Component({
   selector: 'lib-question-runner',
+  standalone: true,
   imports: [
     NgForOf,
     NgStyle,
     ReactiveFormsModule,
     NgClass,
-    NgIf
+    NgIf,
+    CreateSolutionComponent
   ],
   templateUrl: './question-runner.component.html',
   styleUrls: [
@@ -33,10 +32,10 @@ import {CreatedExamResponse, ExamService} from '../../../../shared/src/lib/servi
 })
 export class QuestionRunnerComponent implements OnInit {
   @Input() mode: 'practice' | 'exam' | 'review' = 'practice';
-  @Input() exam?: Exam;   // only needed for review mode
+  @Input() exam?: Exam;
   @Input() timeLimit?: number = 0;
   @Output() answered = new EventEmitter<CheckAnswerRequest>();
-  @Output() finishedExam = new EventEmitter<CheckAnswerRequest[]>(); // emit all answers at the end of exam
+  @Output() finishedExam = new EventEmitter<CheckAnswerRequest[]>();
   @Input() questionIdList: number[] = [];
 
   errorMessage: string | null = null;
@@ -45,40 +44,40 @@ export class QuestionRunnerComponent implements OnInit {
 
   currentQuestionIndex: number = 0;
   isFinished = false;
-
+  showSolutionEditor = false;
+  submitted = false;
+  showAllSolutions = false;
   userId = 1;
-  voteCounts: { [solutionId: number]: number } = {};
 
-  questionService = inject(QuestionService);
-  answerService = inject(AnswerService);
-  questionPoolService = inject(QuestionPoolService);
-  solutionService = inject(SolutionService);
-  examService = inject(ExamService);
-  fb = inject(FormBuilder);
-  route: ActivatedRoute = inject(ActivatedRoute);
-  location: Location = inject(Location)
-
+  timeLeft: number = 0;
   question: Question | undefined;
-  form: FormGroup = this.fb.group({
-    answers: this.fb.array([]),
-    freeTextAnswer: ['']
-  });
-
+  voteCounts: { [solutionId: number]: { up: number, down: number } } = {};
   previousAnswers: { [questionId: number]: CheckAnswerRequest } = {};
-
   answerResult: {
     correct: boolean;
     correctAnswerIds: number[] | null;
     correctFreeTextAnswers: string[] | null;
   } | null = null;
 
-  submitted = false;
-  showAllSolutions = false;
+  form: FormGroup;
 
-  timeLeft: number = 0;
+  // Injections
+  router = inject(Router);
+  questionService = inject(QuestionService);
+  answerService = inject(AnswerService);
+  questionPoolService = inject(QuestionPoolService);
+  solutionService = inject(SolutionService);
+  examService = inject(ExamService);
+  fb = inject(FormBuilder);
+  route = inject(ActivatedRoute);
+  location = inject(Location);
 
-  router: Router = inject(Router);
-
+  constructor() {
+    this.form = this.fb.group({
+      answers: this.fb.array([]),
+      freeTextAnswer: ['']
+    });
+  }
 
   ngOnInit() {
     let state = history.state;
@@ -86,62 +85,37 @@ export class QuestionRunnerComponent implements OnInit {
       if (state?.questionIds) {
         this.questionIdList = state.questionIds;
       }
-
       if (this.questionIdList.length > 0) {
         this.loadQuestion(this.currentQuestionIndex);
-      } else {
-        // TODO: Screen that states that there are no question that could be loaded
       }
     } else {
-      this.loadQuestion(this.currentQuestionIndex)
+      this.loadQuestion(this.currentQuestionIndex);
     }
-    if (this.mode === 'exam') {
-      this.timeLeft = this.timeLimit! * 60
-      this.timerTickDown()
-    } else if (this.mode === 'review') {
-      let started = new Date(this.exam!.startedAt);
-      let finished = new Date(this.exam!.finishedAt);
 
+    if (this.mode === 'exam') {
+      this.timeLeft = this.timeLimit! * 60;
+      this.timerTickDown();
+    } else if (this.mode === 'review' && this.exam) {
+      let started = new Date(this.exam.startedAt);
+      let finished = new Date(this.exam.finishedAt);
       let elapsed = (finished.getTime() - started.getTime()) / 1000;
-      this.timeLeft = this.exam!.timeLimit*60 - elapsed;
-      console.log(this.exam, this.timeLeft)
+      this.timeLeft = (this.exam.timeLimit * 60) - elapsed;
     }
   }
 
   loadQuestion(index: number) {
     if (this.mode === 'review' && this.exam) {
-      let reviewed = this.exam.questions[index]
+      let reviewed = this.exam.questions[index];
       if (reviewed) {
         this.question = reviewed.question;
-
-        // Restore user’s answer
-        if (this.question.type === 'MULTIPLE_CHOICE') {
-          let answerControls = this.fb.array(
-            this.question.answers.map(a => reviewed.selectedAnswers?.some(sa => sa.id === a.id) ?? false)
-          );
-          this.form.setControl('answers', answerControls);
-          this.form.get('freeTextAnswer')?.disable();
-        } else if (this.question.type === 'FREETEXT') {
-          this.form.setControl('answers', this.fb.array([]));
-          this.form.get('freeTextAnswer')?.setValue(reviewed.freeTextAnswer ?? '');
-          this.form.get('freeTextAnswer')?.disable();
-        }
-
-        // Lock and set evaluation
-        this.answerResult = {
-          correct: reviewed.isCorrect,
-          correctAnswerIds: reviewed.correctAnswerIds ?? null,
-          correctFreeTextAnswers: reviewed.correctFreeTextAnswers ?? null
-        };
-
-        this.lockInputs();
+        this.setupFormForReview(reviewed);
         this.submitted = true;
         return;
       }
     }
 
-    let id = this.questionIdList[index]
-    if(!id) return;
+    let id = this.questionIdList[index];
+    if (!id) return;
 
     this.loading = true;
     this.clearError();
@@ -150,13 +124,11 @@ export class QuestionRunnerComponent implements OnInit {
       next: q => {
         this.loading = false;
         this.question = q;
-        //this.sortSolutions();
-
         let previous = this.previousAnswers[q.id];
 
         if (q.type === 'MULTIPLE_CHOICE') {
           let answerControls = this.fb.array(
-            q.answers.map((a, i) => previous?.selectedAnswerIds?.includes(a.id) ?? false)
+            q.answers.map((a) => previous?.selectedAnswerIds?.includes(a.id) ?? false)
           );
           this.form.setControl('answers', answerControls);
           this.form.get('freeTextAnswer')?.disable();
@@ -168,13 +140,26 @@ export class QuestionRunnerComponent implements OnInit {
       },
       error: err => {
         this.loading = false;
-        this.handleError(
-          'Die Frage konnte nicht geladen werden.',
-          'loadQuestion',
-          err
-        )
+        this.handleError('Die Frage konnte nicht geladen werden.', 'loadQuestion', err);
       }
     });
+  }
+
+  private setupFormForReview(reviewed: any) {
+    if (this.question?.type === 'MULTIPLE_CHOICE') {
+      let answerControls = this.fb.array(
+        this.question.answers.map(a => reviewed.selectedAnswers?.some((sa: any) => sa.id === a.id) ?? false)
+      );
+      this.form.setControl('answers', answerControls);
+    } else if (this.question?.type === 'FREETEXT') {
+      this.form.get('freeTextAnswer')?.setValue(reviewed.freeTextAnswer ?? '');
+    }
+    this.answerResult = {
+      correct: reviewed.isCorrect,
+      correctAnswerIds: reviewed.correctAnswerIds ?? null,
+      correctFreeTextAnswers: reviewed.correctFreeTextAnswers ?? null
+    };
+    this.lockInputs();
   }
 
   get answersArray(): FormArray {
@@ -191,9 +176,10 @@ export class QuestionRunnerComponent implements OnInit {
   }
 
   submit(): void {
+    if (!this.question) return;
     let payload = this.buildPayLoad();
+
     if (this.mode === 'practice') {
-      // practice mode: give instant feedback
       this.answerService.checkAnswers(payload).subscribe({
         next: result => {
           this.answerResult = {
@@ -201,70 +187,54 @@ export class QuestionRunnerComponent implements OnInit {
             correctAnswerIds: result.correctAnswerIds ?? null,
             correctFreeTextAnswers: result.correctFreeTextAnswers ?? null
           };
-
           this.lockInputs();
           this.submitted = true;
 
-          //testuser
-          const userId = 1;
-
           if (result.correct) {
-            this.questionPoolService.increaseCorrectCount(this.question!.id, userId)
+            this.questionPoolService.increaseCorrectCount(this.question!.id, this.userId)
               .subscribe(() => console.log('CorrectCount erhöht'));
           }
-
           this.advance();
         },
-        error: err => {
-          this.handleError(
-            'Die Frage konnte nicht geladen werden.',
-            'submitAnswer',
-            err
-          )
-        }
+        error: err => this.handleError('Prüfung fehlgeschlagen.', 'submitAnswer', err)
       });
     } else {
-      // save answers
-      this.previousAnswers[this.question!.id] = payload;
+      this.previousAnswers[this.question.id] = payload;
     }
   }
 
-  buildPayLoad() : CheckAnswerRequest {
-    if (!this.question) throw new Error("There is no Question selected");
-
-    let payload: CheckAnswerRequest;
+  buildPayLoad(): CheckAnswerRequest {
+    if (!this.question) throw new Error("No Question selected");
     if (this.question.type === 'MULTIPLE_CHOICE') {
       const selectedAnswerIds = this.answersArray.controls
         .map((ctrl, index) => ctrl.value ? this.question!.answers[index].id : null)
         .filter((id): id is number => id !== null);
-
-      payload = {
-        questionId: this.question.id,
-        selectedAnswerIds,
-        freeTextAnswer: null
-      };
+      return { questionId: this.question.id, selectedAnswerIds, freeTextAnswer: null };
     } else {
-      payload = {
+      return {
         questionId: this.question.id,
         selectedAnswerIds: [],
         freeTextAnswer: this.form.get('freeTextAnswer')?.value.trim() ?? null
       };
     }
-    return payload;
   }
 
   private lockInputs() {
-    if (this.question?.type === 'MULTIPLE_CHOICE') {
-      this.answersArray.controls.forEach(ctrl => ctrl.disable());
-    } else if (this.question?.type === 'FREETEXT') {
-      this.form.get('freeTextAnswer')?.disable();
-    }
+    this.form.disable();
   }
 
   private advance() {
-    this.currentQuestionIndex++;
-    if (this.currentQuestionIndex >= this.currentQuestions.length) {
+    if (this.currentQuestionIndex >= this.currentQuestions.length - 1) {
       this.isFinished = true;
+    }
+  }
+
+  loadNextQuestion(): void {
+    if (this.currentQuestionIndex < this.currentQuestions.length - 1) {
+      this.currentQuestionIndex++;
+      this.answerResult = null;
+      this.submitted = false;
+      this.loadQuestion(this.currentQuestionIndex);
     }
   }
 
@@ -288,28 +258,18 @@ export class QuestionRunnerComponent implements OnInit {
   }
 
   timerTickDown() {
+    if (this.isFinished) return;
     this.timeLeft -= 1;
     if (this.timeLeft <= 0) {
       this.isFinished = true;
-      this.finish()
+      this.finish();
     } else {
       setTimeout(() => this.timerTickDown(), 1000);
     }
   }
 
-
-  loadNextQuestion(): void {
-    if (!this.isFinished) {
-      this.answerResult = null;
-      this.submitted = false;
-      this.loadQuestion(this.currentQuestionIndex);
-    }
-  }
-
-  get currentQuestions(): { id: number; question: Question; selectedAnswers?: any; freetextAnswer?: string }[] | number[] {
-    return this.mode === 'review'
-      ? this.exam?.questions ?? []
-      : this.questionIdList;
+  get currentQuestions(): any[] {
+    return this.mode === 'review' ? this.exam?.questions ?? [] : this.questionIdList;
   }
 
   get hasSolutions(): boolean {
@@ -322,18 +282,15 @@ export class QuestionRunnerComponent implements OnInit {
 
   isIncorrectAnswer(answerId: number, index: number): boolean {
     if (!this.answerResult?.correctAnswerIds) return false;
-
     const wasSelected = this.answersArray.at(index).value;
     const isActuallyCorrect = this.answerResult.correctAnswerIds.includes(answerId);
-
     return wasSelected && !isActuallyCorrect;
   }
 
   finish() {
-    this.submit()
-
+    this.submit();
     if (this.mode !== 'exam') {
-      this.location.back()
+      this.location.back();
     } else {
       let allAnswers = Object.values(this.previousAnswers);
       this.finishedExam.emit(allAnswers);
@@ -342,30 +299,22 @@ export class QuestionRunnerComponent implements OnInit {
 
   createExamCopy(id: number) {
     this.examService.createExamCopy(id).subscribe(exam => {
-      console.log(exam)
       let settings = exam;
       let target = '/trainer/practice/setup-exam/exam';
-
       if (this.router.url.startsWith(target)) {
-        // navigate to dummy route, then back (because if on same page angular does not automatically reload it via the navigate function)
         this.router.navigateByUrl('/', { skipLocationChange: true })
-          .then(() =>
-            this.router.navigate([target], {
-              state: { settings, examCreated: true }
-            })
-          );
+          .then(() => this.router.navigate([target], { state: { settings, examCreated: true } }));
       } else {
-        this.router.navigate([target], {
-          state: { settings, examCreated: true }
-        });
+        this.router.navigate([target], { state: { settings, examCreated: true } });
       }
-
-    })
+    });
   }
 
   loadVotes(solutionId: number) {
     this.solutionService.getVoteCount(solutionId).subscribe({
-      next: (res) => this.voteCounts[solutionId] = res.score,
+      next: (res) => {
+        this.voteCounts[solutionId] = { up: res.upVotes, down: res.downVotes };
+      },
       error: (err) => console.error(err)
     });
   }
@@ -383,6 +332,7 @@ export class QuestionRunnerComponent implements OnInit {
       error: (err) => console.error(err)
     });
   }
+
   get solutions(): Solution[] {
     return this.question?.solutions ?? [];
   }
@@ -391,10 +341,22 @@ export class QuestionRunnerComponent implements OnInit {
     return this.solutions.length > 1;
   }
 
+  openSolutionEditor() {
+    this.showSolutionEditor = true;
+  }
+
+  closeEditor() {
+    this.showSolutionEditor = false;
+    if (this.question) {
+      this.questionService.getQuestionById(this.question.id).subscribe(q => {
+        this.question!.solutions = q.solutions;
+      });
+    }
+  }
 
   protected readonly Math = Math;
 
-  handleError(msg: string, action: typeof this.lastFailedAction, err: any) {
+  handleError(msg: string, action: 'loadQuestion' | 'submitAnswer' | 'vote' | null, err: any) {
     console.error(err);
     this.errorMessage = msg;
     this.lastFailedAction = action;
@@ -405,4 +367,3 @@ export class QuestionRunnerComponent implements OnInit {
     this.lastFailedAction = null;
   }
 }
-

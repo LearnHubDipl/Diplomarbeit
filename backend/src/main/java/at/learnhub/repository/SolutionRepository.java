@@ -1,5 +1,6 @@
 package at.learnhub.repository;
 
+import at.learnhub.model.Question;
 import at.learnhub.model.Solution;
 import at.learnhub.model.SolutionVote;
 import at.learnhub.model.User;
@@ -60,5 +61,15 @@ public class SolutionRepository {
             vote = entityManager.merge(vote);
         }
         entityManager.remove(vote);
+    }
+
+    @Transactional
+    public Solution saveSolution(Solution solution) {
+        if (solution.getId() == null) {
+            entityManager.persist(solution);
+            return solution;
+        } else {
+            return entityManager.merge(solution);
+        }
     }
 }

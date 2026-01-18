@@ -1,10 +1,7 @@
-
-<!-- this will be the wrapper as a grid -->
 <div class="stats-layout">
-
-  <!-- progress bars -->
   <div class="widget-wrapper">
     <div class="header">Fortschritt</div>
+
     <div class="progress-wrapper">
       <div class="progress-container">
         <div *ngFor="let level of progressLevels" class="progress-level">
@@ -22,28 +19,34 @@
           </div>
         </div>
       </div>
-      <div>
+
+      <div class="selection-container">
         <div class="thempool-container">
-          <label class="label">Thempools:</label>
-          <div class="dropdown-wrapper">
-            <select class="dropdown" (change)="onTopicPoolChange($event)" [value]="selectedTopicPoolId ?? 0">
-              <option [value]="0">Alle Fragen</option>
-              <option *ngFor="let pool of topicPools" [value]="pool.id">{{ pool.name }}</option>
-            </select>
+          <label class="label">Themenpools wählen:</label>
+
+          <div class="checkbox-list">
+            <div *ngFor="let pool of topicPools" class="checkbox-item">
+              <input
+                type="checkbox"
+                [id]="'pool-' + pool.id"
+                [checked]="selectedTopicPoolIds.has(pool.id)"
+                (change)="toggleTopicPool(pool.id)">
+              <label [for]="'pool-' + pool.id">{{ pool.name }}</label>
+            </div>
           </div>
 
           <button class="action-button"
                   (click)="startPractice()"
-                  [disabled]="!hasQuestions">
-            Üben
+                  [disabled]="!hasQuestions"
+                  [class.button-disabled]="!hasQuestions">
+            {{ hasQuestions ? 'Üben' : 'Nichts fällig' }}
           </button>
+
+          <div *ngIf="selectedTopicPoolIds.size > 0 && !hasQuestions" class="no-questions-msg">
+            Alle Fragen in dieser Auswahl sind momentan gelernt. Komm später wieder!
+          </div>
         </div>
       </div>
     </div>
-
-
   </div>
-
-
-
 </div>

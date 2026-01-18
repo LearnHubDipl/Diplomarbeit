@@ -5,7 +5,9 @@ import at.learnhub.dto.request.SubmitExamRequestDto;
 import at.learnhub.dto.response.CreatedExamResponseDto;
 import at.learnhub.dto.response.SubmittedExamResponseDto;
 import at.learnhub.dto.simple.ExamDto;
+import at.learnhub.dto.simple.ExamHistoryDto;
 import at.learnhub.dto.simple.UserExamAverageDto;
+import at.learnhub.mapper.ExamMapper;
 import at.learnhub.service.ExamService;
 import at.learnhub.repository.ExamRepository;
 import jakarta.inject.Inject;
@@ -194,13 +196,11 @@ public class ExamResource {
     @Path("/by-user")
     public Response getExamsByUser(@QueryParam("userId") Long userId) {
         if (userId == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("userId is required")
-                    .build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("userId is required").build();
         }
+        List<ExamHistoryDto> history = examRepository.findHistoryByUserId(userId);
 
-        List<ExamDto> exams = examRepository.findByUserId(userId);
-        return Response.ok(exams).build();
+        return Response.ok(history).build();
     }
 
     @GET

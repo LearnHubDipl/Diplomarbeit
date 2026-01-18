@@ -20,15 +20,23 @@ public class SolutionMapper {
     }*/
 
     public static SolutionSlimDto toSlimDto(Solution solution) {
-        Long upvoteCount = 0L;
-        for (SolutionVote currentSolution : solution.getVotes()) {
-            if (currentSolution.getUpVote()) upvoteCount++;
-            else upvoteCount--;
+        long score = 0L;
+        if (solution.getVotes() != null) {
+            for (SolutionVote vote : solution.getVotes()) {
+                // +1 für Upvote, -1 für Downvote laut deiner Schema-Beschreibung
+                if (Boolean.TRUE.equals(vote.getUpVote())) {
+                    score++;
+                } else {
+                    score--;
+                }
+            }
         }
 
-        return new SolutionSlimDto(solution.getId(),
+        return new SolutionSlimDto(
+                solution.getId(),
                 solution.getSteps().stream().map(SolutionStepMapper::toDto).toList(),
-                upvoteCount);
+                score
+        );
     }
 
     /*

@@ -159,6 +159,36 @@ public class QuestionPoolResource {
         return Response.ok(topicPools).build();
     }
 
+
+
+
+    @GET
+    @Path("/{userId}/questions-by-topics")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(
+            summary = "Get questions for multiple topic pools",
+            description = "Returns question ids for a list of topic pools"
+    )
+    public Response getQuestionsByTopicPools(
+            @PathParam("userId") Long userId,
+            @QueryParam("topicPoolIds") List<Long> topicPoolIds
+    ) {
+        List<Long> questionIds;
+        if (topicPoolIds == null || topicPoolIds.isEmpty()) {
+            questionIds = questionPoolRepository.findAllQuestionIdsByUserId(userId);
+        } else {
+            questionIds = questionPoolRepository.findQuestionIdsByTopicPools(userId, topicPoolIds);
+        }
+        return Response.ok(questionIds).build();
+    }
+
+
+
+
+
+
+
+
     @GET
     @Path("/{userId}/subjects")
     @Produces(MediaType.APPLICATION_JSON)

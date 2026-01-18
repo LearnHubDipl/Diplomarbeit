@@ -11,7 +11,6 @@ import {TopicPool} from '../interfaces/topic-pool';
 })
 export class QuestionService {
   private httpClient = inject(HttpClient);
-  private testurl= 'http://localhost:8080/api';
 
   getQuestionById(id: number): Observable<Question> {
     return this.httpClient.get<Question>(API_BASE_URL + '/questions/' + id);
@@ -33,14 +32,15 @@ export class QuestionService {
     return this.httpClient.patch<Question>(API_BASE_URL + '/questions/' + id, updateRequest);
   }
 
-  getQuestionsForPractice(userId: number, topicPoolId?: number): Observable<number[]> {
+  getQuestionsForPractice(userId: number, topicPoolIds?: number[]): Observable<number[]> {
     let params = new HttpParams().set('userId', userId.toString());
 
-    if (topicPoolId != null) {
-      params = params.set('topicPoolId', topicPoolId.toString());
+    if (topicPoolIds && topicPoolIds.length > 0) {
+      topicPoolIds.forEach(id => {
+        params = params.append('topicPoolIds', id.toString());
+      });
     }
-
-    return this.httpClient.get<number[]>(API_BASE_URL + `/questions/ids`, { params });
+    return this.httpClient.get<number[]>(`${API_BASE_URL}/questionPools/${userId}/questions-by-topics`, { params });
   }
 
 

@@ -3,6 +3,8 @@ import {ExamDto, ExamQuestionDetailDto, ExamQuestionSlimDto, StatsService} from 
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {Exam} from '../../../../shared/src/lib/interfaces/exam';
 import {QuestionRunnerComponent} from '../question-runner/question-runner.component';
+import {ExamHistoryDto} from '../../../../shared/src/lib/interfaces/ExamHistoryDto';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'lib-stats-exams',
@@ -22,11 +24,12 @@ import {QuestionRunnerComponent} from '../question-runner/question-runner.compon
 })
 
 export class StatsExamsComponent implements OnInit {
-  exams: Exam[] = [];
-  expandedExamId?: number;
-  userid=1//test
+  exams: ExamHistoryDto[] = [];
+  selectedExamDetails?: ExamDto;
+  expandedExamId: number | undefined = undefined;
+  userid = 1;
 
-  constructor(private service: StatsService) {}
+  constructor(private service: StatsService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.loadExams();
@@ -36,32 +39,36 @@ export class StatsExamsComponent implements OnInit {
     this.service.getExamsByUser(this.userid).subscribe({
       next: (data) => {
         this.exams = data;
-        if (this.exams.length) this.expandedExamId = this.exams[0].id;
       },
       error: (err) => console.error('Fehler beim Laden der Prüfungen:', err)
     });
   }
 
   toggleExam(id: number) {
-    this.expandedExamId = this.expandedExamId === id ? undefined : id;
+    if (this.expandedExamId === id) {
+      this.expandedExamId = undefined;
+      this.selectedExamDetails = undefined;
+    } else {
+      this.selectedExamDetails = undefined;
+      this.expandedExamId = id;
+
+      this.service.getExamDetails(id).subscribe({
+        next: (data) => {
+          this.selectedExamDetails = data;
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
 
   protected readonly Math = Math;
 
-  formatDuration(exam: Exam){
+  formatDuration(exam: any) {
+    if (!exam.startedAt || !exam.finishedAt) return '';
     const started = new Date(exam.startedAt);
     const finished = new Date(exam.finishedAt);
-
     const diffMs = finished.getTime() - started.getTime();
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
-
-    if (diffMinutes < 60) {
-      return `${diffMinutes} min`;
-    } else {
-      const hours = Math.floor(diffMinutes / 60);
-      const minutes = diffMinutes % 60;
-      return `${hours}h ${minutes}min`;
-    }
+    return diffMinutes < 60 ? `${diffMinutes} min` : `${Math.floor(diffMinutes / 60)}h ${diffMinutes % 60}min`;
   }
 }
-
