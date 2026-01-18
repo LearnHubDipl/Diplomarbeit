@@ -37,6 +37,7 @@ export class QuestionRunnerComponent implements OnInit {
   @Output() answered = new EventEmitter<CheckAnswerRequest>();
   @Output() finishedExam = new EventEmitter<CheckAnswerRequest[]>();
   @Input() questionIdList: number[] = [];
+  @Input() navigateBack: boolean = true;
 
   errorMessage: string | null = null;
   lastFailedAction: 'loadQuestion' | 'submitAnswer' | 'vote' | null = null;
