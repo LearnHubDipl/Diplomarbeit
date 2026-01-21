@@ -1,4 +1,6 @@
-<div class="exam-score-nav-grid" *ngIf="mode !== 'practice' && !showSolutionEditor">
+<!-- score box and navigation in exam and review mode -->
+<div class="exam-score-nav-grid" *ngIf="mode !== 'practice'">
+  <!-- Score Box -->
   <div class="widget-wrapper score-box" [style.opacity]="mode === 'review' ? 1 : 0">
     <div class="header">Dein Ergebnis</div>
     <div class="widget-content score-content">
@@ -11,11 +13,14 @@
     </div>
   </div>
 
+  <!-- Big Navigation -->
   <div class="widget-wrapper big-nav" *ngIf="mode === 'exam'">
     <div
       class="big-nav-item"
       (click)="navigateToQuestion(i)"
-      [ngClass]="{ 'selected-navigation-button': (i == currentQuestionIndex) }"
+      [ngClass]="{
+        'selected-navigation-button': (i == currentQuestionIndex)
+      }"
       *ngFor="let question of this.questionIdList, let i = index "
     >
       <p>{{i+1}}</p>
@@ -31,7 +36,9 @@
     <div
       class="big-nav-item"
       (click)="navigateToQuestion(i)"
-      [ngClass]="{ 'selected-navigation-button': (i == currentQuestionIndex) }"
+      [ngClass]="{
+        'selected-navigation-button': (i == currentQuestionIndex)
+      }"
       *ngFor="let question of this.exam?.questions, let i = index "
     >
       <p>{{i+1}}</p>
@@ -52,14 +59,22 @@
     </span>
   </div>
 
+  <!-- ERROR MESSAGES, IF THERE ARE ANY -->
   <div *ngIf="errorMessage" class="inline-error">
     {{ errorMessage }}
-    <button *ngIf="lastFailedAction === 'loadQuestion'" (click)="loadQuestion(currentQuestionIndex)">Erneut laden</button>
-    <button *ngIf="lastFailedAction === 'submitAnswer'" (click)="submit()">Erneut prüfen</button>
+
+    <button *ngIf="lastFailedAction === 'loadQuestion'"
+            (click)="loadQuestion(currentQuestionIndex)">
+      Erneut laden
+    </button>
+
+    <button *ngIf="lastFailedAction === 'submitAnswer'"
+            (click)="submit()">
+      Erneut prüfen
+    </button>
   </div>
 
-  <form *ngIf="lastFailedAction == null" [formGroup]="form" class="widget-content question-content {{ mode !== 'practice' ? 'exam-form' : ''}}" (ngSubmit)="submit()">
-    <div class="widget-content-top">
+  <form *ngIf="lastFailedAction == null" [formGroup]="form" class="widget-content question-content {{ mode !== 'practice' ? 'exam-form' : ''}}" (ngSubmit)="submit()">    <div class="widget-content-top">
       <div *ngIf="(mode === 'practice' || mode === 'review') && submitted" class="result-badge"
            [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
           <span class="icon">
@@ -69,13 +84,18 @@
         {{ answerResult?.correct ? 'Richtig!' : 'Falsch!' }}
       </div>
 
-      <div class="widget-content-left" [ngClass]="{'full-width': !question?.media, 'sixty-width': question?.media}">
+      <div class="widget-content-left" [ngStyle]="{ width: question?.media ? '60%' : '100%' }">
         <div class="question">{{ question?.text }}</div>
 
         <ng-container *ngIf="question?.type === 'MULTIPLE_CHOICE'">
           <ul class="answers" formArrayName="answers">
-            <li *ngFor="let answer of question?.answers; let i = index"
-                [ngClass]="{'correct': isCorrectAnswer(answer.id), 'incorrect': isIncorrectAnswer(answer.id, i)}">
+            <li
+              *ngFor="let answer of question?.answers; let i = index"
+              [ngClass]="{
+                'correct': isCorrectAnswer(answer.id),
+                'incorrect': isIncorrectAnswer(answer.id, i)
+              }"
+            >
               <input type="checkbox" [formControlName]="i" [disabled]="submitted">
               {{ answer.text }}
             </li>
@@ -83,12 +103,19 @@
         </ng-container>
 
         <ng-container *ngIf="question?.type === 'FREETEXT'">
-          <textarea formControlName="freeTextAnswer" [readonly]="submitted" rows="4" placeholder="Bitte Antwort eingeben..."></textarea>
+          <textarea
+            formControlName="freeTextAnswer"
+            [readonly]="submitted"
+            rows="4"
+            placeholder="Bitte Antwort eingeben..."
+          ></textarea>
+
           <div *ngIf="(mode === 'practice' || mode === 'review') && submitted" class="feedback-wrapper">
             <div class="feedback" [ngClass]="{ 'correct': answerResult?.correct, 'incorrect': !answerResult?.correct }">
               <p *ngIf="answerResult?.correct">Richtig!</p>
               <div *ngIf="!answerResult?.correct">
-                Falsche Antwort.<br> Mögliche Antworten:
+                Falsche Antwort.<br>
+                Mögliche Antworten:
                 <ul>
                   <li *ngFor="let correctAnswer of answerResult?.correctFreeTextAnswers">{{ correctAnswer }}</li>
                 </ul>
@@ -104,16 +131,43 @@
     </div>
 
     <div class="button-container" *ngIf="mode == 'practice'">
-      <button class="submit-btn" type="button" [disabled]="!anySelected() && !submitted"
-              (click)="isFinished ? finish() : (submitted ? loadNextQuestion() : submit())">
-        {{ isFinished ? 'Abschließen' : (submitted ? 'Nächste Frage' : 'Prüfen') }}
+      <button
+        class="submit-btn"
+        type="button"
+        [disabled]="!anySelected() && !submitted"
+        (click)="isFinished
+          ? finish()
+          : (submitted ? loadNextQuestion() : submit())">
+        {{
+          isFinished
+            ? 'Abschließen'
+            : (submitted ? 'Nächste Frage' : 'Prüfen')
+        }}
       </button>
     </div>
 
     <div class="button-container exam-navigation" *ngIf="mode === 'exam' || mode === 'review'">
-      <button type="button" class="submit-btn" [disabled]="currentQuestionIndex === 0" (click)="navigateExam('prev')">← Zurück</button>
-      <img src="https://static.thenounproject.com/png/1921206-200.png" *ngIf="this.mode === 'review'" class="copy-exam-icon" (click)="createExamCopy(this.exam!.id)">
-      <button type="button" class="submit-btn" (click)="currentQuestionIndex < currentQuestions.length - 1 ? navigateExam('next') : finish()">
+      <button
+        type="button"
+        class="submit-btn"
+        [disabled]="currentQuestionIndex === 0"
+        (click)="navigateExam('prev')">
+        ← Zurück
+      </button>
+
+      <img
+        src="/assets/restart.png"
+        *ngIf="this.mode === 'review'"
+        style="height: 5vh; align-self: end; margin-right: -25%; cursor: pointer"
+        (click)="createExamCopy(this.exam!.id)"
+      >
+
+      <button
+        type="button"
+        class="submit-btn"
+        (click)="currentQuestionIndex < currentQuestions.length - 1 ?
+          navigateExam('next') :
+          finish()">
         {{ currentQuestionIndex < currentQuestions.length - 1 ? 'Weiter →' : 'Fertigstellen' }}
       </button>
     </div>
@@ -180,3 +234,7 @@
     <app-create-solution [questionId]="question.id" (close)="closeEditor()"></app-create-solution>
   </div>
 </div>
+
+<!-- Add this to the footer later
+  <a href="https://www.flaticon.com/free-icons/restart" title="restart icons">Restart icons created by Fathema Khanom - Flaticon</a>
+-->
