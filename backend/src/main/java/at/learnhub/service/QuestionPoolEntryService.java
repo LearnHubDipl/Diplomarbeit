@@ -27,7 +27,15 @@ public class QuestionPoolEntryService {
         }
     }
 
-
+    @Transactional
+    public void markAsIncorrect(Long questionId, Long userId) {
+        QuestionPoolEntry entry = repository.findByQuestionIdAndUserId(questionId, userId);
+        if (entry != null) {
+            entry.setCorrectCount(0);
+            entry.setLastAnsweredCorrectly(false);
+            entry.setAnsweredAt(LocalDateTime.now());
+        }
+    }
 
 
 

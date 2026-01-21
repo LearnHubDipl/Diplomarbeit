@@ -1,15 +1,12 @@
-
-<!-- this will be the wrapper as a grid -->
 <div class="stats-layout">
-
-  <!-- progress bars -->
   <div class="widget-wrapper">
     <div class="header">Fortschritt</div>
 
     <div class="progress-wrapper">
       <div class="progress-container">
-        <div *ngFor="let level of progressLevels" class="progress-level">
+        <div *ngFor="let level of progressLevels; trackBy: trackByTitle" class="progress-level">
           <h3>{{ level.title }}</h3>
+
           <div class="progress-bar-wrapper">
             <div *ngFor="let entry of level.entries"
                  class="progress-segment"
@@ -17,27 +14,43 @@
                  [style.width.%]="entry.value > 0 ? entry.value * 10 : 0">
             </div>
           </div>
-          <div *ngFor="let entry of level.entries" class="progress-description">
-            <span class="dot" [style.background]="entry.color"></span>
-            {{ entry.description }}
+
+          <div class="legend-container">
+            <div *ngFor="let entry of level.entries" class="progress-description">
+              <span class="dot" [style.background]="entry.color"></span>
+              {{ entry.description }}
+            </div>
           </div>
         </div>
       </div>
 
       <div class="selection-container">
         <div class="thempool-container">
-          <label class="label">Themenpools wählen:</label>
+          <label class="label">Themenpools wählen:</label><br>
 
-          <div class="checkbox-list">
-            <div *ngFor="let pool of topicPools" class="checkbox-item">
-              <input
-                type="checkbox"
-                [id]="'pool-' + pool.id"
-                [checked]="selectedTopicPoolIds.has(pool.id)"
-                (change)="toggleTopicPool(pool.id)">
-              <label [for]="'pool-' + pool.id">{{ pool.name }}</label>
-            </div>
-          </div>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Fächer und Themenpools</mat-label>
+            <mat-select [formControl]="topicPoolControl" multiple>
+              <mat-select-trigger>
+                {{ getSelectedSubjectNames().join(', ') }}
+              </mat-select-trigger>
+
+              <mat-optgroup *ngFor="let subject of subjects" [label]="''">
+                <div class="subject-header">
+                  <span class="subject-label">{{ subject.name }}</span>
+                  <mat-checkbox
+                    [checked]="isSubjectSelected(subject)"
+                    (change)="toggleSubject(subject, $event.checked)"
+                    (click)="$event.stopPropagation()">
+                  </mat-checkbox>
+                </div>
+
+                <mat-option style="margin-left: 4%" *ngFor="let pool of subject.topicPools" [value]="pool.id">
+                  <span class="topic-pool-name">{{ pool.name }}</span>
+                </mat-option>
+              </mat-optgroup>
+            </mat-select>
+          </mat-form-field><br>
 
           <button class="action-button"
                   (click)="startPractice()"
@@ -45,17 +58,8 @@
                   [class.button-disabled]="!hasQuestions">
             {{ hasQuestions ? 'Üben' : 'Nichts fällig' }}
           </button>
-
-          <div *ngIf="selectedTopicPoolIds.size > 0 && !hasQuestions" class="no-questions-msg">
-            Alle Fragen in dieser Auswahl sind momentan gelernt. Komm später wieder!
-          </div>
         </div>
       </div>
     </div>
-
-
   </div>
-
-
-
 </div>

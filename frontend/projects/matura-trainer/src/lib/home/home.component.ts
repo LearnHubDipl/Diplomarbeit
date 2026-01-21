@@ -1,9 +1,18 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StatsService } from '../../../../shared/src/lib/services/stats.service';
-import { NgForOf, NgIf } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { QuestionService } from '../../../../shared/src/lib/services/question.service';
+import { QuestionPoolService } from '../../../../shared/src/lib/services/question-pool.service';
+
+// Angular Material Imports
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+
+// Interfaces
+import { Subject } from '../../../../shared/src/lib/interfaces/subject';
 
 export interface ProgressEntry {
   label: string;
@@ -24,7 +33,14 @@ export interface ProgressOverviewDto {
 @Component({
   selector: 'lib-home',
   standalone: true,
-  imports: [NgForOf, FormsModule, NgIf],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatCheckboxModule
+  ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css', '../styles/shared-styles.css']
 })
@@ -33,44 +49,40 @@ export class HomeComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   private statsService = inject(StatsService);
   private questionService = inject(QuestionService);
+  private questionPoolService = inject(QuestionPoolService);
 
   userId = 1;
-  topicPools: { id: number; name: string }[] = [];
-  selectedTopicPoolIds: Set<number> = new Set<number>();
+  subjects: Subject[] = [];
+
+  topicPoolControl = new FormControl<number[]>([]);
 
   progressLevels: ProgressLevel[] = [];
   hasQuestions = false;
-  showNoQuestionsWarning = false;
 
   ngOnInit(): void {
-    this.loadTopicPools();
-    this.checkQuestions();
+    this.loadSubjects();
     this.loadProgressData();
+
+    this.topicPoolControl.valueChanges.subscribe(selectedIds => {
+      const ids = selectedIds || [];
+      this.checkQuestions(ids);
+    });
+
+    this.checkQuestions([]);
   }
 
-  loadTopicPools(): void {
-    this.statsService.getTopicPools(this.userId).subscribe({
-      next: pools => (this.topicPools = pools),
-      error: err => console.error('Fehler beim Laden der Topic Pools:', err)
+  loadSubjects(): void {
+    this.questionPoolService.getSubjectsForUser(this.userId).subscribe({
+      next: subjects => (this.subjects = subjects),
+      error: err => console.error('Fehler beim Laden der Fächer:', err)
     });
   }
 
-  toggleTopicPool(poolId: number): void {
-    if (this.selectedTopicPoolIds.has(poolId)) {
-      this.selectedTopicPoolIds.delete(poolId);
-    } else {
-      this.selectedTopicPoolIds.add(poolId);
-    }
-
-    this.showNoQuestionsWarning = false;
-    this.loadProgressData();
-    this.checkQuestions();
-  }
-
   loadProgressData(): void {
-    const ids = Array.from(this.selectedTopicPoolIds);
-    this.statsService.getProgressOverview(this.userId, ids.length > 0 ? ids : undefined).subscribe({
-      next: (overview: ProgressOverviewDto) => (this.progressLevels = overview.levels),
+    this.statsService.getProgressOverview(this.userId, undefined).subscribe({
+      next: (overview: ProgressOverviewDto) => {
+        this.progressLevels = overview.levels;
+      },
       error: err => {
         console.error('Fehler beim Laden der Progress-Daten:', err);
         this.progressLevels = [];
@@ -78,25 +90,42 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  checkQuestions(): void {
-    const ids = Array.from(this.selectedTopicPoolIds);
+  checkQuestions(ids: number[]): void {
     this.questionService.getQuestionsForPractice(this.userId, ids).subscribe({
       next: (questionIds: number[]) => {
         this.hasQuestions = questionIds.length > 0;
       },
-      error: () => {
-        this.hasQuestions = false;
-      }
+      error: () => (this.hasQuestions = false)
     });
   }
 
-  startPractice(): void {
-    if (!this.hasQuestions) {
-      this.showNoQuestionsWarning = true;
-      return;
-    }
+  isSubjectSelected(subject: Subject): boolean {
+    const selected = this.topicPoolControl.value || [];
+    if (!subject.topicPools.length) return false;
+    return subject.topicPools.every(pool => selected.includes(pool.id));
+  }
 
-    const ids = Array.from(this.selectedTopicPoolIds);
+  toggleSubject(subject: Subject, checked: boolean): void {
+    let selected = [...(this.topicPoolControl.value || [])];
+    if (checked) {
+      subject.topicPools.forEach(pool => {
+        if (!selected.includes(pool.id)) selected.push(pool.id);
+      });
+    } else {
+      selected = selected.filter(id => !subject.topicPools.some(pool => pool.id === id));
+    }
+    this.topicPoolControl.setValue(selected);
+  }
+
+  getSelectedSubjectNames(): string[] {
+    const selectedIds = this.topicPoolControl.value || [];
+    return this.subjects
+      .filter(subject => subject.topicPools.some(pool => selectedIds.includes(pool.id)))
+      .map(subject => subject.name);
+  }
+
+  startPractice(): void {
+    const ids = this.topicPoolControl.value || [];
     this.questionService.getQuestionsForPractice(this.userId, ids.length > 0 ? ids : undefined).subscribe({
       next: (questionIds: number[]) => {
         this.router.navigate(['quiz'], {
@@ -106,5 +135,8 @@ export class HomeComponent implements OnInit {
       },
       error: err => console.error('Fehler beim Starten des Quiz:', err)
     });
+  }
+  trackByTitle(index: number, item: any) {
+    return item.title;
   }
 }

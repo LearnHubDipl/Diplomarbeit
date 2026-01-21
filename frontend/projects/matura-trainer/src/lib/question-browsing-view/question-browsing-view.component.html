@@ -1,5 +1,4 @@
 <div class="browser-grid">
-  <!-- Topic pools on the left side -->
   <div class="widget-wrapper">
     <div class="browser-topic-grid">
       <div *ngFor="let currentSubject of subjects">
@@ -20,7 +19,6 @@
     </div>
   </div>
 
-  <!-- Questions of selected Topic pool on the right side -->
   <div class="widget-wrapper">
     <div class="header question-header">
       {{ selectedTopicPool ? selectedTopicPool.subject?.name : "Fach" }} >
@@ -28,9 +26,7 @@
     </div>
 
     <div class="widget-content browser-content">
-
       <div class="selectionButton-flex-container" *ngIf="this.viewQuestions.length > 0">
-
         <button (click)="toggleShowOnlyPool()">
           {{ showOnlyPool ? "Alle Fragen anzeigen" : "Nur Fragen im Fragenpool" }}
         </button>
@@ -41,9 +37,6 @@
         <button (click)="toggleSelectionMode()">
           {{ !selecting ? "Auswählen" : "Abbrechen" }}
         </button>
-
-
-
       </div>
 
       <div *ngFor="let currentQuestion of viewedQuestions"
@@ -75,7 +68,6 @@
               *ngIf="currentQuestion.media && openQuestionDropDowns[currentQuestion.id]"
             >
 
-            <!-- Stern für Fragenpool -->
             <button
               class="star-btn"
               (click)="toggleQuestionPool(currentQuestion.id); $event.stopPropagation()"
@@ -88,7 +80,6 @@
             <span class="arrow">{{ openQuestionDropDowns[currentQuestion.id] ? '▲' : '▼' }}</span>
           </div>
 
-
           <div class="dropdown-content" *ngIf="openQuestionDropDowns[currentQuestion.id]">
             <div class="button-container">
               <button
@@ -98,23 +89,15 @@
               >
                 Jetzt Üben
               </button>
-              <div *ngIf="mode === 'pool'">
-                <!-- Optional pool-specific metadata -->
-
-              </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
+    <div class="button-container" *ngIf="selecting && selectedQuestionIds.length > 0" style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+      <button class="submit-btn save-selection-btn" (click)="addQuestionsToQuestionPool()">
+        Auswahl speichern
+      </button>
+    </div>
   </div>
 </div>
-
-<!-- Only show this button in "browse" mode
-<div class="button-container" *ngIf="mode === 'browse' && selectedQuestionIds.length > 0">
-  <button class="submit-btn question-pool-btn" (click)="addQuestionsToQuestionPool()">
-    In Fragenpool aufnehmen
-  </button>
-</div>
--->

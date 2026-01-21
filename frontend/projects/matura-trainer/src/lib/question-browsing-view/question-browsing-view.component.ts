@@ -54,8 +54,6 @@ export class QuestionBrowsingViewComponent implements OnInit {
   viewedQuestions: Question[] = [];
   showOnlyPool: boolean = false;
 
-
-
   ngOnInit() {
     const userId = 1;
     this.questionPoolService.getQuestionPoolForUser(userId).subscribe(pool => {
@@ -67,7 +65,6 @@ export class QuestionBrowsingViewComponent implements OnInit {
         this.openSubjectDropDowns[subject.id] = false;
       });
 
-      // Restore state
       const key = this.mode === 'browse' ? 'questionBrowserState' : 'questionPoolBrowserState';
       const raw = sessionStorage.getItem(key);
       if (raw) {
@@ -96,8 +93,8 @@ export class QuestionBrowsingViewComponent implements OnInit {
     if (this.mode === 'browse') {
       this.questionService.getQuestionsByTopicPool(topicPool).subscribe(questions => {
         this.questions = questions;
-        this.allViewQuestions = [...questions];    // Backup
-        this.viewedQuestions = [...questions];     // initial alle sichtbar
+        this.allViewQuestions = [...questions];
+        this.viewedQuestions = [...questions];
       });
     } else {
       this.questionPoolService.getEntriesByTopicPool(1, topicPool).subscribe(entries => {
@@ -107,8 +104,6 @@ export class QuestionBrowsingViewComponent implements OnInit {
         this.viewedQuestions = [...questions];
       });
     }
-
-
   }
 
   saveState(topicPool: TopicPool) {
@@ -120,10 +115,10 @@ export class QuestionBrowsingViewComponent implements OnInit {
     }));
   }
 
-
   toggleSubjectDropdown(id: number): void {
     this.openSubjectDropDowns[id] = !this.openSubjectDropDowns[id];
   }
+
   toggleQuestionDropdown(id: number): void {
     this.openQuestionDropDowns[id] = !this.openQuestionDropDowns[id];
     if(this.openQuestionDropDowns[id]){
@@ -132,33 +127,16 @@ export class QuestionBrowsingViewComponent implements OnInit {
     }
   }
 
-  loadQuestionsForTopicPool(topicPool: TopicPool) {
-    this.selectedTopicPool = topicPool;
-    this.questionService.getQuestionsByTopicPool(topicPool).subscribe(questions => {
-      this.questions = questions;
-
-      // save state for later
-      sessionStorage.setItem('questionBrowserState', JSON.stringify({
-        openSubjectDropDowns: this.openSubjectDropDowns,
-        openQuestionDropDowns: this.openQuestionDropDowns,
-        selectedTopicPoolId: topicPool.id
-      }));
-    });
-  }
-
   closeAllQuestionDropDowns() {
-    for (let curr of this.questions) {
+    for (let curr of this.viewedQuestions) {
       this.openQuestionDropDowns[curr.id] = false;
     }
   }
-
 
   toggleSelectionMode() {
     this.selecting = !this.selecting;
     if(this.selecting) {
       this.closeAllQuestionDropDowns()
-    } else {
-      this.selectedQuestionIds = []
     }
   }
 
@@ -171,20 +149,22 @@ export class QuestionBrowsingViewComponent implements OnInit {
   }
 
   selectAllQuestions() {
-    for (let currQuestion of this.questions) {
+    for (let currQuestion of this.viewedQuestions) {
       if(!this.selectedQuestionIds.includes(currQuestion.id)) {
         this.selectedQuestionIds.push(currQuestion.id);
       }
     }
   }
+
   deSelectAllQuestions() {
-    for (let currQuestion of this.questions) {
+    for (let currQuestion of this.viewedQuestions) {
       this.selectedQuestionIds = this.selectedQuestionIds.filter(id => id !== currQuestion.id);
     }
   }
 
   allQuestionsSelected() :boolean {
-    return this.questions.every(q => this.selectedQuestionIds.includes(q.id));
+    if (this.viewedQuestions.length === 0) return false;
+    return this.viewedQuestions.every(q => this.selectedQuestionIds.includes(q.id));
   }
 
   addQuestionsToQuestionPool() {
@@ -193,12 +173,9 @@ export class QuestionBrowsingViewComponent implements OnInit {
       questionIds: this.selectedQuestionIds
     };
     this.questionPoolService.postQuestionsToQuestionPool(payload).subscribe(p => {
-      console.log(p)
-      this.selectedQuestionIds = []
       this.selecting = false;
     })
   }
-
 
   navigateToQuestionRunner(questionId: number) {
     sessionStorage.setItem('questionBrowserState', JSON.stringify({
@@ -209,20 +186,19 @@ export class QuestionBrowsingViewComponent implements OnInit {
 
     this.router.navigate(
       ['/trainer/practice/quiz'],
-      { state: { questionIdList: [questionId] } }
+      { state: { questionIdList: [questionId], isReadOnly: true } }
     );
   }
+
   toggleQuestionPool(questionId: number) {
     const userId = 1;
     const request = { userId, questionIds: [questionId] };
 
     if (this.selectedQuestionIds.includes(questionId)) {
-      // Entfernen
       this.questionPoolService.removeQuestionsFromPool(request).subscribe(() => {
         this.selectedQuestionIds = this.selectedQuestionIds.filter(id => id !== questionId);
       });
     } else {
-      // Hinzufügen
       this.questionPoolService.postQuestionsToQuestionPool(request).subscribe(() => {
         this.selectedQuestionIds.push(questionId);
       });
@@ -231,17 +207,11 @@ export class QuestionBrowsingViewComponent implements OnInit {
 
   toggleShowOnlyPool() {
     if (!this.showOnlyPool) {
-      // nur die fragen im Pool anzeigen
       this.viewedQuestions = this.allViewQuestions.filter(q => this.selectedQuestionIds.includes(q.id));
       this.showOnlyPool = true;
     } else {
-      // alle wieder nazeigen
       this.viewedQuestions = [...this.allViewQuestions];
       this.showOnlyPool = false;
     }
   }
-
-
-
-
 }

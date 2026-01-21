@@ -48,6 +48,7 @@ export class QuestionRunnerComponent implements OnInit {
   showSolutionEditor = false;
   submitted = false;
   showAllSolutions = false;
+  isReadOnly = false;
   userId = 1;
 
   timeLeft: number = 0;
@@ -82,6 +83,11 @@ export class QuestionRunnerComponent implements OnInit {
 
   ngOnInit() {
     let state = history.state;
+
+    if (state?.isReadOnly) {
+      this.isReadOnly = true;
+    }
+
     if (this.mode !== 'review') {
       if (state?.questionIds) {
         this.questionIdList = state.questionIds;
@@ -191,9 +197,16 @@ export class QuestionRunnerComponent implements OnInit {
           this.lockInputs();
           this.submitted = true;
 
-          if (result.correct) {
-            this.questionPoolService.increaseCorrectCount(this.question!.id, this.userId)
-              .subscribe(() => console.log('CorrectCount erhöht'));
+          if (!this.isReadOnly) {
+            if (result.correct) {
+              this.questionPoolService.increaseCorrectCount(this.question!.id, this.userId)
+                .subscribe(() => console.log('Zähler erhöht'));
+            } else {
+              this.questionPoolService.markAsIncorrect(this.question!.id, this.userId)
+                .subscribe(() => console.log('Zähler auf 0 gesetzt'));
+            }
+          } else {
+            console.log('Browsing-Modus: Keine Änderung am correctCount.');
           }
           this.advance();
         },
