@@ -53,6 +53,14 @@ public class QuestionService {
         question.setType(request.type());
         question.setSolutions(List.of());
 
+        if (Boolean.TRUE.equals(user.getAdmin())) {
+            question.setPublic(request.isPublic() != null ? request.isPublic() : false);
+            question.setApprovalRequested(false);
+        } else {
+            question.setPublic(false);
+            question.setApprovalRequested(request.approvalRequested() != null ? request.approvalRequested() : false);
+        }
+
         questionRepository.create(question);
 
         List<Answer> answers = new ArrayList<>();

@@ -1,0 +1,104 @@
+/* ========== FOOTER ========== */
+footer.bg-learnhub {
+  background-color: #F7A400 !important;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+}
+
+footer h5 {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+footer ul li,
+footer p {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+footer ul li i {
+  color: #fff;
+}
+
+/* Links */
+footer a.text-white {
+  transition: 0.2s ease;
+}
+
+footer a.text-white:hover {
+  color: #fff !important;
+  text-decoration: underline !important;
+  opacity: 0.9;
+}
+
+/* CTA Button */
+footer .btn-dark {
+  background-color: #2F2F3F;
+  border: none;
+  color: #fff;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+footer .btn-dark:hover {
+  background-color: #1e1e2b;
+  transform: translateY(-2px);
+}
+
+/* Social Media Icons */
+footer .bi {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+footer .bi:hover {
+  transform: scale(1.15);
+  opacity: 0.9;
+}
+
+/* Copyright Section */
+footer hr {
+  opacity: 0.3;
+}
+
+footer .text-center a {
+  color: #fff;
+  opacity: 0.9;
+}
+
+footer .text-center a:hover {
+  opacity: 1;
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 768px) {
+  footer {
+    text-align: center;
+  }
+
+  footer .text-md-center,
+  footer .text-md-end {
+    text-align: center !important;
+  }
+
+  footer .btn-dark {
+    margin: 0 auto;
+    display: inline-block;
+  }
+
+  footer .mt-4 a {
+    margin: 0 0.4rem;
+  }
+}
+
+@media (max-width: 480px) {
+  footer h5 {
+    font-size: 1.1rem;
+  }
+
+  footer ul li,
+  footer p {
+    font-size: 0.9rem;
+  }
+}

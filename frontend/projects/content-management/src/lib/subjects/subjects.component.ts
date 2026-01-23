@@ -1,20 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-
-import { Subject } from '../../../../shared/src/lib/interfaces/subject';
-import { SubjectService } from '../../../../shared/src/lib/services/subject.service';
-import { TopicPoolService } from '../../../../shared/src/lib/services/topic-pool.service';
-
-
-import { SubjectCardComponent } from '../subject-card/subject-card.component';
-import { UploadBannerComponent } from '../upload-banner/upload-banner.component';
+import {Component, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {Subject} from '../../../../shared/src/lib/interfaces/subject';
+import {SubjectService} from '../../../../shared/src/lib/services/subject.service';
+import {TopicPoolService} from '../../../../shared/src/lib/services/topic-pool.service';
 import {MediaService} from '../../../../shared/src/lib/services/media-service';
+import {firstValueFrom} from 'rxjs';
+import {SubjectCardComponent} from '../subject-card/subject-card.component';
+import {KeycloakOperationService} from '../../../../shared/src/lib/auth';
+import {AuthContextService} from '../../../../shared/src/lib/auth/AuthContextService';
+
 
 @Component({
   selector: 'lib-subjects',
   standalone: true,
-  imports: [CommonModule, FormsModule, SubjectCardComponent, UploadBannerComponent],
+  imports: [CommonModule, FormsModule, SubjectCardComponent],
   templateUrl: './subjects.component.html'
 })
 export class SubjectsComponent implements OnInit {
@@ -22,12 +22,15 @@ export class SubjectsComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
+  canManageSubjects = false;
+
   createOpen = false;
   newName = '';
   newDescription = '';
   newPoolsText = '';
   newImageUrl = '';
   newImageDesc = '';
+  imageError = false;
 
   editOpen = false;
   editId: number | null = null;
@@ -35,51 +38,93 @@ export class SubjectsComponent implements OnInit {
   editDescription = '';
   editImageUrl = '';
   editImageDesc = '';
+  editImageError = false;
 
   constructor(
     private subjectsApi: SubjectService,
     private poolsApi: TopicPoolService,
-    private mediaApi: MediaService
-  ) {}
+    private mediaApi: MediaService,
+    private keycloakOps: KeycloakOperationService,
+    private authCtx: AuthContextService
+  ) {
+  }
 
-  ngOnInit(): void { this.load(); }
+   async ngOnInit() {
+    await this.authCtx.loadMe();
+    this.canManageSubjects = this.authCtx.canManage();
+    this.load();
+  }
 
   load(): void {
-    this.loading = true; this.error = null;
+    this.loading = true;
+    this.error = null;
     this.subjectsApi.getAllSubjects().subscribe({
-      next: (list) => { this.subjects = list ?? []; this.loading = false; },
-      error: () => { this.error = 'Fächer konnten nicht geladen werden.'; this.loading = false; }
+      next: (list) => {
+        this.subjects = list ?? [];
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Fächer konnten nicht geladen werden.';
+        this.loading = false;
+      }
     });
   }
 
-  openCreate(): void { this.createOpen = true; }
+  openCreate(): void {
+    if (!this.canManageSubjects) return;
+    this.createOpen = true;
+  }
+
   cancelCreate(): void {
     this.createOpen = false;
-    this.newName = ''; this.newDescription = '';
-    this.newPoolsText = ''; this.newImageUrl = ''; this.newImageDesc = '';
+    this.newName = '';
+    this.newDescription = '';
+    this.newPoolsText = '';
+    this.newImageUrl = '';
+    this.newImageDesc = '';
+    this.imageError = false;
   }
 
   async submitCreate(): Promise<void> {
+    if (!this.canManageSubjects) return;
+
     const name = this.newName.trim();
     if (!name) return;
 
+    const description = this.newDescription || '';
+    const path = this.newImageUrl.trim();
+    const pools = (this.newPoolsText || '')
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 10);
+
+    this.loading = true;
+
     try {
       let imgId: number | undefined;
-      const path = this.newImageUrl.trim();
+
       if (path) {
-        const media = await this.mediaApi.create({ path, type: 'img', description: this.newImageDesc || undefined }).toPromise();
+        const media = await firstValueFrom(
+          this.mediaApi.create({
+            path,
+            type: 'img',
+            description: this.newImageDesc || undefined
+          })
+        );
         imgId = media?.id;
       }
 
-      const created = await this.subjectsApi.create({
+      const body: any = {
         name,
-        description: this.newDescription || '',
-        imgId
-      }).toPromise();
+        description,
+        ...(imgId !== undefined ? {imgId} : {})
+      };
 
-      const names = this.newPoolsText.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 10);
-      if (created?.id && names.length) {
-        await this.poolsApi.createBatch(created.id, names).toPromise();
+      const created = await firstValueFrom(this.subjectsApi.create(body));
+
+      if (pools.length) {
+        await firstValueFrom(this.poolsApi.createBatch(created.id, pools));
       }
 
       this.cancelCreate();
@@ -87,11 +132,14 @@ export class SubjectsComponent implements OnInit {
     } catch (err: any) {
       console.error(err);
       alert(err?.error?.message || err?.message || 'Fach konnte nicht erstellt werden.');
+    } finally {
+      this.loading = false;
     }
   }
 
-
   onEdit(s: Subject): void {
+    if (!this.canManageSubjects) return;
+
     this.editId = s.id;
     this.editName = s.name;
     this.editDescription = s.description || '';
@@ -99,14 +147,20 @@ export class SubjectsComponent implements OnInit {
     this.editImageDesc = '';
     this.editOpen = true;
   }
+
   cancelEdit(): void {
     this.editOpen = false;
     this.editId = null;
-    this.editName = ''; this.editDescription = '';
-    this.editImageUrl = ''; this.editImageDesc = '';
+    this.editName = '';
+    this.editDescription = '';
+    this.editImageUrl = '';
+    this.editImageDesc = '';
+    this.editImageError = false;
   }
 
   async submitEdit(): Promise<void> {
+    if (!this.canManageSubjects) return;
+
     if (this.editId == null) return;
     const name = this.editName.trim();
     if (!name) return;
@@ -114,16 +168,25 @@ export class SubjectsComponent implements OnInit {
     try {
       let imgId: number | undefined;
       const path = this.editImageUrl.trim();
+
       if (path) {
-        const media = await this.mediaApi.create({ path, type: 'img', description: this.editImageDesc || undefined }).toPromise();
+        const media = await firstValueFrom(
+          this.mediaApi.create({
+            path,
+            type: 'img',
+            description: this.editImageDesc || undefined
+          })
+        );
         imgId = media?.id;
       }
 
-      await this.subjectsApi.update(this.editId, {
-        name,
-        description: this.editDescription || '',
-        ...(imgId !== undefined ? { imgId } : {})
-      }).toPromise();
+      await firstValueFrom(
+        this.subjectsApi.update(this.editId, {
+          name,
+          description: this.editDescription || '',
+          ...(imgId !== undefined ? {imgId} : {})
+        })
+      );
 
       this.cancelEdit();
       this.load();
@@ -134,6 +197,8 @@ export class SubjectsComponent implements OnInit {
   }
 
   onDelete(s: Subject): void {
+    if (!this.canManageSubjects) return;
+
     if (!confirm(`Fach "${s.name}" wirklich löschen?`)) return;
     this.subjectsApi.delete(s.id).subscribe({
       next: () => this.load(),
@@ -142,4 +207,18 @@ export class SubjectsComponent implements OnInit {
   }
 
   trackSubject = (_: number, s: Subject) => s?.id ?? -1;
+
+  get normalizedNewImageUrl(): string {
+    const p = (this.newImageUrl || '').trim();
+    if (!p) return '';
+    if (/^https?:\/\//i.test(p) || p.startsWith('/')) return p;
+    return '/' + p;
+  }
+
+  get normalizedEditImageUrl(): string {
+    const p = (this.editImageUrl || '').trim();
+    if (!p) return '';
+    if (/^https?:\/\//i.test(p) || p.startsWith('/')) return p;
+    return '/' + p;
+  }
 }

@@ -1,9 +1,12 @@
-import {Media} from './media';
+import { Media } from './media';
 
 export interface UserSlim {
   id: number;
+  keycloakSub: string;
   name: string;
   email: string;
   isTeacher: boolean;
-  profilePicture: Media;
+  isAdmin?: boolean;
+  profilePicture?: Media;
+  className?: string;
 }

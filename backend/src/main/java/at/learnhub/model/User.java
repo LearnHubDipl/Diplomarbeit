@@ -2,7 +2,6 @@ package at.learnhub.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
 import java.util.List;
 
 /**
@@ -10,10 +9,22 @@ import java.util.List;
  */
 @Entity
 @Table(name = "\"user\"")
+@NamedQueries({
+        @NamedQuery(
+                name = User.FIND_BY_KEYCLOAK_SUB,
+                query = "SELECT u FROM User u WHERE u.keycloakSub = :sub"
+        ),
+        @NamedQuery(
+                name = User.FIND_BY_EMAIL,
+                query = "SELECT u FROM User u WHERE u.email = :email"
+        )
+})
 public class User {
+    public static final String FIND_BY_KEYCLOAK_SUB = "User.findByKeycloakSub";
+    public static final String FIND_BY_EMAIL = "User.findByEmail";
 
     /**
-     * Unique identifier of the user.
+     * Unique identifier of the user (auto-generated).
      * Example: 123
      */
     @Id
@@ -21,20 +32,28 @@ public class User {
     private Long id;
 
     /**
+     * Keycloak sub claim (unique identifier from Keycloak).
+     * Example: "cbd71d68-661c-4fd7-bced-3444f968d59d"
+     */
+    @Column(name = "keycloak_sub", unique = true, nullable = false, length = 255)
+    private String keycloakSub;
+
+    /**
      * Full name of the user.
-     * Example: Max Mustermann
+     * Example: Isabella Baumann
      */
     private String name;
 
     /**
      * Email address of the user.
-     * Example: max@example.com
+     * Example: i.baumann@students.htl-leonding.ac.at
      */
+    @Column(unique = true)
     private String email;
 
     /**
      * Indicates if the user is a teacher.
-     * Example: true
+     * Example: false
      */
     @Column(name = "is_teacher")
     private Boolean isTeacher;
@@ -47,9 +66,37 @@ public class User {
     private Boolean isAdmin;
 
     /**
+     * Username from Keycloak (preferred_username).
+     * Example: "it210181"
+     */
+    @Column(name = "username")
+    private String username;
+
+    /**
+     * Given name from Keycloak.
+     * Example: "Isabella"
+     */
+    @Column(name = "given_name")
+    private String givenName;
+
+    /**
+     * Family name from Keycloak.
+     * Example: "Baumann"
+     */
+    @Column(name = "family_name")
+    private String familyName;
+
+    /**
+     * Class from distinguished name.
+     * Example: "5AHITM"
+     */
+    @Column(name = "class_name")
+    private String className;
+
+    /**
      * Profile picture associated with the user.
      */
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "profile_picture_id")
     private MediaFile profilePicture;
 
@@ -116,15 +163,33 @@ public class User {
     @JsonIgnoreProperties({"user"})
     private List<SolutionVote> solutionVotes;
 
+    // Constructors
+    public User() {
+    }
+
+    public User(String keycloakSub, String name, String email, Boolean isTeacher) {
+        this.keycloakSub = keycloakSub;
+        this.name = name;
+        this.email = email;
+        this.isTeacher = isTeacher;
+        this.isAdmin = false;
+    }
 
     // Getter und Setter
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getKeycloakSub() {
+        return keycloakSub;
+    }
+
+    public void setKeycloakSub(String keycloakSub) {
+        this.keycloakSub = keycloakSub;
     }
 
     public String getName() {
@@ -157,6 +222,38 @@ public class User {
 
     public void setAdmin(Boolean admin) {
         isAdmin = admin;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getGivenName() {
+        return givenName;
+    }
+
+    public void setGivenName(String givenName) {
+        this.givenName = givenName;
+    }
+
+    public String getFamilyName() {
+        return familyName;
+    }
+
+    public void setFamilyName(String familyName) {
+        this.familyName = familyName;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 
     public MediaFile getProfilePicture() {

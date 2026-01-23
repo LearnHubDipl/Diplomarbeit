@@ -1,11 +1,7 @@
 package at.learnhub.dto.simple;
 
-import at.learnhub.model.*;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import at.learnhub.model.MediaFile;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
-
-import java.util.List;
 
 @Schema(description = "DTO containing the minimal user information")
 public record UserSlimDto(
@@ -16,14 +12,20 @@ public record UserSlimDto(
         Long id,
 
         @Schema(
+                description = "Keycloak sub (unique identifier from Keycloak).",
+                example = "cbd71d68-661c-4fd7-bced-3444f968d59d"
+        )
+        String keycloakSub,
+
+        @Schema(
                 description = "The name of the user.",
-                example = "Max Mustermann"
+                example = "Isabella Baumann"
         )
         String name,
 
         @Schema(
-                description = "The email adress of the user",
-                example = "m.mustermann@students.htl-leonding.ac.at"
+                description = "The email address of the user",
+                example = "i.baumann@students.htl-leonding.ac.at"
         )
         String email,
 
@@ -43,6 +45,11 @@ public record UserSlimDto(
                 description = "Profile picture of the user.",
                 implementation = MediaFile.class
         )
-        MediaFile profilePicture
+        MediaFile profilePicture,
+        @Schema(
+                description = "Class name of the user (e.g., 5AHITM).",
+                example = "5AHITM"
+        )
+        String className
 ) {
 }

@@ -43,7 +43,26 @@ export class QuestionService {
     return this.httpClient.get<number[]>(`${API_BASE_URL}/questionPools/${userId}/questions-by-topics`, { params });
   }
 
+  getAllQuestionsFromLoggedInUser(userId: number): Observable<Question[]> {
+    return this.httpClient.get<Question[]>(API_BASE_URL + '/questions/user/' + userId);
+  }
 
+  getAllPublicQuestions(): Observable<Question[]> {
+    return this.httpClient.get<Question[]>(API_BASE_URL + '/questions/public');
+  }
 
+  getAllPrivateQuestions(): Observable<Question[]> {
+    return this.httpClient.get<Question[]>(API_BASE_URL + '/questions/private');
+  }
 
+  getAllQuestionsWithApprovalRequest(): Observable<Question[]>{
+    return this.httpClient.get<Question[]>(API_BASE_URL + '/questions/awaiting-approval');
+  }
+
+  approveQuestion(id: number): Observable<Question> {
+    return this.httpClient.patch<Question>(
+      API_BASE_URL + `/questions/${id}/public?isPublic=true`,
+      {}
+    );
+  }
 }

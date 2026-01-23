@@ -55,6 +55,12 @@ public record QuestionSlimDto(
         Boolean isPublic,
 
         @Schema(
+                description = "Whether the student has requested admin approval for this question.",
+                example = "true"
+        )
+        Boolean approvalRequested,
+
+        @Schema(
                 description = "List of possible answers for this question.",
                 implementation = AnswerSlimDto.class,
                 type = SchemaType.ARRAY

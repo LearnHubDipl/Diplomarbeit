@@ -1,5 +1,6 @@
 package at.learnhub.repository;
 
+import at.learnhub.dto.request.QuestionCreationRequestDto;
 import at.learnhub.dto.simple.QuestionDto;
 import at.learnhub.dto.simple.QuestionPoolDto;
 import at.learnhub.dto.simple.QuestionUpdateRequestDto;
@@ -34,6 +35,14 @@ public class QuestionRepository {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Finds a question entity by ID (for security checks)
+     * @param id the question ID
+     * @return Question entity or null if not found
+     */
+    public Question findById(Long id) {
+        return em.find(Question.class, id);
+    }
 
     public QuestionDto getQuestionDtoById(Long id) {
         Question question = getQuestionById(id);
@@ -70,6 +79,19 @@ public class QuestionRepository {
      */
     public List<QuestionDto> findAllPublicQuestions() {
         return em.createQuery("select q from Question q where q.isPublic = true", Question.class)
+                .getResultList()
+                .stream()
+                .map(QuestionMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves all public questions
+     *
+     * @return list of publicly visible questions
+     */
+    public List<QuestionDto> findAllPrivateQuestions() {
+        return em.createQuery("select q from Question q where q.isPublic = false", Question.class)
                 .getResultList()
                 .stream()
                 .map(QuestionMapper::toDto)
@@ -161,6 +183,9 @@ public class QuestionRepository {
         if (dto.isPublic() != null) {
             existing.setPublic(dto.isPublic());
         }
+        if (dto.approvalRequested() != null) {
+            existing.setApprovalRequested(dto.approvalRequested());
+        }
 
         if (dto.answers() != null) {
             existing.getAnswers().clear();
@@ -185,6 +210,19 @@ public class QuestionRepository {
             throw new EntityNotFoundException("Question with id " + id + " not found.");
         }
         em.remove(question);
+    }
+
+    /**
+     * Retrieves all questions where approval is requested
+     *
+     * @return list of questions with approvalRequested = true
+     */
+    public List<QuestionDto> findAllQuestionsWithApprovalRequested() {
+        return em.createQuery("select q from Question q where q.approvalRequested = true and q.isPublic = false", Question.class)
+                .getResultList()
+                .stream()
+                .map(QuestionMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 
@@ -251,5 +289,68 @@ public class QuestionRepository {
                 })
                 .map(row -> (Long) row[0])
                 .collect(Collectors.toList());
+    }
+    /**
+     * Creates a new question with answers from the creation DTO
+     *
+     * @param dto the creation request DTO
+     * @return the created Question entity
+     */
+    @Transactional
+    public Question createQuestion(QuestionCreationRequestDto dto) {
+        System.out.println("[QuestionRepository] Creating question from DTO");
+        System.out.println("[QuestionRepository] User ID: " + dto.userId());
+        System.out.println("[QuestionRepository] TopicPool ID: " + dto.topicPoolId());
+
+        User user = em.find(User.class, dto.userId());
+        if (user == null) {
+            throw new EntityNotFoundException("User not found with ID: " + dto.userId());
+        }
+        System.out.println("[QuestionRepository] User found: " + user.getName());
+
+        TopicPool topicPool = em.find(TopicPool.class, dto.topicPoolId());
+        if (topicPool == null) {
+            throw new EntityNotFoundException("Topic pool not found with ID: " + dto.topicPoolId());
+        }
+        System.out.println("[QuestionRepository] TopicPool found: " + topicPool.getName());
+
+        Question question = new Question();
+        question.setText(dto.text());
+        question.setExplanation(dto.explanation());
+        question.setType(dto.type());
+        question.setDifficulty(dto.difficulty());
+        question.setPublic(dto.isPublic() != null ? dto.isPublic() : false);
+        question.setUser(user);
+        question.setTopicPool(topicPool);
+
+        question.setAnswers(new ArrayList<>());
+        question.setSolutions(new ArrayList<>());
+        question.setEntries(new ArrayList<>());
+
+        em.persist(question);
+        em.flush();
+
+        System.out.println("[QuestionRepository] Question persisted with ID: " + question.getId());
+
+        if (dto.answers() != null && !dto.answers().isEmpty()) {
+            System.out.println("[QuestionRepository] Adding " + dto.answers().size() + " answers");
+
+            for (at.learnhub.dto.request.AnswerCreationRequestDto answerDto : dto.answers()) {
+                Answer answer = new Answer();
+                answer.setText(answerDto.text());
+                answer.setCorrect(answerDto.isCorrect() != null ? answerDto.isCorrect() : false);
+                answer.setQuestion(question);
+
+                em.persist(answer);
+                question.getAnswers().add(answer);
+            }
+
+            em.flush();
+            System.out.println("[QuestionRepository] Answers added successfully");
+        }
+
+        System.out.println("[QuestionRepository] Question created successfully with ID: " + question.getId());
+
+        return question;
     }
 }

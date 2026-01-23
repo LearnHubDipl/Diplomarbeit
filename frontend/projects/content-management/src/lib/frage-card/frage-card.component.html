@@ -1,9 +1,25 @@
 <div *ngIf="questions.length > 0" class="container mt-5 d-flex flex-column" style="min-height: 85vh;">
+  <nav aria-label="breadcrumb" class="mb-4" style="--bs-breadcrumb-divider: '>';">
+    <ol class="breadcrumb fs-5 fw-semibold">
+      <li class="breadcrumb-item">
+        <a routerLink="/study/choose" class="text-dark text-decoration-none">
+          <i class="bi bi-journal-bookmark me-1"></i>
+          Erstellen & Lernen
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a routerLink="/study/topics" class="text-dark text-decoration-none">
+          Fachauswahl
+        </a>
+      </li>
+      <li class="breadcrumb-item active text-orange fw-bold" aria-current="page">
+        Lernen
+      </li>
+    </ol>
+  </nav>
   <h2 class="fw-bold">Lernen</h2>
   <p class="text-muted">Einfach und fokussiert lernen</p>
-
-  <div class="bg-warning-subtle rounded p-4 flex-grow-1 position-relative d-flex flex-column">
-
+  <div class="bg-warning-subtle rounded p-4 flex-grow-1 d-flex flex-column position-relative">
     <div class="d-flex justify-content-between align-items-start mb-3">
       <h5 class="mb-0">{{ questions[currentIndex].text }}</h5>
       <span class="ms-2" style="font-size: 1.2rem;">
@@ -11,13 +27,11 @@
         {{ getDifficultyLabel(questions[currentIndex].difficulty) }}
       </span>
     </div>
-
     <img *ngIf="questions[currentIndex].media?.path"
          [src]="questions[currentIndex].media.path"
          class="img-fluid mb-3"
          alt="Bild zur Frage"
          style="max-height: 25vh; width: auto; display: block; margin: 0 auto;"/>
-
     <div *ngIf="showAnswer" class="bg-success-subtle border border-success rounded p-3 mb-3">
       <div *ngIf="questions[currentIndex].type === QuestionType.MULTIPLE_CHOICE">
         <div *ngIf="questions[currentIndex].explanation">
@@ -31,32 +45,36 @@
           </ul>
         </div>
       </div>
-
       <div *ngIf="questions[currentIndex].type === QuestionType.FREETEXT && questions[currentIndex].explanation">
         <h6>Erklärung:</h6>
         <p>{{ questions[currentIndex].explanation }}</p>
       </div>
     </div>
+  </div>
+  <div class="d-flex justify-content-start align-items-center mt-3 gap-2">
+    <button *ngIf="showAnswer"
+            class="btn btn-outline-secondary rounded-pill"
+            (click)="toggleAnswer()">
+      Zudecken
+    </button>
 
-    <div class="position-absolute" style="bottom: 1rem; left: 1rem;">
-      <button *ngIf="showAnswer"
-              class="btn btn-outline-secondary rounded-pill"
-              (click)="toggleAnswer()">
-        Zudecken
-      </button>
+    <button *ngIf="!showAnswer"
+            class="btn btn-warning rounded-pill"
+            (click)="toggleAnswer()">
+      Aufdecken
+    </button>
 
-      <button *ngIf="!showAnswer"
-              class="btn btn-warning rounded-pill"
-              (click)="toggleAnswer()">
-        Aufdecken
-      </button>
+    <button *ngIf="!(currentIndex === questions.length - 1) && showAnswer"
+            class="btn btn-primary rounded-pill"
+            (click)="next()">
+      Weiter
+    </button>
 
-      <button *ngIf="currentIndex === questions.length - 1"
-              class="btn btn-primary rounded-pill ms-3"
-              (click)="finishedLearning()">
-        Beenden
-      </button>
-    </div>
+    <button *ngIf="currentIndex === questions.length - 1 && showAnswer"
+            class="btn btn-primary rounded-pill"
+            (click)="finishedLearning()">
+      Beenden
+    </button>
   </div>
 
   <div class="d-flex justify-content-center align-items-center mt-3 mb-4 gap-3">
@@ -66,15 +84,24 @@
     <button class="btn btn-light rounded-pill" (click)="next()" [disabled]="currentIndex >= questions.length - 1">
       <i class="bi bi-chevron-right"></i>
     </button>
-
-
   </div>
-
   <div class="text-center mb-5">
     {{ currentIndex + 1 }}/{{ questions.length }}
   </div>
 </div>
-
-<div *ngIf="questions.length === 0" class="text-center mt-5">
-  <p>Keine Fragen gefunden.</p>
+<div *ngIf="questions.length === 0" class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <div class="card-body py-5">
+        <h4 class="card-title mb-2">Keine Fragen gefunden</h4>
+        <p class="card-text text-muted mb-4">
+          Für dieses Thema sind aktuell leider keine Fragen verfügbar.
+          Bitte wähle ein anderes Thema aus.
+        </p>
+        <a routerLink="/study/topics" class="btn btn-dark">
+          Thema auswählen
+        </a>
+      </div>
+    </div>
+  </div>
 </div>

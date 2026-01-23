@@ -1,4 +1,3 @@
-// at.learnhub.boundary/TopicContentResource.java
 package at.learnhub.boundary;
 
 import at.learnhub.dto.request.TopicContentCreateRequestDto;

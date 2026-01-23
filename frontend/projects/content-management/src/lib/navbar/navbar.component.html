@@ -1,0 +1,18 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-learnhub px-4"><a class="navbar-brand me-auto" [routerLink]="''">
+  <img src="assets/Learnhub (10).png" alt="Logo" width="75" height="70" class="rounded-circle"> </a>
+  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+          aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation"><span
+    class="navbar-toggler-icon"></span></button>
+  <div class="collapse navbar-collapse" id="navbarContent">
+    <div class="ms-auto d-flex align-items-center flex-column flex-lg-row mt-3 mt-lg-0"><a
+      class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/subjects'">Maturaunterlagen</a> <a
+      class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/study/choose'">Fragenkonfigurator</a> <a
+      class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/trainer'">Maturatrainer</a>
+      <a class="text-white fw-bold me-4 text-decoration-none position-relative"
+                                  [routerLink]="'/profile'"> <i class="bi bi-bell-fill text-white fs-4"></i>
+       <span *ngIf="unreadCount > 0"
+                             class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"> {{ unreadCount }} </span>
+      </a> <a class="text-white fw-bold me-4 text-decoration-none" [routerLink]="'/profile'"> <i
+        class="bi bi-person-circle text-white fs-3 me-2"></i> </a></div>
+  </div>
+</nav>

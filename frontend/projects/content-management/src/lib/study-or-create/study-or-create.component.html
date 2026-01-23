@@ -1,25 +1,49 @@
 <!-- https://chatgpt.com/share/688b1634-3520-8007-a4da-722c988c81bb -->
-<div class="container text-center py-5" style="min-height: 80vh;">
-  <h1 class="text-start mb-4 fw-bold">Fragen erstellen & lernen</h1>
-
+<div class="container py-5" style="min-height: 80vh;">
+  <div class="text-center mb-5">
+    <h1 class="fw-bold mb-3" style="font-size: 3.5rem; background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+      Erstellen & Lernen
+    </h1>
+    <p class="text-muted fs-5">
+      Wähle eine Aktion, um direkt loszulegen
+    </p>
+  </div>
   <div class="row justify-content-center g-4">
-    <div class="col-md-4">
-      <div class="card shadow overflow-hidden border-0">
-        <img src="assets/quiz-7563812_1280 2.png" alt="Bild 1" class="card-img-top object-fit-cover" style="aspect-ratio: 1 / 1;">
+    <div class="col-12 col-sm-10 col-md-6 col-lg-5 col-xl-4">
+      <div class="card border-0 shadow-lg h-100 rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+          <img src="assets/quiz-7563812_1280 2.png"
+               alt="Lernen"
+               class="card-img-top w-100"
+               style="aspect-ratio: 1 / 1; object-fit: cover; transition: transform 0.4s ease;">
+        </div>
+        <div class="card-footer bg-white border-0 text-center p-4">
+          <h3 class="mb-3 fw-bold text-dark">Lernen</h3>
+          <p class="text-muted mb-4">Starte deine Lernreise und verbessere dein Wissen</p>
+          <button class="btn btn-warning btn-lg rounded-pill shadow fw-semibold px-5 py-3 text-white"
+                  [routerLink]="'/study/topics'">
+            Jetzt Lernen
+          </button>
+        </div>
       </div>
-      <button class="btn btn-warning mt-3 px-4 py-2 fw-semibold rounded-pill shadow-sm" style="color: white;" [routerLink]="'/startStudy'">
-        Lernen
-      </button>
     </div>
-
-    <div class="col-md-4">
-      <div class="card shadow overflow-hidden border-0">
-        <img src="assets/quiz-7563812_1280 1.png" alt="Bild 2" class="card-img-top object-fit-cover" style="aspect-ratio: 1 / 1;">
+    <div class="col-12 col-sm-10 col-md-6 col-lg-5 col-xl-4">
+      <div class="card border-0 shadow-lg h-100 rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+          <img src="assets/quiz-7563812_1280 1.png"
+               alt="Fragenkonfigurator"
+               class="card-img-top w-100"
+               style="aspect-ratio: 1 / 1; object-fit: cover; transition: transform 0.4s ease;">
+        </div>
+        <div class="card-footer bg-white border-0 text-center p-4">
+          <h3 class="mb-3 fw-bold text-dark">Fragenkonfigurator</h3>
+          <p class="text-muted mb-4">Erstelle eigene Fragen und teste dein Wissen</p>
+          <button class="btn btn-warning btn-lg rounded-pill shadow fw-semibold px-5 py-3 text-white"
+                  [routerLink]="'/questions/create'">
+            Fragen Erstellen
+          </button>
+        </div>
       </div>
-      <button class="btn btn-warning mt-3 px-4 py-2 fw-semibold rounded-pill shadow-sm" style="color: white;" [routerLink]="'/startCreate'">
-        Fragenkonfigurator
-      </button>
-
     </div>
   </div>
 </div>

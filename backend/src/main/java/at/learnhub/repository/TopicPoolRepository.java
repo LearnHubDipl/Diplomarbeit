@@ -30,12 +30,28 @@ public class TopicPoolRepository{
 
     public TopicPool getTopicPoolById(Long id) {
         TopicPool tp = em.find(TopicPool.class, id);
-        if (tp == null) {
-            throw new EntityNotFoundException("TopicPool with id " + id + " not found.");
-        }
+        System.out.println("DEBUG: Fetched TopicPool with id=" + id + " -> " + tp);
         return tp;
     }
 
+    public int deleteByIdAndSubject(Long poolId, Long subjectId) {
+        return em.createQuery("""
+            DELETE FROM TopicPool tp
+            WHERE tp.id = :poolId AND tp.subject.id = :subjectId
+        """)
+                .setParameter("poolId", poolId)
+                .setParameter("subjectId", subjectId)
+                .executeUpdate();
+    }
+    public TopicPool getByIdAndSubject(Long poolId, Long subjectId) {
+        return em.createQuery("""
+            SELECT tp FROM TopicPool tp
+            WHERE tp.id = :poolId AND tp.subject.id = :subjectId
+        """, TopicPool.class)
+                .setParameter("poolId", poolId)
+                .setParameter("subjectId", subjectId)
+                .getResultStream().findFirst().orElse(null);
+    }
     public List<TopicPool> getTopicPoolListByIds(List<Long> ids) {
         List<TopicPool> topicPools = new LinkedList<>();
         for (Long id : ids) {
@@ -58,6 +74,6 @@ public class TopicPoolRepository{
     @Transactional
     public void delete(Long id) {
         TopicPool tp = getTopicPoolById(id);
-        em.remove(tp);
+        if (tp != null) em.remove(tp);
     }
 }

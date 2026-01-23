@@ -1,0 +1,117 @@
+<div class="container mt-5 mb-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4" style="--bs-breadcrumb-divider: '>';">
+    <ol class="breadcrumb fs-5 fw-semibold">
+      <li class="breadcrumb-item">
+        <a routerLink="/profile" class="text-dark text-decoration-none">
+          <i class="bi bi-person-circle me-1"></i>
+          Persönlicher Bereich
+        </a>
+      </li>
+      <li class="breadcrumb-item active text-orange fw-bold" aria-current="page">
+        Fragen genehmigen
+      </li>
+    </ol>
+  </nav>
+
+  <h2 class="fw-bold text-warning">Fragen von Schülern genehmigen</h2>
+  <p class="text-muted">
+    Prüfe und genehmige private Fragen, um sie öffentlich zu machen
+  </p>
+
+  <div *ngIf="loadError" class="alert alert-danger mt-3">
+    <strong>Fehler</strong><br>
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="isLoading && !loadError" class="text-center mt-5">
+    <div class="spinner-border text-warning" role="status">
+      <span class="visually-hidden">Laden...</span>
+    </div>
+    <p class="text-muted mt-2">Fragen werden geladen...</p>
+  </div>
+
+  <div *ngIf="!isAdmin && !isLoading" class="alert alert-warning mt-3">
+    <i class="bi bi-shield-lock me-2"></i>
+    <strong>Zugriff verweigert</strong><br>
+    Nur Admins können Fragen genehmigen.
+  </div>
+
+  <div *ngIf="isAdmin && !isLoading && !loadError">
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <label for="sortOrder" class="form-label fw-semibold">Sortierung</label>
+        <select
+          id="sortOrder"
+          class="form-select"
+          [(ngModel)]="sortOrder"
+          (change)="onSortChange($event)">
+          <option value="newest">Neueste zuerst</option>
+          <option value="oldest">Älteste zuerst</option>
+          <option value="alphabetical">Alphabetisch (A-Z)</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label for="subjectFilter" class="form-label fw-semibold">Fach filtern</label>
+        <select
+          id="subjectFilter"
+          class="form-select"
+          [value]="selectedSubjectId || ''"
+          (change)="onSubjectChange($event)">
+          <option value="">Alle Fächer</option>
+          <option *ngFor="let subject of subjects" [value]="subject.id">
+            {{ subject.name }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div *ngIf="filteredQuestions.length === 0" class="text-center mt-5">
+      <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+      <h4 class="mt-3 fw-bold">Keine offenen Fragen</h4>
+      <p class="text-muted">Alle Fragen wurden bereits bearbeitet oder es gibt keine privaten Fragen.</p>
+    </div>
+
+    <div *ngIf="filteredQuestions.length > 0" class="list-group">
+      <div
+        *ngFor="let question of filteredQuestions"
+        class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+        style="cursor: pointer;"
+        (click)="viewQuestionDetails(question.id)">
+        <div class="flex-grow-1">
+          <div class="d-flex align-items-start gap-3">
+            <i class="bi bi-question-circle text-warning fs-4"></i>
+
+            <div class="flex-grow-1">
+              <h6 class="mb-1 fw-semibold">{{ getFirstCharacters(question.text, 80) }}</h6>
+              <div class="small text-muted">
+                <span class="me-3">
+                  <i class="bi bi-person me-1"></i>
+                  {{ question.user?.name || 'Unbekannt' }}
+                </span>
+                <span class="me-3">
+                  <i class="bi bi-folder me-1"></i>
+                  {{ question.topicPool?.name || 'Kein Pool' }}
+                </span>
+                <span class="me-3">
+                  <i class="bi bi-bar-chart me-1"></i>
+                  {{ getDifficultyLabel(question.difficulty) }}
+                </span>
+                <span>
+                  <i class="bi bi-tag me-1"></i>
+                  {{ getQuestionTypeLabel(question.type) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button
+          class="btn btn-outline-warning btn-sm ms-3"
+          (click)="viewQuestionDetails(question.id); $event.stopPropagation()"
+          title="Details anzeigen">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

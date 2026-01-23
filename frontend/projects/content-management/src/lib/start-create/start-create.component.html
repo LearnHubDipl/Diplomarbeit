@@ -1,24 +1,40 @@
 <div class="container py-5" style="min-height: 65vh;">
+  <nav aria-label="breadcrumb" class="mb-4" style="--bs-breadcrumb-divider: '>';">
+    <ol class="breadcrumb fs-5 fw-semibold">
+      <li class="breadcrumb-item">
+        <a routerLink="/study/choose" class="text-dark text-decoration-none">
+          <i class="bi bi-journal-bookmark me-1"></i>
+          Erstellen & Lernen
+        </a>
+      </li>
+      <li class="breadcrumb-item active text-orange fw-bold" aria-current="page">
+        Fragen verwalten
+      </li>
+    </ol>
+  </nav>
+
   <div class="row g-5">
     <div class="col-12 col-md-6">
-      <h1 class="fw-bold mb-3">Fragenkonfigurator</h1>
-      <p class="lead mb-4" style="max-width: 500px;">Erstelle individuelle Fragen und ordne sie passenden Themen
-        zu. Ob für die persönliche Vorbereitung oder als Teil eines größeren Fragenpools – der
-        Fragenkonfigurator bietet volle Flexibilität.
+      <h2 class="fw-bold mb-3">Fragenkonfigurator</h2>
+      <p class="lead mb-4" style="max-width: 500px;">
+        Erstelle individuelle Fragen und ordne sie passenden Themen zu. Ob für die persönliche Vorbereitung
+        oder als Teil eines größeren Fragenpools – der Fragenkonfigurator bietet volle Flexibilität.
         <br><br>
         Unterstützt werden verschiedene Fragetypen wie Single-Choice, Multiple-Choice, Bildfragen und
         Freitextfragen.
       </p>
-      <a [routerLink]="'/fragenkonfigurator'"
-         class="btn btn-warning px-4 py-2 fw-semibold rounded-pill shadow-sm" style="color: white;">
+      <a [routerLink]="'/questions/new'"
+         class="btn btn-warning px-4 py-2 fw-semibold rounded-pill shadow-sm text-white">
         Erstellen
       </a>
-      <a [routerLink]="'/manageQuestions'"
-         class="btn btn-warning px-4 py-2 fw-semibold rounded-pill shadow-sm" style="color: white;">
+      <a [routerLink]="'/questions/manage'"
+         class="btn btn-warning px-4 py-2 fw-semibold rounded-pill shadow-sm ms-3 text-white">
         Bearbeiten
       </a>
     </div>
-    <div class="col-12 col-md-6 d-flex justify-content-center">
+
+    <!-- Nur ab md anzeigen -->
+    <div class="col-12 col-md-6 d-none d-md-flex justify-content-center">
       <img src="assets/quiz-7563812_1280 1.png"
            alt="Lernkarten Bild"
            class="rounded shadow"

@@ -1,0 +1,14 @@
+docker build --no-cache -t learnhub-backend -f Dockerfile .
+docker tag learnhub-backend lienhochbichler/learnhub-backend:latest
+docker push lienhochbichler/learnhub-backend:latest
+
+
+docker build -t learnhub-frontend .
+docker tag learnhub-frontend lienhochbichler/learnhub-frontend:latest
+docker push lienhochbichler/learnhub-frontend:latest
+
+ssh student@vm91.htl-leonding.ac.at
+
+cd diplomarbeit
+docker compose pull frontend
+docker compose up -d frontend

@@ -21,9 +21,9 @@ services:
 
   quarkus:
     user: root
+    image: lienhochbichler/learnhub-backend
     build:
-      context: .
-      dockerfile: src/main/docker/Dockerfile
+      dockerfile: Dockerfile
     container_name: learnhub-app
     depends_on:
       mysql:

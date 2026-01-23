@@ -10,31 +10,30 @@ import {CreateSubjectRequestDto} from '../interfaces/CreateSubjectRequestDto';
 })
 export class SubjectService {
   httpClient: HttpClient = inject(HttpClient);
-  private base = 'http://localhost:8080/api/subjects';
 
   constructor() {
   }
   list(): Observable<Subject[]> {
-    return this.httpClient.get<Subject[]>(this.base);
+    return this.httpClient.get<Subject[]>(API_BASE_URL + '/subjects');
   }
 
   getAllSubjects(): Observable<Subject[]> {
-    return this.httpClient.get<Subject[]>(this.base);
+    return this.httpClient.get<Subject[]>(API_BASE_URL + '/subjects');
   }
 
   get(id: number): Observable<Subject> {
-    return this.httpClient.get<Subject>(`${this.base}/${id}`);
+    return this.httpClient.get<Subject>(`${API_BASE_URL}/subjects/${id}`);
   }
 
-  create(dto: CreateSubjectRequestDto): Observable<Subject> {
-    return this.httpClient.post<Subject>(this.base, dto);
+  create(dto: { name: string; description: string; imageUrl: string | undefined }): Observable<Subject> {
+    return this.httpClient.post<Subject>(API_BASE_URL + '/subjects', dto);
   }
 
   update(id: number, payload: { name?: string; description?: string; imgId?: number | null }) {
-    return this.httpClient.put<Subject>(`${this.base}/${id}`, payload);
+    return this.httpClient.put<Subject>(`${API_BASE_URL}/subjects/${id}`, payload);
   }
 
   delete(id: number) {
-    return this.httpClient.delete<void>(`${this.base}/${id}`);
+    return this.httpClient.delete<void>(`${API_BASE_URL}/subjects/${id}`);
   }
 }

@@ -3,6 +3,7 @@ import {Subject} from './subject';
 export interface TopicPool {
   id: number;
   name: string;
-  description: string;
+  description?: string;
   subject?: Subject;
+  subjectId?: number;
 }

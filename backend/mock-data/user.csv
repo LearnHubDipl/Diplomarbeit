@@ -1,6 +1,5 @@
-name,email,isTeacher,isAdmin,profilePictureId
-Anna Müller,anna.mueller@example.com,true,false,4
-Thomas Becker,thomas.becker@example.com,true,true,5
-Lisa Schneider,lisa.schneider@example.com,false,false,6
-Maximilian Roth,max.roth@example.com,false,true,7
-Eva Klein,eva.klein@example.com,true,false,8
+keycloakSub,name,email,isTeacher,isAdmin,profilePictureId
+cbd71d68-661c-4fd7-bced-3444f968d59d,Isabella Baumann 67, i.baumann@students.htl-leonding.ac.at,false,true,4
+27457eb2-2a35-4f55-8906-5bb367fe41e3,Thomas Gossenreiter, t.gossenreiter@students.htl-leonding.ac.at,false,true,4
+7ca640ea-50c2-4d10-8427-9d8674920b69,Lien Hochbichler,l.hochbichler@students.htl-leonding.ac.at,false,true,4
+dd0eb45b-ca3f-4acc-ba01-2ea3776403fe,Stefanie Steinmair,s.steinmair@students.htl-leonding.ac.at,false,true,4

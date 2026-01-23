@@ -1,20 +1,22 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { QuestionService } from '../../../../shared/src/lib/services/question.service';
-import { SubjectService } from '../../../../shared/src/lib/services/subject.service';
-import { TopicPoolService } from '../../../../shared/src/lib/services/topic-pool.service';
-import { QuestionType } from '../../../../shared/src/lib/interfaces/question';
-import { QuestionRequest, AnswerCreationRequest } from '../../../../shared/src/lib/interfaces/question-creation-request';
-import { Subject } from '../../../../shared/src/lib/interfaces/subject';
-import { TopicPool } from '../../../../shared/src/lib/interfaces/topic-pool';
-import {ActivatedRoute, Router} from '@angular/router';
+import {Component, inject, OnInit} from '@angular/core';
+import {FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule} from '@angular/forms';
+import {CommonModule} from '@angular/common';
+import {QuestionService} from '../../../../shared/src/lib/services/question.service';
+import {SubjectService} from '../../../../shared/src/lib/services/subject.service';
+import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
+import {QuestionType} from '../../../../shared/src/lib/interfaces/question';
+import {QuestionRequest, AnswerCreationRequest} from '../../../../shared/src/lib/interfaces/question-creation-request';
+import {Subject} from '../../../../shared/src/lib/interfaces/subject';
+import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'lib-fragen-konfigurator',
   imports: [
     ReactiveFormsModule,
-    CommonModule
+    CommonModule,
+    RouterLink
   ],
   templateUrl: './fragen-konfigurator.component.html',
   styleUrl: './fragen-konfigurator.component.css'
@@ -23,49 +25,82 @@ export class FragenKonfiguratorComponent implements OnInit {
   private fb = inject(FormBuilder);
   private questionService = inject(QuestionService);
   private subjectService = inject(SubjectService);
-  private topicPoolService = inject(TopicPoolService);
+  private userInitService = inject(UserInitializationService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
 
   questionForm!: FormGroup;
   subjects: Subject[] = [];
   topicPools: TopicPool[] = [];
   questionTypes = Object.values(QuestionType);
+  fromSubjectSelection: boolean = false;
 
   readonly QuestionType = QuestionType;
-  readonly maxAnswers = 7; //maximale Anzahl der Antwormöglichkeiten (bei Multiple choice)
+  readonly maxAnswers = 7;
   readonly automaticAnswersLoaded = 2;
 
   private subjectId?: number;
   private topicPoolId?: number;
+  private currentUserId: number | null = null;
+  isAdmin: boolean = false;
 
-  ngOnInit() {
+  async ngOnInit() {
     this.initForm();
-
     this.setupFormSubscriptions();
+    await this.loadCurrentUser();
 
     this.route.queryParams.subscribe(params => {
       this.subjectId = params['subjectId'] ? Number(params['subjectId']) : undefined;
       this.topicPoolId = params['topicPoolId'] ? Number(params['topicPoolId']) : undefined;
+
+      const isPublicParam = params['isPublic'] === 'true';
+
+      this.fromSubjectSelection = params['fromSubjectSelection'] === 'true';
+      if (this.subjectId) {
+        this.questionForm.get('subjectId')?.setValue(this.subjectId);
+        this.loadSubjects();
+      } else {
+        this.loadSubjects();
+      }
+
+      if (isPublicParam && this.isAdmin) {
+        this.questionForm.get('isPublic')?.setValue(true);
+      }
     });
-    /**
-    this.route.queryParams.subscribe(params => {
-      const subjectId = params['subjectId'];
-      const topicId = params['topicId'];
-
-      if (subjectId) {
-        this.questionForm.get('subjectId')?.setValue(subjectId);
-      }
-
-      if (topicId) {
-        this.questionForm.get('topicId')?.setValue(Number(topicId));
-        this.questionForm.get('topicId')?.enable();
-      }
-    })
-**/
-    this.loadSubjects();
   }
 
+  private async loadCurrentUser() {
+    const user = this.userInitService.getCurrentUser();
 
+    if (user?.id) {
+      this.currentUserId = user.id;
+      this.isAdmin = user.isAdmin || false;
+      console.log('Current user ID loaded:', this.currentUserId);
+      console.log('Is admin:', this.isAdmin);
+
+      // Disable isPublic toggle if not admin
+      if (!this.isAdmin) {
+        this.questionForm.get('isPublic')?.disable();
+      }
+    } else {
+      try {
+        const initializedUser = await this.userInitService.initializeUser();
+        if (initializedUser) {
+          this.currentUserId = initializedUser.id;
+          this.isAdmin = initializedUser.isAdmin || false;
+          console.log('Current user ID loaded:', this.currentUserId);
+          console.log('Is admin:', this.isAdmin);
+
+          if (!this.isAdmin) {
+            this.questionForm.get('isPublic')?.disable(); // Disable toggle
+          }
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
+    }
+  }
 
   private initForm() {
     this.questionForm = this.fb.group({
@@ -73,9 +108,10 @@ export class FragenKonfiguratorComponent implements OnInit {
       subjectId: [null, Validators.required],
       topicPoolId: [{value: null, disabled: true}, Validators.required],
       text: ['', Validators.required],
-      difficulty: [2], // Default: mittel
+      difficulty: [2],
       explanation: [''],
-      isPublic: [true],
+      isPublic: [false],
+      approvalRequested: [false],
       answers: this.fb.array([])
     });
   }
@@ -109,16 +145,14 @@ export class FragenKonfiguratorComponent implements OnInit {
       for (let i = 0; i < this.automaticAnswersLoaded; i++) {
         answersArray.push(this.fb.group({
           text: ['', Validators.required],
-          isCorrect: [i === 0] // Erste Antwort standardmäßig richtig
+          isCorrect: [i === 0]
         }));
       }
     }
-    // Für FREETEXT werden keine Antworten benötigt
   }
 
   private updateExplanationValidation(type: QuestionType) {
     const explanationControl = this.questionForm.get('explanation');
-
     if (type === QuestionType.FREETEXT) {
       explanationControl?.setValidators([Validators.required]);
     } else {
@@ -136,45 +170,64 @@ export class FragenKonfiguratorComponent implements OnInit {
     this.subjectService.getAllSubjects().subscribe({
       next: (subjects) => {
         this.subjects = subjects;
-        console.log('Subjects geladen:', this.subjects);
 
-        if(this.subjectId){
+        if (this.subjectId) {
           this.questionForm.get('subjectId')?.setValue(this.subjectId);
-
           this.loadTopicPoolsForSubject(this.subjectId);
 
-          if(this.topicPoolId){
-              this.questionForm.get('topicPoolId')?.setValue(this.topicPoolId);
-              this.questionForm.get('topicPoolId')?.enable();
-
+          if (this.topicPoolId) {
+            this.questionForm.get('topicPoolId')?.setValue(this.topicPoolId);
+            this.questionForm.get('topicPoolId')?.enable();
           }
         }
       },
       error: (error) => {
         console.error('Fehler beim Laden der Schulfächer:', error);
+        this.snackBar.open('Fehler beim Laden der Schulfächer', 'Schließen', {
+          duration: 5000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
       }
     });
   }
 
   private loadTopicPoolsForSubject(subjectId: number) {
-    console.log('Lade TopicPools für Subject ID:', subjectId);
-
-    // Finde das ausgewählte Subject und verwende dessen TopicPools
     const selectedSubject = this.subjects.find(subject => subject.id === subjectId);
 
     if (selectedSubject && selectedSubject.topicPools) {
       this.topicPools = selectedSubject.topicPools;
-      console.log('TopicPools aus Subject geladen:', this.topicPools);
     } else {
-      console.warn('Keine TopicPools für Subject ID gefunden:', subjectId);
       this.topicPools = [];
     }
   }
 
-
   onSubmit() {
+    if (!this.currentUserId) {
+      this.snackBar.open('Benutzer-ID konnte nicht geladen werden. Bitte laden Sie die Seite neu.', 'Schließen', {
+        duration: 5000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        panelClass: ['error-snackbar']
+      });
+      console.error('Current user ID is not available');
+      return;
+    }
+
     if (this.questionForm.valid) {
-      const formValue = this.questionForm.value;
+      const formValue = this.questionForm.getRawValue();
+
+      let isPublic = false;
+      let approvalRequested = false;
+
+      if (this.isAdmin) {
+        isPublic = formValue.isPublic || false;
+        approvalRequested = false;
+      } else {
+        isPublic = false;
+        approvalRequested = formValue.approvalRequested || false;
+      }
 
       const questionRequest: QuestionRequest = {
         text: formValue.text,
@@ -182,41 +235,59 @@ export class FragenKonfiguratorComponent implements OnInit {
         type: formValue.type,
         difficulty: formValue.difficulty,
         isPublic: formValue.isPublic,
-        userId: 1, // TODO: Aktuelle User-ID aus Authentication Service holen
+        approvalRequested: approvalRequested,
+        userId: this.currentUserId,
         topicPoolId: Number(formValue.topicPoolId),
         answers: formValue.answers || []
       };
 
+      console.log('Submitting question with user ID:', this.currentUserId);
+      console.log('Is public:', questionRequest.isPublic);
+
       this.questionService.createQuestion(questionRequest).subscribe({
         next: () => {
-          alert('Frage wurde erfolgreich veröffentlicht!');
-          this.reinitForm();
+          this.snackBar.open('Frage wurde erfolgreich veröffentlicht!', 'OK', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar']
+          });
+
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {
+              subjectId: this.questionForm.get('subjectId')?.value,
+              topicPoolId: this.questionForm.get('topicPoolId')?.value,
+              fromSubjectSelection: this.fromSubjectSelection
+            },
+            queryParamsHandling: 'merge'
+          });
+
+          this.initForm();
+          this.setupFormSubscriptions();
+
+          if (!this.isAdmin) {
+            this.questionForm.get('isPublic')?.disable();
+          }
         },
         error: (error) => {
           console.error('Fehler beim Erstellen der Frage:', error);
-          alert('Fehler beim Veröffentlichen der Frage. Bitte versuchen Sie es erneut.');
+          this.snackBar.open('Fehler beim Veröffentlichen der Frage. Bitte versuchen Sie es erneut.', 'Schließen', {
+            duration: 5000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+            panelClass: ['error-snackbar']
+          });
         }
       });
     } else {
       this.markAllFieldsAsTouched();
-      alert('Bitte füllen Sie alle Pflichtfelder aus.');
-    }
-  }
-
-  private reinitForm(){
-    const prevSubjectId = this.questionForm.get('subjectId')?.value;
-    const prevTopicPoolId = this.questionForm.get('topicPoolId')?.value;
-
-    this.initForm();
-    this.setupFormSubscriptions();
-
-    if(prevSubjectId){
-      this.questionForm.get('subjectId')?.setValue(prevSubjectId);
-      this.loadTopicPoolsForSubject(Number(prevTopicPoolId));
-      if(prevSubjectId ){
-        this.questionForm.get('topicPoolId')?.setValue(prevTopicPoolId);
-        this.questionForm.get('topicPoolId')?.enable();
-      }
+      this.snackBar.open('Bitte füllen Sie alle Pflichtfelder aus.', 'OK', {
+        duration: 4000,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        panelClass: ['warning-snackbar']
+      });
     }
   }
 
@@ -241,6 +312,7 @@ export class FragenKonfiguratorComponent implements OnInit {
         return type;
     }
   }
+
   addAnswer() {
     const answersArray = this.answersArray;
 
@@ -251,6 +323,4 @@ export class FragenKonfiguratorComponent implements OnInit {
       }));
     }
   }
-
-
 }

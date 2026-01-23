@@ -35,6 +35,19 @@ import {
 } from '../../projects/content-management/src/lib/question-manager/question-manager.component';
 import {EditQuestionComponent} from '../../projects/content-management/src/lib/edit-question/edit-question.component';
 import {CreateSolutionComponent} from '../../projects/matura-trainer/src/lib/create-solution/create-solution.component';
+import {
+  SubjectDetailComponent
+} from '../../projects/content-management/src/lib/subject-detail/subject-detail.component';
+import {
+  SubjectPoolDetailComponent
+} from '../../projects/content-management/src/lib/subject-pool-detail/subject-pool-detail.component';
+import {NotFoundComponent} from '../../projects/content-management/src/lib/not-found/not-found.component';
+import {
+  QuestionApprovalListComponent
+} from '../../projects/content-management/src/lib/question-approval-list/question-approval-list.component';
+import {
+  QuestionApprovalDetailComponent
+} from '../../projects/content-management/src/lib/question-approval-detail/question-approval-detail.component';
 
 export const routes: Routes = [
   {
@@ -43,19 +56,34 @@ export const routes: Routes = [
     children: [
       { path: '', component: ContentHomeComponent },
       { path: 'about', component: AboutComponent },
+      {
+        path: 'study',
+        children: [
+          { path: 'choose', component: StudyOrCreateComponent },
+          { path: 'start', component: StartLearningComponent },
+          { path: 'topics', component: ChooseStudyTopicComponent },
+          { path: 'card/:id', component: FrageCardComponent },
+          { path: 'finished', component: FinishedCardComponent },
+        ]
+      },
 
-      { path: 'chooseStudyOrCreate', component: StudyOrCreateComponent },
-      { path: 'startCreate', component: StartCreateComponent },
-      { path: 'startStudy', component: StartLearningComponent },
-      { path: 'fragenkonfigurator', component: FragenKonfiguratorComponent },
-      { path: 'edit-question/:id', component: EditQuestionComponent },
-      { path: 'manageQuestions', component: QuestionManagerComponent },
+      {
+        path: 'questions',
+        children: [
+          { path: 'create', component: StartCreateComponent },
+          { path: 'new', component: FragenKonfiguratorComponent },
+          { path: 'edit/:id', component: EditQuestionComponent },
+          { path: 'manage', component: QuestionManagerComponent },
+          { path: 'approve', component: QuestionApprovalListComponent },
+          { path: 'approve/:id', component: QuestionApprovalDetailComponent },
+        ]
+      },
 
-      { path: 'personalPlace', component: PersonalPlaceComponent },
-      { path: 'questionCard/:id', component: FrageCardComponent },
-      { path: 'finished', component: FinishedCardComponent },
-      { path: 'chooseStudyTopic', component: ChooseStudyTopicComponent },
-      { path: 'subjects', component: SubjectsComponent }
+      { path: 'profile', component: PersonalPlaceComponent },
+      { path: 'subjects', component: SubjectsComponent },
+      { path: 'subjects/:id', component: SubjectDetailComponent },
+      { path: 'subjects/:subjectId/pools/:poolId', component: SubjectPoolDetailComponent },
+      { path: 'subjects/:subjectId/pools/by-name/:poolName', component: SubjectPoolDetailComponent },
     ]
   },
 
@@ -94,6 +122,13 @@ export const routes: Routes = [
           { path: '', redirectTo: 'generell', pathMatch: 'full' }
         ]
       }
+    ]
+  },
+  {
+    path: '**',
+    component: AppLayoutComponent,
+    children: [
+      { path: '**', component: NotFoundComponent }
     ]
   }
 ];

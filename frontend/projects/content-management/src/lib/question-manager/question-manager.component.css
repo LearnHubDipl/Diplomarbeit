@@ -1,0 +1,5 @@
+.hover-white.btn-outline-warning:hover,
+.hover-white.btn-outline-warning:active,
+.hover-white.btn-outline-warning:focus {
+  color: white !important;
+}

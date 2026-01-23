@@ -1,9 +1,13 @@
 package at.learnhub.repository;
 
+import at.learnhub.dto.response.TopicContentDto;
+import at.learnhub.mapper.TopicContentMapper;
+import at.learnhub.model.MediaFile;
 import at.learnhub.model.TopicContent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 
@@ -12,7 +16,6 @@ public class TopicContentRepository {
 
     @Inject EntityManager em;
 
-    public TopicContent getById(Long id) { return em.find(TopicContent.class, id); }
 
     public List<TopicContent> findApprovedBySubject(Long subjectId) {
         return em.createQuery("""
@@ -37,7 +40,6 @@ public class TopicContentRepository {
                 .getResultList();
     }
 
-    // NEU: ohne Approved-Filter
     public List<TopicContent> findBySubjectAll(Long subjectId) {
         return em.createQuery("""
             select tc from TopicContent tc
@@ -61,4 +63,5 @@ public class TopicContentRepository {
     }
 
     public void persist(TopicContent tc) { em.persist(tc); }
+
 }
