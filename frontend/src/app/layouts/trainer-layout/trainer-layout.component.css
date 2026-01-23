@@ -9,6 +9,16 @@
   padding: 4% 10%;
 }
 
+app-navbar {
+  position: relative;
+  z-index: 1001;
+}
+
+app-footer {
+  position: relative;
+  z-index: 1001;
+}
+
 
 /**** RESPONSIVE ****/
 @media (max-width: 767px) {
