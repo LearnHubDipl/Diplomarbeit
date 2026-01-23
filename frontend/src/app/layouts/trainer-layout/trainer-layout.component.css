@@ -3,6 +3,7 @@
   grid-template-columns:20vw auto;
   width: 100%;
   height: 100vh;
+  position: relative;
 }
 .trainer-main-layout .trainer-content {
   padding: 4% 10%;

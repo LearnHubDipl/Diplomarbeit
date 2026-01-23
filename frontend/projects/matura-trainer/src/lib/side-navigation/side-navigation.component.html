@@ -1,4 +1,4 @@
-<button class="nav-toggle" (click)="sidebarOpen = !sidebarOpen">
+<button class="nav-toggle" (click)="sidebarOpen = !sidebarOpen" [class.open]="sidebarOpen">
   ☰
 </button>
 <nav class="trainer-navigation" [class.open]="sidebarOpen">
