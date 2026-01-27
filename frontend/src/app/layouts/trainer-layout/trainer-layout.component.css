@@ -6,6 +6,7 @@
   position: relative;
 }
 .trainer-main-layout .trainer-content {
+  overflow: scroll;
   padding: 4% 10%;
 }
 
