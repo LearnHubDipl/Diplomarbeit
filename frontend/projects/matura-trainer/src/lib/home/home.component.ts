@@ -13,6 +13,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 
 // Interfaces
 import { Subject } from '../../../../shared/src/lib/interfaces/subject';
+import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
 
 export interface ProgressEntry {
   label: string;
@@ -50,8 +51,9 @@ export class HomeComponent implements OnInit {
   private statsService = inject(StatsService);
   private questionService = inject(QuestionService);
   private questionPoolService = inject(QuestionPoolService);
+  private userService: UserInitializationService = inject(UserInitializationService);
 
-  userId = 1;
+  userId = -1;
   subjects: Subject[] = [];
 
   topicPoolControl = new FormControl<number[]>([]);
@@ -60,6 +62,8 @@ export class HomeComponent implements OnInit {
   hasQuestions = false;
 
   ngOnInit(): void {
+    this.userId = this.userService.getCurrentUser()!.id;
+
     this.loadSubjects();
     this.loadProgressData();
 

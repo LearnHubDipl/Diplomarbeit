@@ -12,6 +12,7 @@ import { SolutionService } from '../../../../shared/src/lib/services/solution.se
 import { Solution } from '../../../../shared/src/lib/interfaces/solution';
 import { ExamService } from '../../../../shared/src/lib/services/exam.service';
 import { CreateSolutionComponent } from '../create-solution/create-solution.component';
+import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
 
 @Component({
   selector: 'lib-question-runner',
@@ -49,7 +50,7 @@ export class QuestionRunnerComponent implements OnInit {
   submitted = false;
   showAllSolutions = false;
   isReadOnly = false;
-  userId = 1;
+  userId = -1;
 
   timeLeft: number = 0;
   question: Question | undefined;
@@ -64,6 +65,7 @@ export class QuestionRunnerComponent implements OnInit {
   form: FormGroup;
 
   // Injections
+  userService: UserInitializationService = inject(UserInitializationService);
   router = inject(Router);
   questionService = inject(QuestionService);
   answerService = inject(AnswerService);
@@ -82,6 +84,8 @@ export class QuestionRunnerComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.userId = this.userService.getCurrentUser()!.id;
+
     let state = history.state;
 
     if (state?.isReadOnly) {

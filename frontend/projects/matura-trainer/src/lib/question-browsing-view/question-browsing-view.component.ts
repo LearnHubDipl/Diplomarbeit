@@ -8,6 +8,7 @@ import {QuestionService} from '../../../../shared/src/lib/services/question.serv
 import {QuestionPoolService} from '../../../../shared/src/lib/services/question-pool.service';
 import {TopicPool} from '../../../../shared/src/lib/interfaces/topic-pool';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
+import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
 
 @Component({
   selector: 'lib-question-browsing-view',
@@ -27,6 +28,8 @@ export class QuestionBrowsingViewComponent implements OnInit {
   @Input("mode") mode: 'browse' | 'pool' = 'browse';
   questions: Question[] = [];
   entries: QuestionPoolEntry[] = [];
+
+  userService: UserInitializationService = inject(UserInitializationService);
 
   get viewQuestions(): Question[] {
     return this.mode === 'browse'
@@ -55,7 +58,7 @@ export class QuestionBrowsingViewComponent implements OnInit {
   showOnlyPool: boolean = false;
 
   ngOnInit() {
-    const userId = 1;
+    let userId = this.userService.getCurrentUser()!.id;
     this.questionPoolService.getQuestionPoolForUser(userId).subscribe(pool => {
       this.selectedQuestionIds = pool.entries.map(e => e.question.id);
     });
@@ -169,7 +172,7 @@ export class QuestionBrowsingViewComponent implements OnInit {
 
   addQuestionsToQuestionPool() {
     let payload: QuestionPoolEntryRequest = {
-      userId: 1,
+      userId: this.userService.getCurrentUser()!.id,
       questionIds: this.selectedQuestionIds
     };
     this.questionPoolService.postQuestionsToQuestionPool(payload).subscribe(p => {
@@ -191,7 +194,7 @@ export class QuestionBrowsingViewComponent implements OnInit {
   }
 
   toggleQuestionPool(questionId: number) {
-    const userId = 1;
+    const userId = this.userService.getCurrentUser()!.id;
     const request = { userId, questionIds: [questionId] };
 
     if (this.selectedQuestionIds.includes(questionId)) {

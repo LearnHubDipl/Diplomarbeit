@@ -25,7 +25,8 @@ public class UserMapper {
                 user.getTeacher(),
                 user.getAdmin(),
                 user.getProfilePicture(),
-                user.getClassName()
+                user.getClassName(),
+                user.getUsername()
         );
     }
 

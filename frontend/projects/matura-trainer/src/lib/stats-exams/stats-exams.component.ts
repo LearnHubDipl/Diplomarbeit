@@ -1,10 +1,11 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, inject, Input, OnInit} from '@angular/core';
 import {ExamDto, ExamQuestionDetailDto, ExamQuestionSlimDto, StatsService} from '../../../../shared/src/lib/services/stats.service';
 import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import {Exam} from '../../../../shared/src/lib/interfaces/exam';
 import {QuestionRunnerComponent} from '../question-runner/question-runner.component';
 import {ExamHistoryDto} from '../../../../shared/src/lib/interfaces/ExamHistoryDto';
 import { ChangeDetectorRef } from '@angular/core';
+import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
 
 @Component({
   selector: 'lib-stats-exams',
@@ -27,11 +28,13 @@ export class StatsExamsComponent implements OnInit {
   exams: ExamHistoryDto[] = [];
   selectedExamDetails?: ExamDto;
   expandedExamId: number | undefined = undefined;
-  userid = 1;
+  userid = -1;
+  userService: UserInitializationService = inject(UserInitializationService);
 
   constructor(private service: StatsService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
+    this.userid = this.userService.getCurrentUser()!.id;
     this.loadExams();
   }
 

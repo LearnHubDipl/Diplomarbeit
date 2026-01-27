@@ -46,10 +46,17 @@ public record UserSlimDto(
                 implementation = MediaFile.class
         )
         MediaFile profilePicture,
+
         @Schema(
                 description = "Class name of the user (e.g., 5AHITM).",
                 example = "5AHITM"
         )
-        String className
+        String className,
+
+        @Schema(
+                description = "Username in keycloak",
+                example = "it210181"
+        )
+        String username
 ) {
 }

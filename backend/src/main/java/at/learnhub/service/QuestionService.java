@@ -1,5 +1,6 @@
 package at.learnhub.service;
 
+import at.learnhub.dto.request.AddQuestionToQuestionPoolRequestDto;
 import at.learnhub.dto.request.CheckAnswersRequestDto;
 import at.learnhub.dto.request.QuestionCreationRequestDto;
 import at.learnhub.dto.response.CheckAnswersResponseDto;
@@ -16,10 +17,7 @@ import jakarta.ws.rs.BadRequestException;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -32,7 +30,8 @@ public class QuestionService {
     UserRepository userRepository;
     @Inject
     AnswerRepository answerRepository;
-
+    @Inject
+    QuestionPoolService questionPoolService;
 
     public List<QuestionDto> getQuestionsByTopicPool(Long id) {
         TopicPool topicPool = topicPoolRepository.getTopicPoolById(id);
@@ -73,6 +72,12 @@ public class QuestionService {
             answers.add(answer);
         }
         question.setAnswers(answers);
+        question.setEntries(new LinkedList<>());
+
+        AddQuestionToQuestionPoolRequestDto poolRequest = new AddQuestionToQuestionPoolRequestDto(
+                user.getId(), List.of(question.getId())
+        );
+        questionPoolService.addQuestionsToPool(poolRequest);
 
         return QuestionMapper.toDto(question);
     }

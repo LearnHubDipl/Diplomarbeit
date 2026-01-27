@@ -2,6 +2,7 @@ package at.learnhub.repository;
 
 import at.learnhub.dto.simple.UserSlimDto;
 import at.learnhub.mapper.UserMapper;
+import at.learnhub.model.QuestionPool;
 import at.learnhub.model.User;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -111,9 +112,12 @@ public class UserRepository {
      */
     @Transactional
     public User createUser(User user) {
+        user.setQuestionPool(new QuestionPool());
+        user.getQuestionPool().setUser(user);
         em.persist(user);
         return user;
     }
+
 
     /**
      * Updates an existing user.

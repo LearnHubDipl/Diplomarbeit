@@ -138,7 +138,7 @@ public class User {
     /**
      * Question pool associated with the user.
      */
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.PERSIST)
     @JsonIgnoreProperties({"user"})
     private QuestionPool questionPool;
 
