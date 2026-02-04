@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { ChartData, ChartType, ChartConfiguration, Plugin } from 'chart.js';
 import { StatsLegendEntry, StatsOverviewDto, StatsService } from '../../../../shared/src/lib/services/stats.service';
 import { CenterTextPlugin } from '../plugin/chart-text.plugin';
 import {NgChartsModule} from 'ng2-charts';
 import {NgForOf, NgStyle} from '@angular/common';
+import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
 
 @Component({
   selector: 'lib-stats-home',
@@ -19,6 +20,8 @@ import {NgForOf, NgStyle} from '@angular/common';
   ]
 })
 export class StatsHomeComponent implements OnInit {
+
+  userService: UserInitializationService = inject(UserInitializationService);
 
   chartPlugins: Plugin[] = [CenterTextPlugin];
 
@@ -40,7 +43,7 @@ export class StatsHomeComponent implements OnInit {
 
   public legendData: StatsLegendEntry[] = [];
   streak = 0;
-  userId = 1; // statisch für Test
+  userId = this.userService.getCurrentUser()!.id;
 
   userAverage: number | null = null;
   examCount: number = 0;

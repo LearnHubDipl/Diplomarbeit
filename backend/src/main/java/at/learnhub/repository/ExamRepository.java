@@ -1,6 +1,7 @@
 package at.learnhub.repository;
 
 import at.learnhub.dto.simple.ExamDto;
+import at.learnhub.dto.simple.ExamHistoryDto;
 import at.learnhub.dto.simple.SubjectDto;
 import at.learnhub.dto.simple.UserExamAverageDto;
 import at.learnhub.mapper.ExamMapper;
@@ -61,5 +62,20 @@ public class ExamRepository {
         Double average = (avgNumber == null) ? null : avgNumber.doubleValue();
 
         return new UserExamAverageDto(userId, average, count);
+    }
+
+    public List<ExamHistoryDto> findHistoryByUserId(Long userId) {
+        List<Exam> entities = em.createQuery(
+                        "SELECT DISTINCT e FROM Exam e " +
+                                "LEFT JOIN FETCH e.topicPools tp " +
+                                "LEFT JOIN FETCH tp.subject s " +
+                                "WHERE e.user.id = :userId ORDER BY e.startedAt DESC",
+                        Exam.class)
+                .setParameter("userId", userId)
+                .getResultList();
+
+        return entities.stream()
+                .map(ExamMapper::toHistoryDto)
+                .toList();
     }
 }

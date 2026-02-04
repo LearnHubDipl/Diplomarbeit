@@ -1,0 +1,43 @@
+<form [formGroup]="form" (ngSubmit)="save()">
+  <div formArrayName="steps">
+    <div *ngFor="let step of steps.controls; let i = index" [formGroupName]="i" class="step-wrapper">
+
+      <div class="step-tab">
+        <input
+          type="text"
+          formControlName="title"
+          class="tab-input"
+          [placeholder]="'Schritt ' + (i + 1)">
+      </div>
+
+      <textarea
+        formControlName="text"
+        class="step-textarea"
+        [placeholder]="'Inhalt von Schritt ' + (i + 1)">
+      </textarea>
+
+      <button
+        type="button"
+        class="delete-step"
+        (click)="removeStep(i)"
+        *ngIf="steps.length > 1">
+        Löschen
+      </button>
+    </div>
+  </div>
+
+  <div class="add-button-area" (click)="addStep()">
+    <div class="circle-plus">+</div>
+    <span class="add-label">Schritt hinzufügen</span>
+  </div>
+
+  <div class="button-container">
+    <button type="submit" class="submit-btn" [disabled]="form.invalid">
+      Lösungsweg speichern
+    </button>
+  </div>
+
+  <div class="footer-actions">
+    <button type="button" class="btn-cancel" (click)="cancel()">Abbrechen</button>
+  </div>
+</form>

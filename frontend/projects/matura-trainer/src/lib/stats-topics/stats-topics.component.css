@@ -4,20 +4,30 @@
   width: 100%;
   height: 75vh;
 }
-.left-side{
+.left-side {
   justify-content: center;
   padding-right: 2rem;
   height: 100%;
 }
 
-
-.widget-wrapper canvas{
+.widget-wrapper canvas {
   margin: auto;
   width: 25vw;
   padding: 2rem;
 }
 
-.header select {
+.header {
+  position: relative;
+}
+
+.select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+select {
+  width: 100%;
   background-color: transparent;
   border: none;
   color: white;
@@ -30,22 +40,26 @@
   cursor: pointer;
 }
 
-.header select option {
+select option {
   color: black;
   background-color: white;
 }
-.header::after {
-  content: '▼';
+
+.arrow {
   position: absolute;
-  right: 2rem;
+  right: 0.5rem;
   top: 50%;
-  transform: translateY(-50%);
-  color: white;
+  width: 0;
+  height: 0;
   pointer-events: none;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid white;
+  transform: translateY(-50%);
   transition: transform 0.3s ease;
 }
 
-.header.open::after {
+.header.open .arrow {
   transform: translateY(-50%) rotate(180deg);
 }
 
@@ -102,10 +116,10 @@
   border-radius: 10px;
 }
 
-.stats-content{
+.stats-content {
   padding: 2rem;
 }
 
-.chart-wrapper{
+.chart-wrapper {
   height: 70vh;
 }

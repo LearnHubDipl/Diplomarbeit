@@ -5,7 +5,9 @@ import at.learnhub.dto.request.SubmitExamRequestDto;
 import at.learnhub.dto.response.CreatedExamResponseDto;
 import at.learnhub.dto.response.SubmittedExamResponseDto;
 import at.learnhub.dto.simple.ExamDto;
+import at.learnhub.dto.simple.ExamHistoryDto;
 import at.learnhub.dto.simple.UserExamAverageDto;
+import at.learnhub.mapper.ExamMapper;
 import at.learnhub.service.ExamService;
 import at.learnhub.repository.ExamRepository;
 import jakarta.inject.Inject;
@@ -124,6 +126,38 @@ public class ExamResource {
         return Response.status(Response.Status.CREATED).entity(response).build();
     }
 
+    @GET
+    @Operation(
+            summary = "Create a new copy of an exam",
+            description = "Creates a new copy of an already existing exam so it can be practiced again."
+    )
+    @APIResponses({
+            @APIResponse(
+                    responseCode = "201",
+                    description = "Exam created successfully",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON,
+                            schema = @Schema(implementation = CreatedExamResponseDto.class)
+                    )
+            ),
+            @APIResponse(
+                    responseCode = "404",
+                    description = "Exam not found"
+            )
+    })
+    @Path("/create-copy/{id}")
+    public Response createExamCopy(
+            @Parameter(
+                    required = true,
+                    description = "id of the exam to be copied"
+            )
+            @PathParam("id") Long id
+    ) {
+        CreatedExamResponseDto response = examService.createExamCopy(id);
+        return Response.status(Response.Status.CREATED).entity(response).build();
+    }
+
+
     @POST
     @Path("/submit")
     @Operation(
@@ -162,13 +196,11 @@ public class ExamResource {
     @Path("/by-user")
     public Response getExamsByUser(@QueryParam("userId") Long userId) {
         if (userId == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("userId is required")
-                    .build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("userId is required").build();
         }
+        List<ExamHistoryDto> history = examRepository.findHistoryByUserId(userId);
 
-        List<ExamDto> exams = examRepository.findByUserId(userId);
-        return Response.ok(exams).build();
+        return Response.ok(history).build();
     }
 
     @GET

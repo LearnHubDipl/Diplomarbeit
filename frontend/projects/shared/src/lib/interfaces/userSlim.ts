@@ -9,4 +9,5 @@ export interface UserSlim {
   isAdmin?: boolean;
   profilePicture?: Media;
   className?: string;
+  username?: string;
 }

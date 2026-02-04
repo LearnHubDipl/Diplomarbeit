@@ -40,8 +40,14 @@ export class QuestionPoolService {
 
   increaseCorrectCount(questionId: number, userId: number): Observable<void> {
     return this.httpClient.post<void>(
-      `http://localhost:8080/api/entries/increase-correct-count?questionId=${questionId}&userId=${userId}`,
+      API_BASE_URL +`/entries/increase-correct-count?questionId=${questionId}&userId=${userId}`,
       {}
     );
+  }
+
+  markAsIncorrect(questionId: number, userId: number): Observable<void> {
+    return this.httpClient.post<void>(API_BASE_URL +`/entries/mark-incorrect`, null, {
+      params: { questionId: questionId.toString(), userId: userId.toString() }
+    });
   }
 }

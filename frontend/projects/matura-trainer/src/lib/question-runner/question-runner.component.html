@@ -1,9 +1,80 @@
-<div class="widget-wrapper question-wrapper">
-  <!-- inner 'bread crumbs' showing the subject and the topic pool -->
-  <div class="header">{{ question?.topicPool?.subject?.name }} &gt; {{ question?.topicPool?.name }}</div>
+<!-- score box and navigation in exam and review mode -->
+<div class="exam-score-nav-grid" *ngIf="mode !== 'practice'">
+  <!-- Score Box -->
+  <div class="widget-wrapper score-box" [style.opacity]="mode === 'review' ? 1 : 0">
+    <div class="header">Dein Ergebnis</div>
+    <div class="widget-content score-content">
+      <p class="score-text">
+        Score: <strong>{{ Math.floor(exam?.score || 0)}}%</strong>
+      </p>
+      <div class="score-bar-container">
+        <div class="score-bar" [style.width.%]="exam?.score || 0"></div>
+      </div>
+    </div>
+  </div>
 
-  <form [formGroup]="form" class="widget-content question-content" (ngSubmit)="submit()">
-    <div class="widget-content-top">
+  <!-- Big Navigation -->
+  <div class="widget-wrapper big-nav" *ngIf="mode === 'exam'">
+    <div
+      class="big-nav-item"
+      (click)="navigateToQuestion(i)"
+      [ngClass]="{
+        'selected-navigation-button': (i == currentQuestionIndex)
+      }"
+      *ngFor="let question of this.questionIdList, let i = index "
+    >
+      <p>{{i+1}}</p>
+      <div class="answer-indication" [ngClass]="{
+       'answered': (previousAnswers[question]?.selectedAnswerIds?.length ?? 0) > 0
+                || !!previousAnswers[question]?.freeTextAnswer
+      }">
+      </div>
+    </div>
+  </div>
+
+  <div class="widget-wrapper big-nav" *ngIf="mode === 'review'">
+    <div
+      class="big-nav-item"
+      (click)="navigateToQuestion(i)"
+      [ngClass]="{
+        'selected-navigation-button': (i == currentQuestionIndex)
+      }"
+      *ngFor="let question of this.exam?.questions, let i = index "
+    >
+      <p>{{i+1}}</p>
+      <div class="answer-indication" [ngClass]="{
+           'correct': (question.isCorrect),
+           'incorrect': (!question.isCorrect)
+      }">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="widget-wrapper question-wrapper" [hidden]="showSolutionEditor">
+  <div class="header flex-between">
+    {{ question?.topicPool?.subject?.name || 'Fach' }} &gt; {{ question?.topicPool?.name || 'Themenpool' }}
+    <span *ngIf="this.mode !== 'practice'" class="timer-badge">
+      {{ Math.floor(timeLeft / 60).toString().padStart(2, '0') }}:{{ Math.floor(timeLeft % 60).toString().padStart(2, '0') }}
+    </span>
+  </div>
+
+  <!-- ERROR MESSAGES, IF THERE ARE ANY -->
+  <div *ngIf="errorMessage" class="inline-error">
+    {{ errorMessage }}
+
+    <button *ngIf="lastFailedAction === 'loadQuestion'"
+            (click)="loadQuestion(currentQuestionIndex)">
+      Erneut laden
+    </button>
+
+    <button *ngIf="lastFailedAction === 'submitAnswer'"
+            (click)="submit()">
+      Erneut prüfen
+    </button>
+  </div>
+
+  <form *ngIf="lastFailedAction == null" [formGroup]="form" class="widget-content question-content {{ mode !== 'practice' ? 'exam-form' : ''}}" (ngSubmit)="submit()">    <div class="widget-content-top">
       <div *ngIf="(mode === 'practice' || mode === 'review') && submitted" class="result-badge"
            [ngClass]="{'correct': answerResult?.correct, 'incorrect': !answerResult?.correct}">
           <span class="icon">
@@ -54,7 +125,7 @@
         </ng-container>
       </div>
 
-      <div class="widget-content-right" [ngStyle]="{ display: this.question?.media ? 'block' : 'none'}">
+      <div class="widget-content-right" [ngClass]="{'hidden': !this.question?.media, 'visible-block': this.question?.media}">
         <img [src]="this.question?.media?.path" [alt]="this.question?.media?.description">
       </div>
     </div>
@@ -84,59 +155,86 @@
         ← Zurück
       </button>
 
+      <img
+        src="/assets/restart.png"
+        *ngIf="this.mode === 'review'"
+        style="height: 5vh; align-self: end; margin-right: -25%; cursor: pointer"
+        (click)="createExamCopy(this.exam!.id)"
+      >
+
       <button
         type="button"
         class="submit-btn"
-        [disabled]="currentQuestionIndex >= currentQuestions.length - 1 && !navigateBack"
         (click)="currentQuestionIndex < currentQuestions.length - 1 ?
           navigateExam('next') :
           finish()">
-        {{ currentQuestionIndex >= currentQuestions.length - 1 && navigateBack ?  'Fertigstellen' : 'Weiter →' }}
+        {{ currentQuestionIndex < currentQuestions.length - 1 ? 'Weiter →' : 'Fertigstellen' }}
       </button>
     </div>
   </form>
 </div>
 
-
-<div *ngIf="hasSolutions && submitted && (mode === 'practice' || mode === 'review')" style="margin-top: 3rem;" class="widget-wrapper">
-  <div class="header">TOP Lösungsweg</div>
-
-  <!-- Top Lösung -->
+<div *ngIf="!showSolutionEditor && hasSolutions && submitted && (mode === 'practice' || mode === 'review')" class="widget-wrapper solution-margin-top">
+  <div class="header">Lösungswege</div>
   <div class="widget-content">
-    <div *ngFor="let step of solutions[0]?.steps">
-      <h5>{{ step.title }}</h5>
-      <p>{{ step.text }}</p>
+    <div *ngIf="solutions.length > 0">
+      <div *ngFor="let step of solutions[0]?.steps">
+        <h5>{{ step.title }}</h5>
+        <p>{{ step.text }}</p>
+      </div>
+      <div class="vote-container">
+        <div class="vote-item">
+          <img src="https://www.pngmart.com/files/23/Upvote-PNG-Photos.png" (click)="upvoteSolution(solutions[0].id)" class="vote-img">
+          <p class="vote-count">{{ voteCounts[solutions[0].id]?.up ?? solutions[0].upVotes }}</p>
+        </div>
+        <div class="vote-item">
+          <img src="https://i.imgur.com/2mVSBqP.png" (click)="downvoteSolution(solutions[0].id)" class="vote-img">
+          <p class="vote-count">{{ voteCounts[solutions[0].id]?.down ?? 0 }}</p>
+        </div>
+      </div>
     </div>
 
-    <div class="vote-wrapper">
-      <img src="https://www.pngmart.com/files/23/Upvote-PNG-Photos.png"
-           (click)="upvoteSolution(solutions[0].id)"
-           style="cursor:pointer; width: 24px; margin-right: 5px;">
-      <p>{{ voteCounts[solutions[0].id] ?? solutions[0].upVotes }}</p>
-      <img src="https://i.imgur.com/2mVSBqP.png"
-           (click)="downvoteSolution(solutions[0].id)"
-           style="cursor:pointer; width: 24px; margin-left: 5px;">
-    </div>
-  </div>
-
-  <div class="viewMore-btn" *ngIf="hasMultipleSolutions" (click)="showAllSolutions = !showAllSolutions">
-    {{ showAllSolutions ? 'Weniger anzeigen' : 'Mehr anzeigen' }}
-  </div>
-
-  <div *ngFor="let solution of solutions.slice(1)" class="widget-content" [hidden]="!showAllSolutions">
-    <div *ngFor="let step of solution.steps">
-      <h5>{{ step.title }}</h5>
-      <p>{{ step.text }}</p>
+    <div class="solution-footer-actions">
+      <div class="viewMore-btn no-margin" *ngIf="hasMultipleSolutions" (click)="showAllSolutions = !showAllSolutions">
+        {{ showAllSolutions ? 'Weniger anzeigen' : 'Mehr anzeigen' }}
+      </div>
+      <div class="create-solution-link" (click)="openSolutionEditor()">+ Eigenen Lösungsweg erstellen</div>
     </div>
 
-    <div class="vote-wrapper">
-      <img src="https://www.pngmart.com/files/23/Upvote-PNG-Photos.png"
-           (click)="upvoteSolution(solution.id)"
-           style="cursor:pointer; width: 24px; margin-right: 5px;">
-      <p>{{ voteCounts[solution.id] ?? solution.upVotes }}</p>
-      <img src="https://i.imgur.com/2mVSBqP.png"
-           (click)="downvoteSolution(solution.id)"
-           style="cursor:pointer; width: 24px; margin-left: 5px;">
+    <div *ngFor="let solution of solutions.slice(1)" [hidden]="!showAllSolutions" class="extra-solution-item">
+      <div *ngFor="let step of solution.steps">
+        <h5>{{ step.title }}</h5>
+        <p>{{ step.text }}</p>
+      </div>
+      <div class="vote-container">
+        <div class="vote-item">
+          <img src="https://www.pngmart.com/files/23/Upvote-PNG-Photos.png" (click)="upvoteSolution(solution.id)" class="vote-img">
+          <p class="vote-count">{{ voteCounts[solution.id]?.up ?? solution.upVotes }}</p>
+        </div>
+        <div class="vote-item">
+          <img src="https://i.imgur.com/2mVSBqP.png" (click)="downvoteSolution(solution.id)" class="vote-img">
+          <p class="vote-count">{{ voteCounts[solution.id]?.down ?? 0 }}</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
+
+<div *ngIf="!showSolutionEditor && !hasSolutions && submitted && (mode === 'practice' || mode === 'review')" class="widget-wrapper solution-margin-top">
+  <div class="widget-content empty-solution-placeholder">
+    <p>Für diese Frage gibt es noch keinen Lösungsweg.</p>
+    <button class="submit-btn warning-btn" (click)="openSolutionEditor()">Als Erster einen Lösungsweg erstellen</button>
+  </div>
+</div>
+
+<div *ngIf="showSolutionEditor && question" class="widget-wrapper solution-margin-top">
+  <div class="header">{{ question?.topicPool?.subject?.name }} > {{ question?.topicPool?.name }}</div>
+  <div class="widget-content">
+    <h3 class="solution-editor-title">{{ question.text }}</h3>
+    <app-create-solution [questionId]="question.id" (close)="closeEditor()"></app-create-solution>
+  </div>
+</div>
+
+<!-- Add this to the footer later
+  <a href="https://www.flaticon.com/free-icons/restart" title="restart icons">Restart icons created by Fathema Khanom - Flaticon</a>
+-->

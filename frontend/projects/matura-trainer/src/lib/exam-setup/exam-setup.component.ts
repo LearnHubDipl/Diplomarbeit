@@ -8,6 +8,7 @@ import { Subject } from '../../../../shared/src/lib/interfaces/subject';
 import {SubjectService} from '../../../../shared/src/lib/services/subject.service';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {QuestionPoolService} from '../../../../shared/src/lib/services/question-pool.service';
+import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
 
 
 @Component({
@@ -33,7 +34,10 @@ export class ExamSetupComponent implements OnInit {
   activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   questionPoolService: QuestionPoolService = inject(QuestionPoolService);
   subjectService: SubjectService = inject(SubjectService);
+  userService: UserInitializationService = inject(UserInitializationService);
   subjects: Subject[] = []
+
+  errorMessage: string | null = null;
 
   form: FormGroup = this.fb.group({
     userId: [1],
@@ -43,14 +47,24 @@ export class ExamSetupComponent implements OnInit {
   });
 
   ngOnInit() {
+    this.loadSubjects()
+  }
+
+  loadSubjects() {
+    this.clearError()
     // this.subjectService.getAllSubjects().subscribe(subjects => {this.subjects = subjects;});
-    this.questionPoolService.getSubjectsForUser(1).subscribe(subjects => this.subjects = subjects);
+    this.questionPoolService.getSubjectsForUser(1).subscribe({
+      next: subjects => {
+        this.subjects = subjects
+      },
+      error: err => this.handleError("Themenpools konnten nicht geladen werden.", err)
+    });
   }
 
   startExam() {
     if (this.form.invalid) return;
 
-    this.form.value.userId = 1;
+    this.form.value.userId = this.userService.getCurrentUser()!.id;
     let settings = this.form.value;
 
     this.router.navigate(['exam'], {
@@ -89,5 +103,14 @@ export class ExamSetupComponent implements OnInit {
         subject.topicPools.some(pool => selectedTopicPoolIds.includes(pool.id))
       )
       .map(subject => subject.name);
+  }
+
+  handleError(msg: string, err: any) {
+    console.error(err);
+    this.errorMessage = msg;
+  }
+
+  clearError() {
+    this.errorMessage = null;
   }
 }

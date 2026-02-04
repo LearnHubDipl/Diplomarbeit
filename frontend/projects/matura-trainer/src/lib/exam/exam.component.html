@@ -1,19 +1,29 @@
-<div *ngIf="!isLoading && exam && !examSubmitted">
+<div *ngIf="!isLoading && !errorMessage && exam && !examSubmitted">
   <lib-question-runner
     mode="exam"
+    [timeLimit]="this.exam?.timeLimitMinutes"
     [questionIdList]="this.questionIds"
     (answered)="storeAnswer($event)"
     (finishedExam)="submitExam($event)">
   </lib-question-runner>
 </div>
 
-<div *ngIf="!isLoading && submittedExam && examSubmitted">
+<div *ngIf="!isLoading && !errorMessage && submittedExam && examSubmitted">
   <lib-question-runner
     mode="review"
     [exam]="this.submittedExam">
   </lib-question-runner>
 </div>
 
-<div *ngIf="isLoading">
+<div *ngIf="isLoading && !errorMessage">
   <p>Prüfung wird erstellt...</p>
+</div>
+
+<!-- ERROR MESSAGES, IF THERE ARE ANY -->
+<div *ngIf="errorMessage" class="inline-error">
+  {{ errorMessage }}
+
+  <button (click)="navigateBack()">
+    Zurück
+  </button>
 </div>

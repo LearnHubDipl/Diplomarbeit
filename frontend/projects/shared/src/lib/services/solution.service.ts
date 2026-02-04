@@ -18,8 +18,17 @@ export class SolutionService {
     return this.http.post(`${API_BASE_URL}/solutions/${solutionId}/votes/down?userId=${userId}`, null);
   }
 
-  getVoteCount(solutionId: number): Observable<{solutionId: number, score: number}> {
-    return this.http.get<{solutionId: number, score: number}>(`${API_BASE_URL}/solutions/${solutionId}/votes/count`);
+  getVoteCount(solutionId: number): Observable<{solutionId: number, upVotes: number, downVotes: number}> {
+    return this.http.get<{solutionId: number, upVotes: number, downVotes: number}>(
+      `${API_BASE_URL}/solutions/${solutionId}/votes/count`
+    );
+  }
+
+  createSolution(questionId: number, userId: number, solution: any): Observable<any> {
+    const params = new HttpParams()
+      .set('questionId', questionId.toString())
+      .set('userId', userId.toString());
+    return this.http.post(`${API_BASE_URL}/solutions/create`, solution, { params });
   }
 
 }

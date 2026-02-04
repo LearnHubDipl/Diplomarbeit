@@ -2,7 +2,16 @@
   <div class="header">Prüfung konfigurieren</div>
 
   <div class="widget-content">
-    <form [formGroup]="form" (ngSubmit)="startExam()">
+    <!-- ERROR MESSAGES, IF THERE ARE ANY -->
+    <div *ngIf="errorMessage" class="inline-error">
+      {{ errorMessage }}
+
+      <button (click)="loadSubjects()">
+        Erneut laden
+      </button>
+    </div>
+
+    <form *ngIf="!errorMessage" [formGroup]="form" (ngSubmit)="startExam()">
       <!-- Topic Pools -->
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Wähle Fächer und Themenpools</mat-label>

@@ -1,0 +1,147 @@
+@startuml
+entity User {
+  * id : Long
+  --
+  name : String
+  email : String
+  isTeacher : Boolean
+  isAdmin : Boolean
+}
+
+entity MediaFile {
+  * id : Long
+  --
+  filename : String
+  contentType : String
+  size : Long
+}
+
+entity Subject {
+  * id : Long
+  --
+  name : String
+  description : String
+  image : MediaFile
+}
+
+entity TopicPool {
+  * id : Long
+  --
+  name : String
+  description : String
+}
+
+entity TopicContent {
+  * id : Long
+  --
+  path : String
+  date : Date
+  isApproved : Boolean
+}
+
+entity Question {
+  * id : Long
+  --
+  text : String
+  difficulty : Integer
+  explanation : String
+  type : QuestionType
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TEXT
+}
+
+entity Answer {
+  * id : Long
+  --
+  text : String
+  isCorrect : Boolean
+}
+
+entity QuestionPool {
+  * id : Long
+}
+
+entity QuestionPoolEntry {
+  * id : Long
+  --
+  answeredAt : DateTime
+  correctCount : Integer
+  lastAnsweredCorrectly : Boolean
+}
+
+entity StreakTracking {
+  * id : Long
+  --
+  streak : Integer
+}
+
+entity Solution {
+  * id : Long
+}
+
+entity SolutionStep {
+  * id : Long
+  --
+  title : String
+  text : String
+}
+
+entity SolutionVote {
+  * id : Long
+  --
+  isUpVote : Boolean
+}
+
+entity Exam {
+  * id : Long
+  --
+  timeLimit : Integer
+  startedAt : DateTime
+  endedAt : DateTime
+  score : Float
+}
+
+entity ExamQuestion {
+  * id : Long
+  --
+  selectedAnswer : String
+  isCorrect : Boolean
+}
+
+' =====================
+' Relationships
+' =====================
+
+User ||--o{ Question : creates
+User ||--|| QuestionPool : owns
+User ||--o{ Exam : takes
+User ||--|| StreakTracking
+User ||--o{ Solution
+User ||--o{ SolutionVote
+
+User ||--o{ TopicContent : owns
+User ||--o{ TopicContent : approves
+User ||--o{ TopicContent : teaches
+
+MediaFile ||--o{ User : profilePicture
+MediaFile ||--o{ Subject : image
+
+Subject ||--o{ TopicPool
+TopicPool ||--o{ TopicContent
+
+Question ||--o{ Answer
+Question ||--o{ Solution
+Question ||--o{ QuestionPoolEntry
+
+QuestionPool ||--o{ QuestionPoolEntry
+QuestionPoolEntry }o--|| Question
+
+Solution ||--o{ SolutionStep
+Solution ||--o{ SolutionVote
+
+Exam ||--o{ ExamQuestion
+ExamQuestion }o--|| Question
+@enduml

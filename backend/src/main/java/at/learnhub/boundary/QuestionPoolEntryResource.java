@@ -75,4 +75,11 @@ public class QuestionPoolEntryResource {
         return Response.ok(entries).build();
     }
 
+    @POST
+    @Path("/mark-incorrect")
+    public Response markAsIncorrect(@QueryParam("questionId") Long questionId, @QueryParam("userId") Long userId) {
+        service.markAsIncorrect(questionId, userId);
+        return Response.noContent().build();
+    }
+
 }

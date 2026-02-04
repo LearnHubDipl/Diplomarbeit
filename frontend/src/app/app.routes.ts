@@ -34,6 +34,7 @@ import {
   QuestionManagerComponent
 } from '../../projects/content-management/src/lib/question-manager/question-manager.component';
 import {EditQuestionComponent} from '../../projects/content-management/src/lib/edit-question/edit-question.component';
+import {CreateSolutionComponent} from '../../projects/matura-trainer/src/lib/create-solution/create-solution.component';
 import {
   SubjectDetailComponent
 } from '../../projects/content-management/src/lib/subject-detail/subject-detail.component';
@@ -94,11 +95,12 @@ export const routes: Routes = [
 
       {
         path: 'practice',
-        data: { breadcrumb: 'Üben' },
+        data: { breadcrumb: 'Meinen Fragenpool üben' },
         children: [
           { path: '', component: TrainerHomeComponent, data: { breadcrumb: null } },
           { path: 'quiz', component: PracticeComponent, data: { breadcrumb: 'Fragen beantworten' } },
           { path: 'fragen', component: QuestionBrowserComponent, data: { breadcrumb: 'Fragen browsen' } },
+          { path: 'create-solution/:id', component: CreateSolutionComponent, data: { breadcrumb: 'Lösungsweg erstellen' } },
           {
             path: 'setup-exam',
             data: { breadcrumb: 'Prüfung konfigurieren' },

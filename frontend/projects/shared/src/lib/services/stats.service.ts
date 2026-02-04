@@ -5,6 +5,7 @@ import { TopicPool } from '../../../../matura-trainer/src/lib/stats-topics/stats
 import {ProgressOverviewDto} from '../../../../matura-trainer/src/lib/home/home.component';
 import {Exam} from '../interfaces/exam';
 import { API_BASE_URL } from "./globals";
+import {ExamHistoryDto} from '../interfaces/ExamHistoryDto';
 
 export interface AnswerSlimDto {
   id: number;
@@ -85,17 +86,17 @@ export class StatsService {
     return this.http.get<StatsOverviewDto>(`${API_BASE_URL}/stats/${userId}/topicPool/${topicPoolId}/overview`);
   }
 
-  getExamsByUser(userId: number): Observable<Exam[]> {
-    return this.http.get<Exam[]>(`${API_BASE_URL}/exams/by-user`, {
-      params: { userId: userId.toString() }
-    });
-  }
-
-  getProgressOverview(userId: number, topicPoolId?: number): Observable<ProgressOverviewDto> {
+  getProgressOverview(userId: number, topicPoolIds?: number[]): Observable<ProgressOverviewDto> {
     let params = new HttpParams();
-    if (topicPoolId != null) {
-      params = params.set('topicPoolId', topicPoolId.toString());
+
+
+    if (topicPoolIds && topicPoolIds.length > 0) {
+      topicPoolIds.forEach(id => {
+
+        params = params.append('topicPoolIds', id.toString());
+      });
     }
+
     return this.http.get<ProgressOverviewDto>(`${API_BASE_URL}/stats/${userId}/progress`, { params });
   }
 
@@ -104,6 +105,17 @@ export class StatsService {
       `${API_BASE_URL}/exams/by-user/average`,
       { params: { userId: userId.toString() } }
     );
+  }
+
+
+  getExamsByUser(userId: number): Observable<ExamHistoryDto[]> {
+    return this.http.get<ExamHistoryDto[]>(`${API_BASE_URL}/exams/by-user`, {
+      params: { userId: userId.toString() }
+    });
+  }
+
+  getExamDetails(examId: number): Observable<ExamDto> {
+    return this.http.get<ExamDto>(`${API_BASE_URL}/exams/${examId}`);
   }
 
 }

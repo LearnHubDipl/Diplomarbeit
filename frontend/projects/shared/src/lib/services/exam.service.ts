@@ -15,7 +15,7 @@ export interface CreateExamRequest {
 
 export interface CreatedExamResponse {
   examId: number;
-  timeLimit: number;
+  timeLimitMinutes: number;
   startedAt: string;
   questionCount: number;
   questions: Question[];
@@ -48,6 +48,10 @@ export class ExamService {
 
   createExam(request: CreateExamRequest): Observable<CreatedExamResponse> {
     return this.httpClient.post<CreatedExamResponse>(`${API_BASE_URL}/exams/create`, request);
+  }
+
+  createExamCopy(id: number): Observable<CreatedExamResponse> {
+    return this.httpClient.get<CreatedExamResponse>(`${API_BASE_URL}/exams/create-copy/` + id);
   }
 
   submitExam(request: SubmitExamRequest): Observable<Exam> {

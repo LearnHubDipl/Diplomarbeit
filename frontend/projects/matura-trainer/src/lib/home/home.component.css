@@ -59,8 +59,6 @@ label {
   font-size: 1.4em;
   font-weight: 600;
   color: #333;
-  margin-top: 30%;
-
 }
 
 .dropdown {
@@ -102,5 +100,48 @@ label {
 }
 
 .thempool-container{
-  margin-left: 25%;
+  margin-left: 20%;
+  margin-top: 15vh;
+}
+
+.no-questions-msg {
+  color: #a2a2a2;
+  font-size: 0.85rem;
+  margin-top: 8px;
+  text-align: left;
+  font-weight: 500;
+}
+
+.button-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+.checkbox-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 20px;
+  margin: 2vh 0;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.checkbox-item label {
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1;
 }
