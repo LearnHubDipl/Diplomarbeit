@@ -1,16 +1,18 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {firstValueFrom} from 'rxjs';
+import {API_BASE_URL} from '../services/globals';
 
 @Injectable({ providedIn: 'root' })
 export class AuthContextService {
   private me?: any;
+  private URL = API_BASE_URL + '/users';
 
   constructor(private http: HttpClient) {}
 
   async loadMe(): Promise<void> {
     this.me = await firstValueFrom(
-      this.http.get('http://localhost:8080/api/users/me')
+      this.http.get(`${this.URL}/me`)
     );
   }
 

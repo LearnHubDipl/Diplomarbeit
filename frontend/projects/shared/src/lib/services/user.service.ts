@@ -2,13 +2,14 @@ import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {firstValueFrom, Observable} from 'rxjs';
 import {UserSlim} from '../interfaces/userSlim';
+import {API_BASE_URL} from './globals';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   private httpClient: HttpClient = inject(HttpClient);
-  private URL: string = 'http://localhost:8080/api/users';
+  private URL = API_BASE_URL + '/users';
 
   registerOrGetCurrentUser(): Observable<UserSlim> {
     return this.httpClient.post<UserSlim>(`${this.URL}/register`, {});
