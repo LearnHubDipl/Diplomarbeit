@@ -66,12 +66,10 @@ export interface StatsOverviewDto {
 })
 export class StatsService {
 
-  private streakApiUrl = 'http://localhost:8080/streak';
-
   constructor(private http: HttpClient) {}
 
   getStreak(userId: number): Observable<number> {
-    return this.http.get<{ streak: number }>(`${this.streakApiUrl}/user/${userId}`)
+    return this.http.get<{ streak: number }>(`${API_BASE_URL}/streak/user/${userId}`)
       .pipe(map(response => response.streak));
   }
 
