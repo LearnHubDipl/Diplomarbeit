@@ -2,19 +2,30 @@ import { Component, inject, OnInit } from '@angular/core';
 import { KeycloakOperationService } from '../../../../shared/src/lib/auth';
 import { UserInitializationService } from '../../../../shared/src/lib/services/user-initialization.service';
 import { UserSlim } from '../../../../shared/src/lib/interfaces/userSlim';
-import { DatePipe, NgForOf, NgIf } from '@angular/common';
+import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
 import { RouterLink } from '@angular/router';
 
-import { PendingNotesService } from '../../../../shared/src/lib/services/pending-notes.service';
-import { PendingNoteDto } from '../../../../shared/src/lib/interfaces/pendingNoteDto';
-
+import { PendingNotesService, PendingNoteDto } from '../../../../shared/src/lib/services/pending-notes.service';
 import { NotificationsService, NotificationDto } from '../../../../shared/src/lib/services/notification.service';
+import { HttpClient } from '@angular/common/http';
+import { API_BASE_URL } from '../../../../shared/src/lib/services/globals';
+
+export interface MyNoteDto {
+  topicPoolId?: number;
+  fileName?: string;
+  title?: string;
+  uploaderName?: string;
+  status?: string;
+  approved?: boolean;
+  createdAt?: number;
+  pdfUrl?: string;
+}
 
 @Component({
   selector: 'lib-personal-place',
   standalone: true,
   templateUrl: './personal-place.component.html',
-  imports: [NgIf, NgForOf, RouterLink, DatePipe],
+  imports: [NgIf, NgForOf, RouterLink, DatePipe, NgClass],
   styleUrls: ['./personal-place.component.css'],
 })
 export class PersonalPlaceComponent implements OnInit {
@@ -22,6 +33,7 @@ export class PersonalPlaceComponent implements OnInit {
   private userInitService = inject(UserInitializationService);
   private pendingNotesService = inject(PendingNotesService);
   private notificationsService = inject(NotificationsService);
+  private http = inject(HttpClient);
 
   givenName = '';
   familyName = '';
@@ -36,10 +48,17 @@ export class PersonalPlaceComponent implements OnInit {
   backendUser: UserSlim | null = null;
   isLoadingUser = true;
 
+  // Lehrer: pending Mitschriften
   pendingNotes: PendingNoteDto[] = [];
   isLoadingPending = false;
   pendingError: string | null = null;
 
+  // Schüler: eigene Mitschriften
+  myNotes: MyNoteDto[] = [];
+  isLoadingMyNotes = false;
+  myNotesError: string | null = null;
+
+  // Notifications
   notifications: NotificationDto[] = [];
   unreadCount = 0;
   isLoadingNotifications = false;
@@ -55,6 +74,10 @@ export class PersonalPlaceComponent implements OnInit {
 
     if (this.canSeeTeacherArea()) {
       this.loadPendingNotes();
+    }
+
+    if (this.isStudent && !this.isAdmin) {
+      this.loadMyNotes();
     }
   }
 
@@ -73,7 +96,6 @@ export class PersonalPlaceComponent implements OnInit {
     }
   }
 
-
   private async loadBackendUser() {
     try {
       this.isLoadingUser = true;
@@ -84,14 +106,8 @@ export class PersonalPlaceComponent implements OnInit {
       }
 
       const u: any = this.backendUser;
-
       this.isAdmin = !!(u?.isAdmin ?? u?.admin ?? u?.is_admin);
-
       this.isTeacher = !!(u?.isTeacher ?? u?.teacher ?? u?.is_teacher);
-
-      if (this.isAdmin) {
-
-      }
     } catch (error) {
       console.error('Error loading backend user:', error);
     } finally {
@@ -107,6 +123,8 @@ export class PersonalPlaceComponent implements OnInit {
     return !this.isAdmin;
   }
 
+  // ── Lehrer: pending Mitschriften ──────────────────────────────────────────
+
   loadPendingNotes() {
     this.isLoadingPending = true;
     this.pendingError = null;
@@ -119,9 +137,7 @@ export class PersonalPlaceComponent implements OnInit {
       error: (err) => {
         console.error('[PendingNotes] load failed', err);
         this.pendingError =
-          err?.error?.error ||
-          err?.message ||
-          'Pending Mitschriften konnten nicht geladen werden.';
+          err?.error?.error || err?.message || 'Pending Mitschriften konnten nicht geladen werden.';
         this.isLoadingPending = false;
       },
     });
@@ -160,6 +176,42 @@ export class PersonalPlaceComponent implements OnInit {
     });
   }
 
+  // ── Schüler: eigene Mitschriften ──────────────────────────────────────────
+
+  loadMyNotes() {
+    this.isLoadingMyNotes = true;
+    this.myNotesError = null;
+
+    this.http.get<MyNoteDto[]>(`${API_BASE_URL}/notes/my`).subscribe({
+      next: (list) => {
+        this.myNotes = list ?? [];
+        this.isLoadingMyNotes = false;
+      },
+      error: (err) => {
+        console.error('[MyNotes] load failed', err);
+        this.myNotesError =
+          err?.error?.error || err?.message || 'Mitschriften konnten nicht geladen werden.';
+        this.isLoadingMyNotes = false;
+      },
+    });
+  }
+
+  getStatusLabel(n: MyNoteDto): string {
+    const s = (n.status ?? '').toUpperCase();
+    if (s === 'APPROVED') return 'Freigegeben';
+    if (s === 'PENDING') return 'Wartet auf Freigabe';
+    return s;
+  }
+
+  getStatusClass(n: MyNoteDto): string {
+    const s = (n.status ?? '').toUpperCase();
+    if (s === 'APPROVED') return 'bg-success';
+    if (s === 'PENDING') return 'bg-secondary';
+    return 'bg-danger';
+  }
+
+  // ── Notifications ─────────────────────────────────────────────────────────
+
   loadNotifications() {
     this.isLoadingNotifications = true;
     this.notifError = null;
@@ -173,9 +225,7 @@ export class PersonalPlaceComponent implements OnInit {
       error: (err) => {
         console.error('[Notifications] load failed', err);
         this.notifError =
-          err?.error?.error ||
-          err?.message ||
-          'Notifications konnten nicht geladen werden.';
+          err?.error?.error || err?.message || 'Notifications konnten nicht geladen werden.';
         this.isLoadingNotifications = false;
       },
     });

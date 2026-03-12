@@ -6,6 +6,7 @@ import { API_BASE_URL } from './globals';
 export interface Teacher {
   id: number;
   name: string;
+  email: string;
 }
 
 @Injectable({ providedIn: 'root' })

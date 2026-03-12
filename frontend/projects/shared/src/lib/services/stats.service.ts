@@ -4,7 +4,7 @@ import { map, Observable } from 'rxjs';
 import { TopicPool } from '../../../../matura-trainer/src/lib/stats-topics/stats-topics.component';
 import {ProgressOverviewDto} from '../../../../matura-trainer/src/lib/home/home.component';
 import {Exam} from '../interfaces/exam';
-import { API_BASE_URL } from "./globals";
+import { API_BASE_URL } from './globals';
 import {ExamHistoryDto} from '../interfaces/ExamHistoryDto';
 
 export interface AnswerSlimDto {

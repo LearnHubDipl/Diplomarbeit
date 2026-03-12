@@ -75,7 +75,7 @@ export class SubjectPoolDetailComponent implements OnInit {
       title: ['', Validators.required],
       description: [''],
       uploaderName: [''],
-      teacherId: [null],
+      teacherEmail: [null],  // Email statt ID!
       file: [null, Validators.required],
     });
 
@@ -112,7 +112,7 @@ export class SubjectPoolDetailComponent implements OnInit {
   }
 
   private applyTeacherValidator(): void {
-    const ctrl = this.form?.get('teacherId');
+    const ctrl = this.form?.get('teacherEmail');
     if (!ctrl) return;
 
     if (this.isStudent) {
@@ -146,7 +146,6 @@ export class SubjectPoolDetailComponent implements OnInit {
       error: () => (this.teachers = [])
     });
   }
-
 
   private getStatus(n: any): string {
     return (
@@ -197,7 +196,6 @@ export class SubjectPoolDetailComponent implements OnInit {
     });
   }
 
-
   onFileChange(ev: Event): void {
     const input = ev.target as HTMLInputElement;
     if (input.files && input.files.length) {
@@ -217,9 +215,11 @@ export class SubjectPoolDetailComponent implements OnInit {
   }
 
   upload(): void {
-    if (this.form.invalid || !this.form.value.file) return;
+    if (this.form.invalid) return;
 
-    if (this.isStudent && (this.form.value.teacherId == null || this.form.value.teacherId === '')) {
+    if (!this.editing && !this.form.value.file) return;
+
+    if (this.isStudent && !this.form.value.teacherEmail) {
       this.error = 'Bitte wähle eine Lehrperson für die Freigabe aus.';
       return;
     }
@@ -234,7 +234,7 @@ export class SubjectPoolDetailComponent implements OnInit {
       title: v.title!,
       description: (v.description ?? '').trim(),
       uploaderName: (v.uploaderName ?? '').trim() || undefined,
-      teacherId: v.teacherId ?? undefined
+      teacherEmail: v.teacherEmail ?? undefined  // Email statt ID!
     };
 
     if (this.editing && this.editingOldFileName) {
@@ -291,11 +291,11 @@ export class SubjectPoolDetailComponent implements OnInit {
       title: (n as any).title ?? (n as any).fileName,
       description: (n as any).description ?? '',
       uploaderName: (n as any).uploaderName ?? '',
-      teacherId: (n as any).teacherId ?? null,
+      teacherEmail: (n as any).teacherEmail ?? null,  // Email statt ID!
       file: null
     });
 
-    this.form.get('file')?.setValidators([Validators.required]);
+    this.form.get('file')?.clearValidators();
     this.form.get('file')?.updateValueAndValidity();
     this.resetFileInput();
 

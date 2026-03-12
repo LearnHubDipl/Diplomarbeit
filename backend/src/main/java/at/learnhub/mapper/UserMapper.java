@@ -24,7 +24,7 @@ public class UserMapper {
                 user.getEmail(),
                 user.getTeacher(),
                 user.getAdmin(),
-                user.getProfilePicture(),
+                user.getProfilePicture() != null ? MediaFileMapper.toSlimDto(user.getProfilePicture()) : null,
                 user.getClassName(),
                 user.getUsername()
         );

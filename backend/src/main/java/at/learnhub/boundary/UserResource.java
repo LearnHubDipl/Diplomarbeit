@@ -339,7 +339,6 @@ public class UserResource {
                         .entity(Map.of("error", "User not found", "keycloakSub", keycloakSub))
                         .build());
     }
-
     /**
      * Admin-only: Delete user
      */

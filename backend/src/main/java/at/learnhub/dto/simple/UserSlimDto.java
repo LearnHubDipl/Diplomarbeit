@@ -1,6 +1,5 @@
 package at.learnhub.dto.simple;
 
-import at.learnhub.model.MediaFile;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 @Schema(description = "DTO containing the minimal user information")
@@ -43,9 +42,9 @@ public record UserSlimDto(
 
         @Schema(
                 description = "Profile picture of the user.",
-                implementation = MediaFile.class
+                implementation = MediaFileSlimDto.class
         )
-        MediaFile profilePicture,
+        MediaFileSlimDto profilePicture,
 
         @Schema(
                 description = "Class name of the user (e.g., 5AHITM).",

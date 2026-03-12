@@ -48,6 +48,16 @@ public class UserRepository {
                 .toList();
     }
 
+    public User findUserEntityByEmail(String email) {
+        try {
+            return em.createNamedQuery(User.FIND_BY_EMAIL, User.class)
+                    .setParameter("email", email)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
     public List<UserSlimDto> findActiveTeachers(int limit) {
         return em.createQuery("""
             SELECT u FROM User u 
