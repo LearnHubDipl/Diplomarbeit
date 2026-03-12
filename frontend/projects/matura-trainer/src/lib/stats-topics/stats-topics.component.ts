@@ -94,8 +94,7 @@ export class StatsTopicsComponent implements OnInit {
 
         this.legendData = data.legend;
 
-        const unansweredEntry = data.legend.find(e => e.label.toLowerCase().includes('nicht beantwortet'));
-        this.chartOptions!.plugins!.centerText!.text = unansweredEntry ? `${unansweredEntry.value} offene Fragen` : '';
+        this.chartOptions!.plugins!.centerText!.text = `${data.unanswered} offene Fragen`;
 
         this.chart?.update();
       });

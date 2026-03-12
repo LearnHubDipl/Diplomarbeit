@@ -65,8 +65,7 @@ export class StatsHomeComponent implements OnInit {
       this.legendData = data.legend;
 
       // CenterText zeigt offene Fragen
-      const unansweredEntry = data.legend.find(e => e.label.toLowerCase().includes('nicht beantwortet'));
-      this.chartOptions!.plugins!.centerText!.text = unansweredEntry ? `${unansweredEntry.value} offene Fragen` : '';
+      this.chartOptions!.plugins!.centerText!.text =  `${data.unanswered} offene Fragen`;
     });
 
     this.statsService.getUserExamAverage(this.userId).subscribe({
