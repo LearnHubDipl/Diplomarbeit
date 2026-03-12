@@ -53,7 +53,7 @@ export class ExamSetupComponent implements OnInit {
   loadSubjects() {
     this.clearError()
     // this.subjectService.getAllSubjects().subscribe(subjects => {this.subjects = subjects;});
-    this.questionPoolService.getSubjectsForUser(1).subscribe({
+    this.questionPoolService.getSubjectsForUser(this.userService.getCurrentUser()!.id).subscribe({
       next: subjects => {
         this.subjects = subjects
       },
