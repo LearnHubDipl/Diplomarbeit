@@ -34,7 +34,7 @@
   <div *ngIf="!isAdmin && !isLoading" class="alert alert-warning mt-3">
     <i class="bi bi-shield-lock me-2"></i>
     <strong>Zugriff verweigert</strong><br>
-    Nur Admins können Fragen genehmigen.
+    Nur Admins und Lehrer können Fragen genehmigen.
   </div>
 
   <div *ngIf="isAdmin && !isLoading && !loadError">

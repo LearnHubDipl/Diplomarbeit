@@ -47,26 +47,19 @@ export class QuestionApprovalListComponent implements OnInit {
   private async checkAdminAccess() {
     const user = this.userInitService.getCurrentUser();
     if (user) {
-      this.isAdmin = user.isAdmin || false;
+      this.isAdmin = (user.isAdmin || user.isTeacher) || false;
     } else {
       try {
         const initializedUser = await this.userInitService.initializeUser();
-        this.isAdmin = initializedUser?.isAdmin || false;
+        this.isAdmin = (initializedUser?.isAdmin || initializedUser?.isTeacher) || false;
       } catch (err) {
         console.error('Fehler beim Laden des Users:', err);
       }
     }
 
-     if (!this.isAdmin) {
+    if (!this.isAdmin) {
       this.router.navigate(['/']);
-      /**this.snackBar.open('Zugriff verweigert: Nur Admins können Fragen genehmigen', 'Schließen', {
-        duration: 5000,
-        horizontalPosition: 'right',
-        verticalPosition: 'top',
-        panelClass: ['error-snackbar']
-      });**/
     }
-
   }
 
   private loadSubjects(): void {
