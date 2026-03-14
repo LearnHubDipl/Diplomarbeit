@@ -101,8 +101,7 @@
                   </span>
                 </div>
                 <div class="text-muted small mt-1">
-                  <span *ngIf="n.topicPoolId">Pool-ID: {{ n.topicPoolId }}</span>
-                  <span *ngIf="n.createdAt"> • {{ n.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
+                  <span *ngIf="n.createdAt"> {{ n.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
                 </div>
                 <div class="mt-2" *ngIf="n.pdfUrl && n.approved">
                   <a class="btn btn-sm btn-outline-secondary"
@@ -208,7 +207,22 @@
                 </div>
                 <div class="text-muted small">
                   Von: {{ n.uploaderName || 'Unbekannt' }}
-                  <span *ngIf="n.topicPoolId"> • Pool-ID: {{ n.topicPoolId }}</span>
+
+                  <!-- NEU: Fach und Themenpool statt Pool-ID -->
+                  <ng-container *ngIf="n.subjectName || n.poolName">
+                    <span class="mx-1">•</span>
+                    <i class="bi bi-journal-bookmark me-1"></i>
+                    <span *ngIf="n.subjectName">{{ n.subjectName }}</span>
+                    <span *ngIf="n.subjectName && n.poolName"> › </span>
+                    <span *ngIf="n.poolName">{{ n.poolName }}</span>
+                  </ng-container>
+
+                  <!-- Fallback: Pool-ID nur wenn keine Namen geladen -->
+                  <ng-container *ngIf="!n.subjectName && !n.poolName && n.topicPoolId">
+                    <span class="mx-1">•</span>
+                    Pool-ID: {{ n.topicPoolId }}
+                  </ng-container>
+
                   <span *ngIf="n.createdAt"> • {{ n.createdAt | date:'mediumDate' }}</span>
                 </div>
                 <div class="mt-2" *ngIf="n.pdfUrl">

@@ -2,11 +2,14 @@ import { Component, inject, OnInit } from '@angular/core';
 import { KeycloakOperationService } from '../../../../shared/src/lib/auth';
 import { UserInitializationService } from '../../../../shared/src/lib/services/user-initialization.service';
 import { UserSlim } from '../../../../shared/src/lib/interfaces/userSlim';
-import {DatePipe, NgClass, NgForOf, NgIf} from '@angular/common';
+import { DatePipe, NgClass, NgForOf, NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 
 import { PendingNotesService, PendingNoteDto } from '../../../../shared/src/lib/services/pending-notes.service';
 import { NotificationsService, NotificationDto } from '../../../../shared/src/lib/services/notification.service';
+import { TopicPoolService } from '../../../../shared/src/lib/services/topic-pool.service';
+import { SubjectService } from '../../../../shared/src/lib/services/subject.service';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../../../shared/src/lib/services/globals';
 
@@ -21,6 +24,11 @@ export interface MyNoteDto {
   pdfUrl?: string;
 }
 
+export interface EnrichedPendingNoteDto extends PendingNoteDto {
+  subjectName?: string;
+  poolName?: string;
+}
+
 @Component({
   selector: 'lib-personal-place',
   standalone: true,
@@ -33,6 +41,8 @@ export class PersonalPlaceComponent implements OnInit {
   private userInitService = inject(UserInitializationService);
   private pendingNotesService = inject(PendingNotesService);
   private notificationsService = inject(NotificationsService);
+  private topicPoolService = inject(TopicPoolService);
+  private subjectService = inject(SubjectService);
   private http = inject(HttpClient);
 
   givenName = '';
@@ -49,7 +59,7 @@ export class PersonalPlaceComponent implements OnInit {
   isLoadingUser = true;
 
   // Lehrer: pending Mitschriften
-  pendingNotes: PendingNoteDto[] = [];
+  pendingNotes: EnrichedPendingNoteDto[] = [];
   isLoadingPending = false;
   pendingError: string | null = null;
 
@@ -63,6 +73,9 @@ export class PersonalPlaceComponent implements OnInit {
   unreadCount = 0;
   isLoadingNotifications = false;
   notifError: string | null = null;
+
+  // Cache für Pool-Namen damit wir nicht mehrfach denselben Pool laden
+  private poolCache = new Map<number, { poolName: string; subjectName: string }>();
 
   async ngOnInit() {
     this.loadKeycloakData();
@@ -123,6 +136,39 @@ export class PersonalPlaceComponent implements OnInit {
     return !this.isAdmin;
   }
 
+  private async enrichWithNames(note: EnrichedPendingNoteDto): Promise<void> {
+    if (!note.topicPoolId) return;
+
+    if (this.poolCache.has(note.topicPoolId)) {
+      const cached = this.poolCache.get(note.topicPoolId)!;
+      note.poolName = cached.poolName;
+      note.subjectName = cached.subjectName;
+      return;
+    }
+
+    try {
+      const subjects = await firstValueFrom(this.subjectService.getAllSubjects());
+
+      for (const subject of subjects) {
+        const pools = await firstValueFrom(
+          this.topicPoolService.getTopicPoolsBySubject(subject.id)
+        );
+        const found = pools.find((p: any) => p.id === note.topicPoolId);
+        if (found) {
+          note.poolName = found.name;
+          note.subjectName = subject.name;
+          this.poolCache.set(note.topicPoolId, {
+            poolName: found.name,
+            subjectName: subject.name
+          });
+          break;
+        }
+      }
+    } catch (err) {
+      console.error('[enrichWithNames] failed', err);
+    }
+  }
+
   // ── Lehrer: pending Mitschriften ──────────────────────────────────────────
 
   loadPendingNotes() {
@@ -130,8 +176,13 @@ export class PersonalPlaceComponent implements OnInit {
     this.pendingError = null;
 
     this.pendingNotesService.listMyPending().subscribe({
-      next: (list) => {
-        this.pendingNotes = list ?? [];
+      next: async (list) => {
+        const enriched: EnrichedPendingNoteDto[] = (list ?? []).map(n => ({ ...n }));
+
+        // Namen für alle Notes parallel nachladen
+        await Promise.all(enriched.map(n => this.enrichWithNames(n)));
+
+        this.pendingNotes = enriched;
         this.isLoadingPending = false;
       },
       error: (err) => {
@@ -143,7 +194,7 @@ export class PersonalPlaceComponent implements OnInit {
     });
   }
 
-  approveNote(n: PendingNoteDto) {
+  approveNote(n: EnrichedPendingNoteDto) {
     if (!n?.topicPoolId || !n?.fileName) return;
 
     this.pendingNotesService.approve(n.topicPoolId, n.fileName).subscribe({
@@ -158,7 +209,7 @@ export class PersonalPlaceComponent implements OnInit {
     });
   }
 
-  rejectNote(n: PendingNoteDto) {
+  rejectNote(n: EnrichedPendingNoteDto) {
     if (!n?.topicPoolId || !n?.fileName) return;
 
     const ok = confirm('Mitschrift wirklich ablehnen? (Sie wird gelöscht)');

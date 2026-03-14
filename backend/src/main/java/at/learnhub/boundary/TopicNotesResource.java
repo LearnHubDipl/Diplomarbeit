@@ -81,6 +81,11 @@ public class TopicNotesResource {
 
     private String currentFullNameOrFallback() {
         try {
+            User me = currentUserOrNull();
+            if (me != null && me.getName() != null && !me.getName().isBlank()) {
+                return me.getName();
+            }
+           
             CustomSecurityContext csc = currentCscOrNull();
             if (csc != null) {
                 String n = csc.fullName();

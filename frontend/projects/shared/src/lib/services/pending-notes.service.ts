@@ -7,12 +7,13 @@ export interface PendingNoteDto {
   topicPoolId?: number;
   fileName?: string;
   title?: string;
-  description?: string;
   uploaderName?: string;
+  status?: string;
+  approved?: boolean;
   createdAt?: number;
   pdfUrl?: string;
-  approved?: boolean;
-  status?: 'PENDING' | 'APPROVED' | string;
+  subjectName?: string;
+  poolName?: string;
 }
 
 @Injectable({ providedIn: 'root' })
