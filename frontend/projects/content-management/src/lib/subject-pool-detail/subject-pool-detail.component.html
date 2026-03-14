@@ -42,6 +42,15 @@
                 <span class="badge bg-success" *ngIf="isApproved(n)">APPROVED</span>
               </div>
 
+              <!-- certified by: Lehrer Name -->
+              <div *ngIf="isApproved(n) && n.approvedByName"
+                   class="mt-1 d-flex align-items-center gap-1">
+                <i class="bi bi-patch-check-fill text-success" style="font-size: 11px;"></i>
+                <span class="text-muted" style="font-size: 11px;">
+                  certified by: {{ n.approvedByName }}
+                </span>
+              </div>
+
               <div *ngIf="isPending(n) && isOwnNote(n)" class="small text-muted mt-1">
                 Wartet auf Freigabe durch Lehrperson.
               </div>

@@ -2,7 +2,6 @@ import { TopicContent } from '../interfaces/topicContent';
 import { TopicNoteDto } from '../interfaces/topicNoteDto';
 
 export function mapNoteToTopicContent(dto: TopicNoteDto): TopicContent {
-  // Fallbacks damit Frontend-Logik zuverlässig klappt:
   const approved =
     (dto as any).approved === true ||
     (dto as any).isApproved === true ||
@@ -30,5 +29,7 @@ export function mapNoteToTopicContent(dto: TopicNoteDto): TopicContent {
     status,
 
     createdAt: (dto as any).createdAt ?? (dto as any).date ?? undefined,
+
+    approvedByName: (dto as any).approvedByName ?? null,
   } as any;
 }

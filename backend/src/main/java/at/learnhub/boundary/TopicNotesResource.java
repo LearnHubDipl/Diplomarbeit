@@ -85,7 +85,6 @@ public class TopicNotesResource {
             if (me != null && me.getName() != null && !me.getName().isBlank()) {
                 return me.getName();
             }
-           
             CustomSecurityContext csc = currentCscOrNull();
             if (csc != null) {
                 String n = csc.fullName();
@@ -343,7 +342,7 @@ public class TopicNotesResource {
             String title = trimOrNull(field(map, "title"));
             String description = trimOrNull(field(map, "description"));
             String uploaderName = trimOrNull(field(map, "uploaderName"));
-            String teacherEmail = trimOrNull(field(map, "teacherEmail")); // NEU: Email statt ID!
+            String teacherEmail = trimOrNull(field(map, "teacherEmail"));
 
             boolean teacherOrAdmin = isTeacherOrAdminDb();
             String sub = currentSubOrNull();
@@ -361,6 +360,8 @@ public class TopicNotesResource {
             if (teacherOrAdmin) {
                 approved = true;
                 status = "APPROVED";
+                // Lehrer-Upload → approvedByName sofort setzen
+                meta.put("approvedByName", currentFullNameOrFallback());
             } else {
                 if (teacherEmail == null && !isReplace) {
                     return Response.status(Response.Status.BAD_REQUEST)
@@ -383,19 +384,13 @@ public class TopicNotesResource {
             meta.put("approved", approved);
             meta.put("status", status);
 
-            // teacherEmail + teacherSub nur bei Schüler-Uploads
             if (!teacherOrAdmin && teacherEmail != null) {
                 meta.put("teacherEmail", teacherEmail);
                 try {
-                    // Lehrer per Email in DB suchen → teacherSub speichern
-                    userRepository.findByEmail(teacherEmail).ifPresent(teacherDto -> {
-                        // findByEmail gibt UserSlimDto zurück, wir brauchen die Entity
-                    });
-                    // Entity direkt per Email suchen
+                    userRepository.findByEmail(teacherEmail).ifPresent(teacherDto -> {});
                     User teacher = userRepository.findUserEntityByEmail(teacherEmail);
                     if (teacher != null && teacher.getKeycloakSub() != null) {
                         meta.put("teacherSub", teacher.getKeycloakSub());
-                        // Notification an Lehrer
                         if (!isReplace) {
                             String noteTitle = (String) meta.getOrDefault("title", targetFileName);
                             pushNotificationToUserSub(
@@ -486,6 +481,7 @@ public class TopicNotesResource {
 
             meta.put("approved", true);
             meta.put("status", "APPROVED");
+            meta.put("approvedByName", teacherName); // ← NEU: Name des Lehrers speichern
             writeMeta(dir, safe, meta);
 
             pushNotificationToUserSub(

@@ -23,4 +23,5 @@ export interface TopicContent {
   teacherId?: number;
   uploaderSub?: string;
   status?: string;
+  approvedByName?: string;
 }
