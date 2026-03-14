@@ -1,7 +1,6 @@
 <div class="container py-3">
   <div class="d-flex align-items-center justify-content-between mb-3">
     <h2 class="mb-0">Fächer</h2>
-
     <button
       *ngIf="canManageSubjects"
       class="btn btn-dark"
@@ -10,11 +9,39 @@
     </button>
   </div>
 
+  <!-- Suchfeld -->
+  <div class="position-relative mb-3">
+    <i class="bi bi-search position-absolute"
+       style="left: 14px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 15px; pointer-events: none;"></i>
+    <input
+      type="text"
+      class="form-control ps-5 pe-5"
+      placeholder="Fach suchen..."
+      [(ngModel)]="searchQuery"
+      style="border-radius: 12px; padding-top: 10px; padding-bottom: 10px; font-size: 15px;"
+    />
+    <button
+      *ngIf="searchQuery"
+      class="btn btn-sm position-absolute"
+      style="right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #aaa;"
+      (click)="searchQuery = ''">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  </div>
+
+  <!-- Ergebnis-Anzahl -->
+  <p *ngIf="searchQuery.trim()" class="text-muted small mb-2">
+    <span *ngIf="filteredSubjects.length > 0">
+      {{ filteredSubjects.length }} von {{ subjects.length }} Fächern gefunden
+    </span>
+  </p>
+
   <div *ngIf="loading" class="alert alert-secondary">Lade Fächer ...</div>
   <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-  <div class="row row-cols-1 row-cols-md-2 g-3">
-    <div class="col" *ngFor="let s of subjects; trackBy: trackSubject">
+  <!-- Fächer-Karten -->
+  <div class="row row-cols-1 row-cols-md-2 g-3" *ngIf="filteredSubjects.length > 0">
+    <div class="col" *ngFor="let s of filteredSubjects; trackBy: trackSubject">
       <lib-subject-card
         [subject]="s"
         [canManage]="canManageSubjects"
@@ -23,9 +50,27 @@
       </lib-subject-card>
     </div>
   </div>
+
+  <!-- Kein Ergebnis -->
+  <div
+    *ngIf="!loading && filteredSubjects.length === 0 && searchQuery.trim()"
+    class="text-center py-5 text-muted">
+    <i class="bi bi-search" style="font-size: 2rem; opacity: 0.3; display: block; margin-bottom: 12px;"></i>
+    <p class="mb-0">Kein Fach gefunden für „{{ searchQuery }}"</p>
+    <button class="btn btn-link btn-sm mt-1 text-muted" (click)="searchQuery = ''">Suche zurücksetzen</button>
+  </div>
+
+  <!-- Keine Fächer vorhanden -->
+  <div
+    *ngIf="!loading && subjects.length === 0 && !searchQuery.trim()"
+    class="text-center py-5 text-muted">
+    <i class="bi bi-journal-x" style="font-size: 2rem; opacity: 0.3; display: block; margin-bottom: 12px;"></i>
+    <p class="mb-0">Noch keine Fächer vorhanden.</p>
+  </div>
 </div>
 
 
+<!-- Modal: Neues Fach -->
 <div
   class="modal fade show"
   tabindex="-1"
@@ -90,7 +135,7 @@
   </div>
 </div>
 
-<!-- ✅ Modal: Fach bearbeiten (nur Lehrer/Admin) -->
+<!-- Modal: Fach bearbeiten -->
 <div
   class="modal fade show"
   tabindex="-1"

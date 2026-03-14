@@ -22,6 +22,8 @@ export class SubjectsComponent implements OnInit {
   loading = false;
   error: string | null = null;
 
+  searchQuery = '';
+
   canManageSubjects = false;
 
   createOpen = false;
@@ -46,13 +48,21 @@ export class SubjectsComponent implements OnInit {
     private mediaApi: MediaService,
     private keycloakOps: KeycloakOperationService,
     private authCtx: AuthContextService
-  ) {
-  }
+  ) {}
 
-   async ngOnInit() {
+  async ngOnInit() {
     await this.authCtx.loadMe();
     this.canManageSubjects = this.authCtx.canManage();
     this.load();
+  }
+
+  get filteredSubjects(): Subject[] {
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) return this.subjects;
+    return this.subjects.filter(s =>
+      s.name.toLowerCase().includes(q) ||
+      (s.description || '').toLowerCase().includes(q)
+    );
   }
 
   load(): void {
