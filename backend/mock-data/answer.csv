@@ -29,3 +29,128 @@ text,isCorrect,questionId
 "6",true,7
 "9",false,7
 "12",false,7
+
+"Use-Case-Diagramm",true,8
+"Klassendiagramm",false,8
+"Zustandsdiagramm",false,8
+"Verteilungsdiagramm",false,8
+"Systemanalyse",true,9
+"Ist-Aufnahme",true,9
+"Anforderungsanalyse",true,9
+"Requirements Engineering",true,9
+"Definition der Systemarchitektur",true,10
+"Installation der Datenbank-Hardware",false,10
+"Schreiben des Benutzerhandbuchs",false,10
+"Akquise von neuen Projektmitarbeitern",false,10
+"Robustheit",true,11
+"Portabilität",false,11
+"Konformität",false,11
+"Modularität",false,11
+"Wasserfallmodell",true,12
+"Scrum",false,12
+"Extreme Programming",false,12
+"Kanban",false,12
+"Vorgangskette ohne Zeitpuffer",true,13
+"Die Liste aller Meilensteine",false,13
+"Der Weg mit den geringsten Kosten",false,13
+"Die Summe aller optionalen Aufgaben",false,13
+"Meilensteintrendanalyse",true,14
+"Burn-Down-Chart",false,14
+"Ishikawa-Diagramm",false,14
+"Pareto-Analyse",false,14
+"Antwortzeitverhalten und Datensicherheit",true,15
+"Berechnung der Mehrwertsteuer",false,15
+"Eingabe eines Benutzernamens",false,15
+"Drucken einer Rechnung",false,15
+"Ist-Zustand, Zielsetzung und Lieferumfang",true,16
+"Quellcode-Dokumentation",false,16
+"Gehaltsliste der Entwickler",false,16
+"Marketing-Strategie für das Produkt",false,16
+"Observer und Strategy Pattern",true,17
+"Singleton (globaler Status)",false,17
+"Hard-Coding von Pfaden",false,17
+"Direkte Instanziierung von Klassen",false,17
+"Strukturverbesserung ohne Verhaltensänderung",true,18
+"Hinzufügen neuer Features",false,18
+"Beheben von kritischen Bugs",false,18
+"Umschreiben in eine andere Programmiersprache",false,18
+"Unit-Tests und Integrationstests",true,19
+"Code-Reviews durch Kollegen",false,19
+"Statische Code-Analyse",false,19
+"Durchlesen der Anforderungsliste",false,19
+"Verifikation: Bauen wir das Produkt richtig? / Validierung: Bauen wir das richtige Produkt?",true,20
+"Es gibt keinen Unterschied",false,20
+"Validierung erfolgt nur durch den Entwickler",false,20
+"Verifikation ist ein informelles Gespräch",false,20
+"Product Owner, Scrum Master, Developers",true,21
+"Project Manager, Teamlead, CEO",false,21
+"Kunde, Stakeholder, Designer",false,21
+"Tester, Architekt, Datenbankadmin",false,21
+"Zuweisung von Testphasen zu Entwicklungsphasen",true,22
+"Einführung von täglichen Meetings",false,22
+"Vollständiger Verzicht auf Dokumentation",false,22
+"Fokus auf rein hardwarebasierte Entwicklung",false,22
+"Gesamtpuffer und freier Puffer",true,23
+"Soll-Puffer und Ist-Puffer",false,23
+"Finanzieller Puffer und Zeitpuffer",false,23
+"Echtzeit-Puffer und Verspätungs-Puffer",false,23
+"Zeit, Kosten, Qualität",true,24
+"Hardware, Software, Personal",false,24
+"Planung, Durchführung, Abschluss",false,24
+"Risiko, Chance, Erfolg",false,24
+"Strategische Entscheidungsfindung und Freigaben",true,25
+"Schreiben von täglichen Status-E-Mails",false,25
+"Programmierung von Bugfixes",false,25
+"Durchführung von Urlaubsplanung für Entwickler",false,25
+"Einsatz zusätzlicher Ressourcen zur Zeitersparnis",true,26
+"Abbrechen des gesamten Projekts",false,26
+"Reduzierung der Qualitätsstandards",false,26
+"Verschieben des Enddatums nach hinten",false,26
+"Das System muss auf einem Linux-Server laufen",true,27
+"Die DSGVO-Konformität muss gewährleistet sein",true,27
+"Der Benutzer kann Rechnungen als PDF exportieren",false,27
+"Die Antwortzeit muss unter 200ms liegen",false,27
+"Funktionale Anforderungen beschreiben Features",true,28
+"Nicht-funktionale Anforderungen beschreiben Qualitäten",true,28
+"Was vs. Wie",true,28
+"Verhalten vs. Eigenschaften",true,28
+"Änderungen an einem Modul haben minimale Auswirkungen auf andere",true,29
+"Die Wartbarkeit und Testbarkeit der Software wird erhöht",true,29
+"Der Code wird schneller ausgeführt (Laufzeitoptimierung)",false,29
+"Die Datei-Größe des fertigen Programms wird reduziert",false,29
+"Die Pakete können nur noch gemeinsam übersetzt und verteilt werden",true,30
+"Es entsteht ein unentwirrbarer 'Knäuel' an Abhängigkeiten",true,30
+"Die Performance des Systems verbessert sich automatisch",false,30
+"Der Speicherbedarf zur Laufzeit sinkt",false,30
+"Frühe Testphasen wurden vernachlässigt",true,31
+"Modultests waren unzureichend",true,31
+"Anforderungen waren unklar definiert",true,31
+"Qualitätssicherung fand erst zu spät statt",true,31
+"White-Box-Tests basieren auf der Kenntnis des Quellcodes",true,32
+"Black-Box-Tests werden gegen die Spezifikation geprüft",true,32
+"Black-Box-Tests erfordern zwingend Zugriff auf die Datenbank",false,32
+"White-Box-Tests werden primär vom Endanwender durchgeführt",false,32
+"Reaktion auf Veränderung über dem Befolgen eines Plans",true,33
+"Individuen und Interaktionen über Prozessen und Werkzeugen",true,33
+"Umfassende Dokumentation über funktionierender Software",false,33
+"Vertragsverhandlungen über der Zusammenarbeit mit dem Kunden",false,33
+"Anforderungen ändern sich während der Laufzeit",true,34
+"Kunde sieht das Ergebnis erst am Ende",true,34
+"Hohes Risiko für Fehlentwicklungen",true,34
+"Mangelnde Flexibilität bei Marktänderungen",true,34
+"Das Projekt liegt hinter dem Zeitplan zurück",true,35
+"Das Projekt ist kosteneffizienter als geplant",false,35
+"Die Qualität der Arbeit ist höher als erwartet",false,35
+"Das Projekt wird früher fertig als geplant",false,35
+"Personalausfall",true,36
+"Technische Schulden",true,36
+"Scope Creep",true,36
+"Anforderungsänderungen",true,36
+"Es gefährdet die Einhaltung von Deadlines und Budgets",true,37
+"Es sorgt für intransparente Entscheidungsprozesse",true,37
+"Es verbessert die Moral im Entwicklerteam",false,37
+"Es automatisiert den Build-Prozess der Software",false,37
+"Schleichende Ausweitung des Umfangs",true,38
+"Fehlendes Änderungsmanagement",true,38
+"Umfangserweiterung ohne Budgetanpassung",true,38
+"Verhinderung durch Change Control Board",true,38

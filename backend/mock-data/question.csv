@@ -6,3 +6,37 @@
 "Was ist die Ableitung von x^2?","Grundregel der Ableitung","FREETEXT","1","false","4","","4"
 "Was passiert bei isobarer Expansion?","Druck bleibt konstant","MULTIPLE_CHOICE","3","true","5","16","5"
 "Wie viele verschiedene Permutationen (Anordnungen) gibt es von 3 verschiedenen Büchern?","Hierbei ist die Reihenfolge wichtig und es gibt keine Wiederholung.","MULTIPLE_CHOICE","1","true","7","17","1"
+
+"Welches Diagramm wird primär zur Modellierung der funktionalen Anforderungen genutzt?","Use-Case-Diagramme visualisieren die Interaktion zwischen Akteuren und dem System.","MULTIPLE_CHOICE",2,true,22,null,3
+"Nenne einen Fachbegriff für die Untersuchung des Ist-Zustands in der Analyse.","Begriffe wie Systemanalyse oder Ist-Aufnahme sind hier zentral.","FREETEXT",2,true,22,null,1
+"Was ist ein Hauptziel der Design-Phase in der Softwareentwicklung?","Design definiert die Architektur und sorgt für Entkopplung und Wartbarkeit.","MULTIPLE_CHOICE",2,true,23,null,2
+"Welcher Begriff beschreibt die Fähigkeit der Software, bei Fehlern weiterzufunktionieren?","Robustheit und Fehlertoleranz sind Kernaspekte der Softwarequalität.","MULTIPLE_CHOICE",2,true,24,null,4
+"Welches Vorgehensmodell ist für seine streng sequenziellen Phasen bekannt?","Das Wasserfallmodell lässt im Standard keine Rücksprünge in vorherige Phasen zu.","MULTIPLE_CHOICE",1,true,25,null,2
+"Was kennzeichnet den 'Kritischen Pfad' in der Netzplantechnik?","Verzögerungen auf dem kritischen Pfad führen direkt zur Verzögerung des Gesamtprojekts.","MULTIPLE_CHOICE",3,true,26,null,3
+"Welches Werkzeug dient der visuellen Überwachung des Projektfortschritts?","Die Meilensteintrendanalyse visualisiert Terminabweichungen über die Zeit.","MULTIPLE_CHOICE",3,true,27,null,1
+
+"Welche Aspekte gehören zur nicht-funktionalen Anforderungsanalyse?","Nicht-funktionale Anforderungen beschreiben die Qualität des Systems, nicht das Verhalten.","MULTIPLE_CHOICE",2,true,22,null,2
+"Was sind typische Bestandteile eines Lastenhefts?","Das Lastenheft beschreibt die Gesamtheit der Anforderungen des Auftraggebers.","MULTIPLE_CHOICE",2,true,22,null,1
+"Welche Entwurfsmuster (Design Patterns) fördern die Entkopplung von Modulen?","Patterns wie Observer oder Dependency Injection reduzieren direkte Abhängigkeiten.","MULTIPLE_CHOICE",3,true,23,null,4
+"Was versteht man unter 'Refactoring' im Designprozess?","Refactoring verbessert die interne Struktur, ohne das externe Verhalten zu ändern.","MULTIPLE_CHOICE",2,true,23,null,2
+"Welche Testarten gehören zum dynamischen Testen?","Dynamische Tests erfordern die Ausführung des Programmcodes.","MULTIPLE_CHOICE",2,true,24,null,3
+"Was ist der Unterschied zwischen Verifikation und Validierung?","Verifikation prüft die Spezifikation, Validierung den Nutzen für den Anwender.","MULTIPLE_CHOICE",3,true,24,null,1
+"Welche Rollen sind im Scrum-Framework fest definiert?","Scrum definiert genau drei Rollen, um Verantwortlichkeiten klar zu trennen.","MULTIPLE_CHOICE",1,true,25,null,2
+"Was charakterisiert das 'V-Modell' im Vergleich zum Wasserfallmodell?","Das V-Modell stellt den Entwicklungsphasen direkt Testphasen gegenüber.","MULTIPLE_CHOICE",2,true,25,null,4
+"Welche Pufferzeiten werden im Netzplan unterschieden?","Man differenziert zwischen dem freien Puffer und dem Gesamtpuffer eines Vorgangs.","MULTIPLE_CHOICE",3,true,26,null,3
+"Was beschreibt das 'Magische Dreieck' des Projektmanagements?","Zeit, Kosten und Qualität (Leistung) stehen in ständiger Wechselwirkung zueinander.","MULTIPLE_CHOICE",1,true,26,null,1
+"Was ist das Hauptziel eines Lenkungsausschusses in der Projektsteuerung?","Der Lenkungsausschuss trifft strategische Entscheidungen und löst Ressourcenkonflikte.","MULTIPLE_CHOICE",3,true,27,null,4
+"Was passiert bei einer 'Crashing'-Maßnahme in der Projektsteuerung?","Crashing versucht durch zusätzliche Ressourcen die Projektdauer zu verkürzen.","MULTIPLE_CHOICE",3,true,27,null,2
+
+"Im Requirements Engineering unterscheidet man zwischen funktionalen Anforderungen, Qualitätsanforderungen und Randbedingungen. Welche der folgenden Beispiele sind typische Randbedingungen?","Randbedingungen sind einschränkende Vorgaben, die den Lösungsraum begrenzen (z. B. technologische Vorgaben oder Gesetze).","MULTIPLE_CHOICE",3,true,22,null,1
+"Beschreibe den wesentlichen Unterschied zwischen funktionalen Anforderungen und nicht-funktionalen Anforderungen.","Funktionale Anforderungen beschreiben WAS das System tut, nicht-funktionale WIE es die Aufgaben erfüllt.","FREETEXT",2,true,22,null,2
+"Beim Software-Entwurf (Design) spricht man oft von 'hoher Kohäsion' und 'loser Kopplung'. Warum wird dieser Zustand angestrebt?","Hohe Kohäsion bedeutet starke Logik innerhalb eines Moduls; lose Kopplung bedeutet geringe Abhängigkeit zwischen Modulen.","MULTIPLE_CHOICE",3,true,23,null,4
+"Welche Konsequenzen hat eine 'zyklische Abhängigkeit' zwischen zwei Paketen im Software-Design?","Zyklen verhindern eine unabhängige Wiederverwendbarkeit und erschweren das Testen massiv.","MULTIPLE_CHOICE",3,true,23,null,3
+"Stell dir vor, ein Testteam findet in der Abnahmephase sehr viele Fehler. Welche Rückschlüsse auf die Qualitätssicherung in früheren Phasen lassen sich ziehen?","Späte Fehlerfunde deuten meist auf mangelnde Modul- und Integrationstests oder unklare Spezifikationen hin.","FREETEXT",2,true,24,null,1
+"Was sind die Kernunterschiede zwischen Black-Box-Testing und White-Box-Testing?","Black-Box fokussiert sich auf die Spezifikation (Input/Output), White-Box auf die interne Struktur (Code-Abdeckung).","MULTIPLE_CHOICE",2,true,24,null,4
+"Das Agile Manifest priorisiert bestimmte Werte gegenüber anderen. Welche der folgenden Aussagen entsprechen der agilen Philosophie?","Agilität bedeutet nicht 'keine Dokumentation', sondern den Fokus auf funktionierende Software und Zusammenarbeit.","MULTIPLE_CHOICE",2,true,25,null,2
+"Warum scheitern klassische Wasserfall-Projekte oft in dynamischen Marktumfeldern?","Die späte Validierung der Ergebnisse am Ende der langen Laufzeit führt oft zu Produkten, die am Markt vorbeigehen.","FREETEXT",3,true,25,null,1
+"Ein Projektleiter stellt fest, dass der Gesamtwert des Projekts (Planned Value) höher ist als der tatsächlich erarbeitete Wert (Earned Value). Was bedeutet das?","Dies ist ein Indikator für einen Zeitverzug im Projektplan.","MULTIPLE_CHOICE",3,true,26,null,3
+"Nenne drei typische Risiken in der IT-Projektplanung.","Risiken können personeller, technischer oder organisatorischer Natur sein.","FREETEXT",1,true,26,null,2
+"In der Projektsteuerung wird das 'Change Management' (Änderungswesen) oft als kritisch angesehen. Warum?","Unkontrollierte Änderungen führen zum sogenannten 'Scope Creep', was Zeit- und Budgetrahmen sprengt.","MULTIPLE_CHOICE",3,true,27,null,4
+"Was versteht man unter 'Scope Creep' und wie kann man ihn verhindern?","Scope Creep ist die schleichende Ausweitung des Projektumfangs ohne entsprechende Ressourcenanpassung.","FREETEXT",3,true,27,null,1
