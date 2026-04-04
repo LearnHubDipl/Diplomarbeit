@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import {Component, EventEmitter, HostListener, inject, Input, OnInit, Output} from '@angular/core';
 import { Question } from '../../../../shared/src/lib/interfaces/question';
 import { QuestionService } from '../../../../shared/src/lib/services/question.service';
 import { NgClass, NgForOf, NgIf, NgStyle, Location } from '@angular/common';
@@ -370,6 +370,13 @@ export class QuestionRunnerComponent implements OnInit {
         this.question!.solutions = q.solutions;
       });
     }
+  }
+
+  getDisplayTime() {
+    const totalSeconds = Math.max(0, this.timeLeft);
+    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${seconds}`;
   }
 
   protected readonly Math = Math;
