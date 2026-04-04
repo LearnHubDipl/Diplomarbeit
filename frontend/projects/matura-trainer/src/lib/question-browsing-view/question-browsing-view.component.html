@@ -55,7 +55,7 @@
         <p>Keine Fragen in diesem Bereich gefunden.</p>
         <button *ngIf="showOnlyPool"
                 (click)="toggleShowOnlyPool()"
-                style="background: none; border: underline; color: #f3c400; cursor: pointer;">
+                style="background: none; color: #f3c400; cursor: pointer;">
           Filter zurücksetzen
         </button>
       </div>
@@ -105,13 +105,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="selection-footer" *ngIf="selecting && selectedQuestionIds.length > 0">
-      <span class="count-info">{{ selectedQuestionIds.length }} Fragen ausgewählt</span>
-      <button class="submit-btn" (click)="addQuestionsToQuestionPool()">
-        Auswahl speichern
-      </button>
     </div>
   </div>
 </div>
