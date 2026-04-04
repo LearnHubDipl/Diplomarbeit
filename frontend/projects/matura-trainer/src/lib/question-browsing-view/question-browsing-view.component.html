@@ -1,5 +1,6 @@
-<div class="browser-grid">
-  <div class="widget-wrapper">
+<div class="browser-grid" [class.has-selection]="!!selectedTopicPool">
+
+  <div class="widget-wrapper topic-sidebar">
     <div class="browser-topic-grid">
       <div *ngFor="let currentSubject of subjects">
         <div class="header topicPool-header" (click)="toggleSubjectDropdown(currentSubject.id)">
@@ -11,82 +12,93 @@
           <ul>
             <li *ngFor="let pool of currentSubject.topicPools"
                 (click)="loadTopicPoolData(pool)"
-                [class]="pool == selectedTopicPool ? 'selectedTopicPool' : ''"
-            >{{ pool.name }}</li>
+                [class.selectedTopicPool]="pool === selectedTopicPool">
+              {{ pool.name }}
+            </li>
           </ul>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="widget-wrapper">
+  <div class="widget-wrapper questions-main">
     <div class="header question-header">
-      {{ selectedTopicPool ? selectedTopicPool.subject?.name : "Fach" }} >
-      {{ selectedTopicPool ? selectedTopicPool.name : "Themenpool" }}
+      <button class="mobile-back-btn" (click)="resetSelection()">
+        ← Fächer
+      </button>
+
+      <span class="header-text">
+        {{ selectedTopicPool ? selectedTopicPool.subject?.name : "Fach" }} &gt;
+        {{ selectedTopicPool ? selectedTopicPool.name : "Themenpool" }}
+      </span>
     </div>
 
     <div class="widget-content browser-content">
-      <div class="selectionButton-flex-container" *ngIf="this.viewQuestions.length > 0">
+
+      <div class="selectionButton-flex-container" *ngIf="allViewQuestions.length > 0">
         <button (click)="toggleShowOnlyPool()">
-          {{ showOnlyPool ? "Alle Fragen anzeigen" : "Nur Fragen im Fragenpool" }}
+          {{ showOnlyPool ? "Alle Fragen anzeigen" : "Nur Fragen im Pool" }}
         </button>
 
         <button *ngIf="selecting"
-                (click)="!allQuestionsSelected() ? selectAllQuestions() : deSelectAllQuestions()"
-        >{{ !allQuestionsSelected() ? "Alle auswählen" : "Alle abwählen" }}</button>
-        <button (click)="toggleSelectionMode()">
+                (click)="!allQuestionsSelected() ? selectAllQuestions() : deSelectAllQuestions()">
+          {{ !allQuestionsSelected() ? "Alle auswählen" : "Alle abwählen" }}
+        </button>
+
+        <button (click)="toggleSelectionMode()" [class.warning-btn]="selecting">
           {{ !selecting ? "Auswählen" : "Abbrechen" }}
+        </button>
+      </div>
+
+      <div *ngIf="selectedTopicPool && viewedQuestions.length === 0" class="empty-placeholder">
+        <span>🔍</span>
+        <p>Keine Fragen in diesem Bereich gefunden.</p>
+        <button *ngIf="showOnlyPool"
+                (click)="toggleShowOnlyPool()"
+                style="background: none; border: underline; color: #f3c400; cursor: pointer;">
+          Filter zurücksetzen
         </button>
       </div>
 
       <div *ngFor="let currentQuestion of viewedQuestions"
            class="widget-wrapper question-wrapper"
-           style="margin-bottom: 0.8rem;"
            [ngClass]="{
              'selecting': selecting,
              'not-selecting': !selecting,
              'selected': selectedQuestionIds.includes(currentQuestion.id)
-           }"
-      >
-        <div
-          class="widget-content question-content"
-          (click)="!selecting
-            ? toggleQuestionDropdown(currentQuestion.id)
-            : toggleQuestionSelected(currentQuestion.id)"
-        >
-          <div class="question-title">
-            <h5
-              [class]="!openQuestionDropDowns[currentQuestion.id] ? 'truncated' : 'expanded'"
-              [style]="currentQuestion.media && openQuestionDropDowns[currentQuestion.id] ? 'width: 50%;' : 'width: 70%'"
-            >
+           }">
+
+        <div class="widget-content question-content"
+             (click)="!selecting
+                ? toggleQuestionDropdown(currentQuestion.id)
+                : toggleQuestionSelected(currentQuestion.id)">
+
+          <div class="question-title-container">
+            <h5 [ngClass]="openQuestionDropDowns[currentQuestion.id] ? 'expanded' : 'truncated'">
               {{ currentQuestion.text }}
             </h5>
 
-            <img
-              [src]="currentQuestion.media.path"
-              [alt]="currentQuestion.media.description"
-              *ngIf="currentQuestion.media && openQuestionDropDowns[currentQuestion.id]"
-            >
+            <img *ngIf="currentQuestion.media && openQuestionDropDowns[currentQuestion.id]"
+                 [src]="currentQuestion.media.path"
+                 [alt]="currentQuestion.media.description"
+                 class="question-browser-img">
 
-            <button
-              class="star-btn"
-              (click)="toggleQuestionPool(currentQuestion.id); $event.stopPropagation()"
-              [ngClass]="{'selected-star': selectedQuestionIds.includes(currentQuestion.id)}"
-              title="Frage in Fragenpool aufnehmen"
-            >
-              ★
-            </button>
-
-            <span class="arrow">{{ openQuestionDropDowns[currentQuestion.id] ? '▲' : '▼' }}</span>
+            <div class="question-actions">
+              <button class="star-btn"
+                      (click)="toggleQuestionPool(currentQuestion.id); $event.stopPropagation()"
+                      [ngClass]="{'selected-star': selectedQuestionIds.includes(currentQuestion.id)}">
+                ★
+              </button>
+              <span class="arrow">{{ openQuestionDropDowns[currentQuestion.id] ? '▲' : '▼' }}</span>
+            </div>
           </div>
 
-          <div class="dropdown-content" *ngIf="openQuestionDropDowns[currentQuestion.id]">
-            <div class="button-container">
-              <button
-                class="submit-btn"
-                type="button"
-                (click)="navigateToQuestionRunner(currentQuestion.id)"
-              >
+          <div class="dropdown-details" *ngIf="openQuestionDropDowns[currentQuestion.id]">
+            <hr class="divider">
+            <div class="button-row">
+              <button class="submit-btn"
+                      type="button"
+                      (click)="navigateToQuestionRunner(currentQuestion.id); $event.stopPropagation()">
                 Jetzt Üben
               </button>
             </div>
@@ -94,8 +106,10 @@
         </div>
       </div>
     </div>
-    <div class="button-container" *ngIf="selecting && selectedQuestionIds.length > 0" style="margin-top: 2rem; display: flex; justify-content: flex-end;">
-      <button class="submit-btn save-selection-btn" (click)="addQuestionsToQuestionPool()">
+
+    <div class="selection-footer" *ngIf="selecting && selectedQuestionIds.length > 0">
+      <span class="count-info">{{ selectedQuestionIds.length }} Fragen ausgewählt</span>
+      <button class="submit-btn" (click)="addQuestionsToQuestionPool()">
         Auswahl speichern
       </button>
     </div>

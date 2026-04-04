@@ -217,4 +217,10 @@ export class QuestionBrowsingViewComponent implements OnInit {
       this.showOnlyPool = false;
     }
   }
+
+
+  resetSelection() {
+    this.selectedTopicPool = null;
+    this.viewedQuestions = [];
+  }
 }
