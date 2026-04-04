@@ -59,6 +59,9 @@
     <span *ngIf="this.mode !== 'practice'" class="timer-badge">
       {{ getDisplayTime() }}
     </span>
+    <span *ngIf="this.mode === 'practice'" class="timer-badge">
+      {{ this.currentQuestionIndex+1 }} / {{ this.questionIdList.length}}
+    </span>
   </div>
 
   <!-- ERROR MESSAGES, IF THERE ARE ANY -->
