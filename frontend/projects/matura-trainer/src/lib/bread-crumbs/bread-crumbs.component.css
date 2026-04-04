@@ -2,14 +2,25 @@
  BREADCRUMBS (From w3schools.com)
  */
 ul.breadcrumb {
-  position: relative;
-  left: -4%;
-  margin-bottom: 6%;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 0;
+  margin-bottom: 1rem;
   list-style: none;
+  scrollbar-width: none;
 }
+
+ul.breadcrumb::-webkit-scrollbar {
+  display: none;
+}
+
 ul.breadcrumb li {
-  display: inline;
-  font-size: 2em;
+  display: inline-flex;
+  align-items: center;
+  font-size: 1.8rem;
 }
 ul.breadcrumb li+li:before {
   padding: 8px;
@@ -23,4 +34,21 @@ ul.breadcrumb li a {
 ul.breadcrumb li a:hover {
   color: #ec8424;;
   text-decoration: underline;
+}
+
+@media(max-width:767px) {
+  ul.breadcrumb {
+    left: 0;
+  }
+  ul.breadcrumb li {
+    font-size: 1.4em;
+  }
+  ul.breadcrumb li:not(:nth-last-child(-n+2)) {
+    display: none;
+  }
+
+  ul.breadcrumb li:nth-last-child(2):not(:first-child):before {
+    content: "... > ";
+    padding-right: 8px;
+  }
 }

@@ -53,7 +53,9 @@
 
 <div class="widget-wrapper question-wrapper" [hidden]="showSolutionEditor">
   <div class="header flex-between">
-    {{ question?.topicPool?.subject?.name || 'Fach' }} &gt; {{ question?.topicPool?.name || 'Themenpool' }}
+    <span class="subject-and-topic-pool">
+      {{ question?.topicPool?.subject?.name || 'Fach' }} &gt; {{ question?.topicPool?.name || 'Themenpool' }}
+    </span>
     <span *ngIf="this.mode !== 'practice'" class="timer-badge">
       {{ getDisplayTime() }}
     </span>
@@ -160,7 +162,7 @@
       <img
         src="/assets/restart.png"
         *ngIf="this.mode === 'review'"
-        style="height: 5vh; align-self: end; margin-right: -25%; cursor: pointer"
+        class="copy-exam-icon"
         (click)="createExamCopy(this.exam!.id)"
       >
 

@@ -13,7 +13,7 @@
 
     <form *ngIf="!errorMessage" [formGroup]="form" (ngSubmit)="startExam()">
       <!-- Topic Pools -->
-      <mat-form-field appearance="fill" class="full-width">
+      <mat-form-field style="width: 100%" appearance="fill">
         <mat-label>Wähle Fächer und Themenpools</mat-label>
         <mat-select
           formControlName="topicPoolIds"
