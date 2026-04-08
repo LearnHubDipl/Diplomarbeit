@@ -19,13 +19,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.enums.SchemaType;
-import org.eclipse.microprofile.openapi.annotations.media.Content;
-import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityRequirement;
 
 import java.lang.reflect.InvocationHandler;
@@ -91,7 +86,8 @@ public class QuestionResource {
     }
 
     private boolean canModifyQuestion(User currentUser, Question question) {
-        if (Boolean.TRUE.equals(currentUser.getAdmin()) && Boolean.TRUE.equals(question.getPublic())) return true;
+        if ((Boolean.TRUE.equals(currentUser.getAdmin()) || Boolean.TRUE.equals(currentUser.getTeacher()))
+                && Boolean.TRUE.equals(question.getPublic())) return true;
         return question.getUser().getId().equals(currentUser.getId());
     }
 
@@ -168,7 +164,7 @@ public class QuestionResource {
         try {
             User currentUser = getCurrentUser(securityContext);
 
-            if (!Boolean.TRUE.equals(currentUser.getAdmin())) {
+            if (!Boolean.TRUE.equals(currentUser.getAdmin()) && !Boolean.TRUE.equals(currentUser.getTeacher())) {
                 return Response.status(Response.Status.FORBIDDEN)
                         .entity(Map.of("error", "Only admins can view all private questions")).build();
             }
@@ -271,7 +267,7 @@ public class QuestionResource {
                 return Response.status(Response.Status.BAD_REQUEST)
                         .entity(Map.of("error", "Topic pool ID is required")).build();
             }
-            if (Boolean.TRUE.equals(dto.isPublic()) && !Boolean.TRUE.equals(currentUser.getAdmin())) {
+            if (Boolean.TRUE.equals(dto.isPublic()) && !Boolean.TRUE.equals(currentUser.getAdmin()) && !Boolean.TRUE.equals(currentUser.getTeacher())) {
                 return Response.status(Response.Status.FORBIDDEN)
                         .entity(Map.of("error", "Only admins can create public questions")).build();
             }
@@ -311,7 +307,7 @@ public class QuestionResource {
                         .entity(Map.of("error", "You can only modify your own questions or public questions as admin"))
                         .build();
             }
-            if (dto.isPublic() != null && dto.isPublic() && !Boolean.TRUE.equals(currentUser.getAdmin())) {
+            if (dto.isPublic() != null && dto.isPublic() && !Boolean.TRUE.equals(currentUser.getAdmin()) && !Boolean.TRUE.equals(currentUser.getTeacher())) {
                 return Response.status(Response.Status.FORBIDDEN)
                         .entity(Map.of("error", "Only admins can make questions public")).build();
             }
@@ -337,7 +333,7 @@ public class QuestionResource {
         try {
             User currentUser = getCurrentUser(securityContext);
 
-            if (!Boolean.TRUE.equals(currentUser.getAdmin())) {
+            if (!Boolean.TRUE.equals(currentUser.getAdmin()) && !Boolean.TRUE.equals(currentUser.getTeacher())) {
                 return Response.status(Response.Status.FORBIDDEN)
                         .entity(Map.of("error", "Only admins can change public status of questions")).build();
             }
