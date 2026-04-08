@@ -1,5 +1,5 @@
 keycloakSub,name,email,isTeacher,isAdmin,profilePictureId
 cbd71d68-661c-4fd7-bced-3444f968d59d,Isabella Baumann, i.baumann@students.htl-leonding.ac.at,false,true,4
-27457eb2-2a35-4f55-8906-5bb367fe41e3,Thomas Gossenreiter, t.gossenreiter@students.htl-leonding.ac.at,false,true,1
-7ca640ea-50c2-4d10-8427-9d8674920b69,Lien Hochbichler,l.hochbichler@students.htl-leonding.ac.at,false,true,4
+27457eb2-2a35-4f55-8906-5bb367fe41e3,Thomas Gossenreiter, t.gossenreiter@students.htl-leonding.ac.at,false,true,
+7ca640ea-50c2-4d10-8427-9d8674920b69,Lien Hochbichler,l.hochbichler@students.htl-leonding.ac.at,false,false,4
 dd0eb45b-ca3f-4acc-ba01-2ea3776403fe,Stefanie Steinmair,s.steinmair@students.htl-leonding.ac.at,false,true,4

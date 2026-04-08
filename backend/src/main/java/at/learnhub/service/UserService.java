@@ -20,48 +20,51 @@ public class UserService {
     @Inject
     UserRepository userRepository;
 
-    /**
-     * Finds or creates a user based on Keycloak token.
-     * This is called automatically when a user logs in.
-     *
-     * @param token the JWT token from Keycloak
-     * @return the UserSlimDto
-     */
     @Transactional
     public UserSlimDto findOrCreateUser(String token) {
         DecodedJWT jwt = JWT.decode(token);
         String keycloakSub = jwt.getSubject();
 
-        // Check if user already exists
         Optional<UserSlimDto> existingUser = userRepository.findByKeycloakSub(keycloakSub);
         if (existingUser.isPresent()) {
             return existingUser.get();
         }
 
-        // Extract user data from token
         UserCreateDto dto = extractUserDataFromToken(jwt);
-
-        // Create new user
         User newUser = UserMapper.toEntity(dto);
         User savedUser = userRepository.createUser(newUser);
-
         return UserMapper.toSlimDto(savedUser);
     }
 
-    /**
-     * Finds or creates a user based on CustomSecurityContext.
-     * This is the recommended method as the token is already validated.
-     */
     @Transactional
     public UserSlimDto findOrCreateUserFromContext(CustomSecurityContext context) {
         String keycloakSub = context.keycloakSub();
 
         System.out.println("[UserService] Looking for user with keycloakSub: " + keycloakSub);
 
-        Optional<UserSlimDto> existingUser = userRepository.findByKeycloakSub(keycloakSub);
-        if (existingUser.isPresent()) {
-            System.out.println("[UserService] User exists: " + existingUser.get().name());
-            return existingUser.get();
+        Optional<User> existingUserEntity = userRepository.findUserEntityByKeycloakSub(keycloakSub);
+
+        // Fallback: per Email suchen falls Sub nicht gefunden (z.B. nach Keycloak-Reset)
+        if (existingUserEntity.isEmpty() && context.email() != null && !context.email().isBlank()) {
+            User byEmail = userRepository.findUserEntityByEmail(context.email());
+            if (byEmail != null) {
+                System.out.println("[UserService] Found user by email, updating keycloakSub: " + context.email());
+                byEmail.setKeycloakSub(keycloakSub);
+                byEmail.setTeacher(context.isTeacher());
+                userRepository.updateUser(byEmail);
+                return UserMapper.toSlimDto(byEmail);
+            }
+        }
+
+        if (existingUserEntity.isPresent()) {
+            User user = existingUserEntity.get();
+            System.out.println("[UserService] User exists: " + user.getName());
+
+            // Rolle immer aktualisieren falls sie sich geändert hat
+            user.setTeacher(context.isTeacher());
+            userRepository.updateUser(user);
+
+            return UserMapper.toSlimDto(user);
         }
 
         System.out.println("[UserService] Creating new user: " + keycloakSub);
@@ -89,7 +92,6 @@ public class UserService {
                     fullName = username;
                     System.out.println("[UserService] Using username: " + fullName);
                 } else {
-                    // Absolute last resort: shortened UUID
                     fullName = "User " + keycloakSub.substring(0, Math.min(8, keycloakSub.length()));
                     System.out.println("[UserService] WARNING: Using fallback name: " + fullName);
                 }
@@ -97,6 +99,7 @@ public class UserService {
         } else {
             System.out.println("[UserService] Using fullName from context: " + fullName);
         }
+
         UserCreateDto dto = new UserCreateDto(
                 keycloakSub,
                 fullName,
@@ -121,9 +124,6 @@ public class UserService {
         return UserMapper.toSlimDto(savedUser);
     }
 
-    /**
-     * Extracts user data from JWT token.
-     */
     private UserCreateDto extractUserDataFromToken(DecodedJWT jwt) {
         String keycloakSub = jwt.getSubject();
         String name = jwt.getClaim("name").asString();
@@ -133,71 +133,42 @@ public class UserService {
         String familyName = jwt.getClaim("family_name").asString();
         String distinguishedName = jwt.getClaim("distinguishedName").asString();
 
-        // Extract class from DN
         String className = extractClassFromDN(distinguishedName);
-
-        // Determine if user is student
         Boolean isStudent = isStudentFromDN(distinguishedName);
         Boolean isTeacher = !isStudent;
 
         return new UserCreateDto(
-                keycloakSub,
-                name,
-                email,
-                username,
-                givenName,
-                familyName,
-                className,
-                isTeacher
+                keycloakSub, name, email, username,
+                givenName, familyName, className, isTeacher
         );
     }
 
-    /**
-     * Extracts class name from distinguished name.
-     * Example: CN=it210181,OU=5AHITM,... -> "5AHITM"
-     */
     private String extractClassFromDN(String dn) {
-        if (dn == null || dn.isEmpty()) {
-            return "";
-        }
+        if (dn == null || dn.isEmpty()) return "";
 
-        // Split by comma and find OU entries
         String[] parts = dn.split(",");
         for (String part : parts) {
             part = part.trim();
             if (part.startsWith("OU=")) {
                 String value = part.substring(3);
-                // Check if it contains numbers or class identifiers
                 if (value.matches(".*\\d.*") ||
                         value.matches(".*(HIF|HITM|HEL|HBG|FELA|CIF|BIFT|CIFT|ABIF|ACIF).*")) {
                     return value;
                 }
             }
         }
-
         return "";
     }
 
-    /**
-     * Checks if user is a student based on DN.
-     */
     private Boolean isStudentFromDN(String dn) {
-        if (dn == null || dn.isEmpty()) {
-            return false;
-        }
+        if (dn == null || dn.isEmpty()) return false;
         return dn.toUpperCase().contains("OU=STUDENTS");
     }
 
-    /**
-     * Gets a user by ID.
-     */
     public UserSlimDto getUserById(Long id) {
         return userRepository.getUserSlimDtoById(id);
     }
 
-    /**
-     * Gets a user by Keycloak sub.
-     */
     public Optional<UserSlimDto> getUserByKeycloakSub(String keycloakSub) {
         return userRepository.findByKeycloakSub(keycloakSub);
     }

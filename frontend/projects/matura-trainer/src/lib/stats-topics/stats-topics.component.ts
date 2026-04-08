@@ -29,7 +29,9 @@ export interface TopicPool {
   styleUrls: ['./stats-topics.component.css', '../styles/shared-styles.css']
 })
 export class StatsTopicsComponent implements OnInit {
+
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+
   userService: UserInitializationService = inject(UserInitializationService);
 
   topicPools: TopicPool[] = [];
@@ -43,6 +45,7 @@ export class StatsTopicsComponent implements OnInit {
     datasets: [{ data: [], backgroundColor: [] }]
   };
   doughnutChartType: ChartType = 'doughnut';
+
   chartOptions: ChartConfiguration['options'] = {
     plugins: {
       legend: { display: false },
@@ -75,7 +78,6 @@ export class StatsTopicsComponent implements OnInit {
     }
   }
 
-  // WICHTIG: Die Prüfung für das HTML
   get hasChartData(): boolean {
     const data = this.doughnutChartData.datasets[0].data;
     return data && data.length > 0 && data.some(value => value > 0);
@@ -88,7 +90,6 @@ export class StatsTopicsComponent implements OnInit {
 
   loadChartData(): void {
     if (!this.selectedTopicPoolId) return;
-
     this.statsService.getStatsOverviewForTopicPool(this.userId, this.selectedTopicPoolId)
       .subscribe((data: StatsOverviewDto) => {
         const rawData = data.legend.map(entry => entry.value);
@@ -102,9 +103,8 @@ export class StatsTopicsComponent implements OnInit {
         this.legendData = data.legend;
 
         const unansweredEntry = data.legend.find(e => e.label.toLowerCase().includes('nicht beantwortet'));
-        this.chartOptions!.plugins!.centerText!.text = unansweredEntry && this.hasChartData
-          ? `${unansweredEntry.value} offene Fragen`
-          : '';
+        this.chartOptions!.plugins!.centerText!.text = unansweredEntry ? `${unansweredEntry.value} offene Fragen` : '';
+        this.chartOptions!.plugins!.centerText!.text = `${data.unanswered} offene Fragen`;
 
         this.chart?.update();
       });

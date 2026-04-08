@@ -9,15 +9,13 @@ import java.util.List;
 @Path("/api/teachers")
 @Produces(MediaType.APPLICATION_JSON)
 public class TeacherResource {
-
-    public record TeacherDto(Long id, String name) {}
-
     @Inject TeacherRepository repo;
+    public record TeacherDto(Long id, String name, String email) {}
 
     @GET
     public List<TeacherDto> list() {
         return repo.listAll().stream()
-                .map(t -> new TeacherDto(t.getId(), t.getName()))
+                .map(t -> new TeacherDto(t.getId(), t.getName(), t.getEmail()))
                 .toList();
     }
 }

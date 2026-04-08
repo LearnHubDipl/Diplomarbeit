@@ -74,16 +74,16 @@ export class KeycloakOperationService{
     return matches[0].replace(/^OU=/i, '');
   }
 
-  /**getIsStudent(): boolean {
+  getIsStudent(): boolean {
     const claims = this.getDecodedToken();
     const dn: string = claims?.['distinguishedName'] || claims?.['distinguished_name'] || '';
     if (!dn) return false;
     return /OU=Students/i.test(dn) || /Students/i.test(dn);
-  }**/
-
-  getIsStudent(): boolean {
-    return false; // TEMP: Test als Lehrkraft
   }
+
+  /**getIsStudent(): boolean {
+    return false; // TEMP: Test als Lehrkraft
+  }**/
 
   getEmail(): string {
     const claims = this.getDecodedToken();

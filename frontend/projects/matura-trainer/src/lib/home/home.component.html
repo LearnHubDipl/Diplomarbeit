@@ -11,7 +11,7 @@
             <div *ngFor="let entry of level.entries"
                  class="progress-segment"
                  [style.background]="entry.color"
-                 [style.width.%]="entry.value > 0 ? entry.value * 10 : 0">
+                 [style.width.%]="entry.value > 0 ? entry.value / this.questionPool?.entries!.length * 100 : 0">
             </div>
           </div>
 

@@ -22,23 +22,26 @@ export class TopicContentService {
     topicPoolId: number,
     _subjectId: number,
     params: {
-      file: File;
+      file?: File | null;
       title: string;
       description?: string;
       uploaderName?: string;
-      teacherId?: number;
+      teacherEmail?: string;
       replaceFileName?: string;
     }
   ) {
     const fd = new FormData();
-    fd.append('file', params.file);
-    fd.append('filename', params.file.name);
 
-    if (params.title)        fd.append('title', params.title);
-    if (params.description)  fd.append('description', params.description);
-    if (params.uploaderName) fd.append('uploaderName', params.uploaderName);
-    if (params.teacherId != null) fd.append('teacherId', String(params.teacherId));
-    if (params.replaceFileName)   fd.append('replaceFileName', params.replaceFileName);
+    if (params.file) {
+      fd.append('file', params.file);
+      fd.append('filename', params.file.name);
+    }
+
+    if (params.title)           fd.append('title', params.title);
+    if (params.description)     fd.append('description', params.description);
+    if (params.uploaderName)    fd.append('uploaderName', params.uploaderName);
+    if (params.teacherEmail)    fd.append('teacherEmail', params.teacherEmail);
+    if (params.replaceFileName) fd.append('replaceFileName', params.replaceFileName);
 
     return this.http
       .post<TopicNoteDto>(`${this.base}/${topicPoolId}/notes/upload`, fd)

@@ -1,19 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import {API_BASE_URL} from './globals';
+import { API_BASE_URL } from './globals';
 
 export interface PendingNoteDto {
-  topicPoolId: number;
-  fileName: string;
+  topicPoolId?: number;
+  fileName?: string;
   title?: string;
+  description?: string;
   uploaderName?: string;
-  uploaderSub?: string;
-  teacherId?: number;
   createdAt?: number;
-  status?: 'PENDING' | 'APPROVED' | string;
+  pdfUrl?: string;
   approved?: boolean;
-  publicUrl?: string;
+  status?: 'PENDING' | 'APPROVED' | string;
 }
 
 @Injectable({ providedIn: 'root' })

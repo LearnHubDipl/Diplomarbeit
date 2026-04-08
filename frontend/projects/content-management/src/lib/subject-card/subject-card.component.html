@@ -1,7 +1,7 @@
 <div class="card h-100 shadow-sm position-relative" (click)="closeMenu()">
   <img
     class="card-img-top"
-    [src]="subject?.img?.path || '/assets/subject-default.jpg'"
+    [src]="subject?.img?.path || 'src/assets/subject-default.jpg'"
     alt="{{ subject?.name || 'Fachbild' }}"
     style="object-fit:cover; aspect-ratio: 4/3;"
     onerror="this.onerror=null; this.src='/assets/subject-default.jpg';"

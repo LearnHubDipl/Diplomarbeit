@@ -12,3 +12,10 @@ ssh student@vm91.htl-leonding.ac.at
 cd diplomarbeit
 docker compose pull frontend
 docker compose up -d frontend
+
+
+docker compose down
+docker volume rm learnhub-data
+docker compose up -d
+sleep 20
+docker exec learnhub-mysql mysql -u quarkus -pquarkus learnhub-db -e "UPDATE user SET is_teacher = 1 WHERE email = 'b.schroeder@htl-leonding.ac.at';" 2>/dev/null

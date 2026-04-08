@@ -37,19 +37,16 @@
                 {{ n.title || n.fileName || 'Ohne Titel' }}
               </h5>
 
-              <!-- Status-Badge -->
               <div class="mt-1">
                 <span class="badge bg-secondary" *ngIf="isPending(n)">PENDING</span>
                 <span class="badge bg-success" *ngIf="isApproved(n)">APPROVED</span>
               </div>
 
-              <!-- Hinweis nur für eigenen Pending Upload -->
               <div *ngIf="isPending(n) && isOwnNote(n)" class="small text-muted mt-1">
                 Wartet auf Freigabe durch Lehrperson.
               </div>
             </div>
 
-            <!-- Icons: getrennt nach canEdit/canDelete -->
             <div class="btn-group btn-group-sm" *ngIf="canEdit(n) || canDelete(n)">
               <i class="bi bi-pencil-fill text-success fs-5"
                  *ngIf="canEdit(n)"
@@ -148,16 +145,15 @@
               <textarea class="form-control" rows="2" formControlName="description"></textarea>
             </div>
 
-            <!-- Schüler: Pflicht, Teacher/Admin: optional -->
             <div class="col-md-6">
               <label class="form-label">
                 Lehrperson
                 <span *ngIf="isStudent" class="text-danger">*</span>
                 <span *ngIf="!isStudent" class="text-muted small">(optional)</span>
               </label>
-              <select class="form-select" formControlName="teacherId">
+              <select class="form-select" formControlName="teacherEmail">
                 <option [ngValue]="null">– auswählen –</option>
-                <option *ngFor="let t of teachers" [ngValue]="t.id">{{ t.name }}</option>
+                <option *ngFor="let t of teachers" [ngValue]="t.email">{{ t.name }}</option>
               </select>
               <div *ngIf="isStudent" class="form-text">
                 Schüler:innen müssen eine Lehrperson für die Freigabe auswählen.
@@ -165,14 +161,22 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label">PDF-Datei*</label>
+              <label class="form-label">
+                PDF-Datei
+                <span *ngIf="!editing" class="text-danger">*</span>
+                <span *ngIf="editing" class="text-muted small">(optional – nur wenn ersetzen)</span>
+              </label>
               <input class="form-control"
                      #fileInput
                      type="file"
                      accept="application/pdf"
                      (click)="resetFileInput(fileInput)"
                      (change)="onFileChange($event)">
+              <div *ngIf="editing" class="form-text text-muted">
+                Leer lassen um das bestehende PDF zu behalten.
+              </div>
             </div>
+
           </div>
 
           <div *ngIf="error" class="alert alert-danger mt-3">{{ error }}</div>

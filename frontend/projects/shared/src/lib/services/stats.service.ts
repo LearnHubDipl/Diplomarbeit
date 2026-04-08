@@ -4,7 +4,7 @@ import { map, Observable } from 'rxjs';
 import { TopicPool } from '../../../../matura-trainer/src/lib/stats-topics/stats-topics.component';
 import {ProgressOverviewDto} from '../../../../matura-trainer/src/lib/home/home.component';
 import {Exam} from '../interfaces/exam';
-import { API_BASE_URL } from "./globals";
+import { API_BASE_URL } from './globals';
 import {ExamHistoryDto} from '../interfaces/ExamHistoryDto';
 
 export interface AnswerSlimDto {
@@ -66,12 +66,10 @@ export interface StatsOverviewDto {
 })
 export class StatsService {
 
-  private streakApiUrl = 'http://localhost:8080/streak';
-
   constructor(private http: HttpClient) {}
 
   getStreak(userId: number): Observable<number> {
-    return this.http.get<{ streak: number }>(`${this.streakApiUrl}/user/${userId}`)
+    return this.http.get<{ streak: number }>(`${API_BASE_URL}/streak/user/${userId}`)
       .pipe(map(response => response.streak));
   }
 
