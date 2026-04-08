@@ -40,13 +40,10 @@
           {{ showOnlyPool ? "Alle Fragen anzeigen" : "Nur Fragen im Pool" }}
         </button>
 
-        <button *ngIf="selecting"
-                (click)="!allQuestionsSelected() ? selectAllQuestions() : deSelectAllQuestions()">
+        <button
+          [class.warning-btn]="allQuestionsSelected()"
+          (click)="handleBulkAction()">
           {{ !allQuestionsSelected() ? "Alle auswählen" : "Alle abwählen" }}
-        </button>
-
-        <button (click)="toggleSelectionMode()" [class.warning-btn]="selecting">
-          {{ !selecting ? "Auswählen" : "Abbrechen" }}
         </button>
       </div>
 

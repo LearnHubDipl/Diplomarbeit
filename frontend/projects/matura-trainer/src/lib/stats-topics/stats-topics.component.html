@@ -1,7 +1,6 @@
 <div class="stats-layout">
   <div class="left-side">
     <div class="widget-wrapper">
-      <!-- Header mit Pfeil -->
       <div class="header" [class.open]="isDropdownOpen">
         <div class="select-wrapper">
           <select
@@ -18,13 +17,21 @@
         </div>
       </div>
 
-      <div class="chart-wrapper" style="display: block; width: 100%;">
-        <canvas baseChart
+      <div class="chart-wrapper">
+        <canvas *ngIf="hasChartData"
+                baseChart
                 [data]="doughnutChartData"
                 [type]="doughnutChartType"
                 [options]="chartOptions"
                 [plugins]="chartPlugins">
         </canvas>
+
+        <div *ngIf="!hasChartData" class="empty-chart-content">
+          <p>Noch keine Fragen im Pool</p>
+          <button class="browsing-btn" routerLink="/trainer/practice/fragen">
+            Fragen finden
+          </button>
+        </div>
       </div>
     </div>
   </div>

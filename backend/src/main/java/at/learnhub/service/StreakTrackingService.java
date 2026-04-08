@@ -35,18 +35,17 @@ public class StreakTrackingService {
 
         LocalDate lastLogin = tracking.getLastLoggedInAt();
 
-        if (lastLogin.isEqual(today)) {
+        if (lastLogin != null && lastLogin.isEqual(today)) {
             return tracking;
         }
-        if (lastLogin.plusDays(1).isEqual(today)) {
+
+        if (lastLogin != null && lastLogin.plusDays(1).isEqual(today)) {
             tracking.setStreak(tracking.getStreak() + 1);
         } else {
             tracking.setStreak(1);
         }
 
         tracking.setLastLoggedInAt(today);
-
-        streakTrackingRepository.persist(tracking);
         return tracking;
     }
 

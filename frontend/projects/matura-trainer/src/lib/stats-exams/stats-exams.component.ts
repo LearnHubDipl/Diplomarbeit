@@ -6,6 +6,7 @@ import {QuestionRunnerComponent} from '../question-runner/question-runner.compon
 import {ExamHistoryDto} from '../../../../shared/src/lib/interfaces/ExamHistoryDto';
 import { ChangeDetectorRef } from '@angular/core';
 import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'lib-stats-exams',
@@ -14,7 +15,8 @@ import {UserInitializationService} from '../../../../shared/src/lib/services/use
     NgForOf,
     NgClass,
     NgIf,
-    QuestionRunnerComponent
+    QuestionRunnerComponent,
+    RouterLink
   ],
   templateUrl: './stats-exams.component.html',
   styleUrls:[

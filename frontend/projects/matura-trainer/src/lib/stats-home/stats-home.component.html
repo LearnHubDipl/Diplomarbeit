@@ -2,18 +2,30 @@
   <div class="left-side">
     <div class="widget-wrapper">
       <div class="header">Allgemein</div>
-      <div style="display: block; width: 100%;">
-        <canvas baseChart
+
+      <div class="chart-container" style="position: relative; min-height: 250px; display: flex; align-items: center; justify-content: center;">
+
+        <canvas *ngIf="hasChartData"
+                baseChart
                 [data]="doughnutChartData"
                 [type]="doughnutChartType"
                 [options]="chartOptions"
                 [plugins]="chartPlugins">
         </canvas>
+
+        <div *ngIf="!hasChartData" class="empty-chart-content">
+          <p>Noch keine Fragen im Pool</p>
+          <button class="browsing-btn" routerLink="/trainer/practice/fragen">
+            Fragen finden
+          </button>
+        </div>
+
       </div>
     </div>
+
     <div class="stats-widgets">
       <div class="stats-widget">
-        {{ userAverage }}% <br>
+        {{ userAverage || 0 }}% <br>
         <div>Prüfungs - <br>durchschnitt</div>
       </div>
       <div class="stats-widget">
@@ -24,20 +36,17 @@
     </div>
   </div>
 
-
-    <div class="widget-wrapper">
-      <div class="header question-header">Legende</div>
-      <div class="stats-content" *ngFor="let entry of legendData">
-        <div class="legend-info">
-          <span class="legend-dot" [ngStyle]="{'background-color': entry.color}"></span>
-          <span class="legend-label">{{ entry.label }}</span>
-          <span class="legend-percent">{{ entry.value }}%</span>
-        </div>
-        <div class="legend-bar">
-          <div class="legend-bar-fill" [ngStyle]="{'width.%': entry.value, 'background-color': entry.color}"></div>
-        </div>
+  <div class="widget-wrapper">
+    <div class="header question-header">Legende</div>
+    <div class="stats-content" *ngFor="let entry of legendData">
+      <div class="legend-info">
+        <span class="legend-dot" [ngStyle]="{'background-color': entry.color}"></span>
+        <span class="legend-label">{{ entry.label }}</span>
+        <span class="legend-percent">{{ entry.value }}%</span>
+      </div>
+      <div class="legend-bar">
+        <div class="legend-bar-fill" [ngStyle]="{'width.%': entry.value, 'background-color': entry.color}"></div>
       </div>
     </div>
   </div>
-
-
+</div>

@@ -3,8 +3,10 @@ import { ChartData, ChartType, ChartConfiguration, Plugin } from 'chart.js';
 import { StatsLegendEntry, StatsOverviewDto, StatsService } from '../../../../shared/src/lib/services/stats.service';
 import { CenterTextPlugin } from '../plugin/chart-text.plugin';
 import {NgChartsModule} from 'ng2-charts';
-import {NgForOf, NgStyle} from '@angular/common';
+import {NgForOf, NgIf, NgStyle} from '@angular/common';
 import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
+import {RouterLink} from '@angular/router';
+import {StreakService} from '../../../../shared/src/lib/services/streak.service';
 
 @Component({
   selector: 'lib-stats-home',
@@ -12,7 +14,9 @@ import {UserInitializationService} from '../../../../shared/src/lib/services/use
   imports: [
     NgChartsModule,
     NgForOf,
-    NgStyle
+    NgStyle,
+    NgIf,
+    RouterLink
   ],
   styleUrls: [
     '../styles/shared-styles.css',
@@ -22,7 +26,7 @@ import {UserInitializationService} from '../../../../shared/src/lib/services/use
 export class StatsHomeComponent implements OnInit {
 
   userService: UserInitializationService = inject(UserInitializationService);
-
+  streakService: StreakService=inject(StreakService);
   chartPlugins: Plugin[] = [CenterTextPlugin];
 
   public doughnutChartLabels: string[] = [];
@@ -43,9 +47,10 @@ export class StatsHomeComponent implements OnInit {
 
   public legendData: StatsLegendEntry[] = [];
   streak = 0;
+  private testTimer: any;
   userId = this.userService.getCurrentUser()!.id;
 
-  userAverage: number | null = null;
+  userAverage: number = 0;
   examCount: number = 0;
 
   constructor(private statsService: StatsService) {}
@@ -71,11 +76,38 @@ export class StatsHomeComponent implements OnInit {
 
     this.statsService.getUserExamAverage(this.userId).subscribe({
       next: dto => {
-        console.log('Average DTO', dto);
-        this.userAverage = dto.average;
+        this.userAverage = dto.average ? Math.round(dto.average) : 0;
         this.examCount = dto.count;
       },
-      error: err => console.error('Fehler beim Laden des Averages:', err)
+      error: () => this.userAverage = 0
+    });
+
+    this.loadStreak();
+  }
+
+  get hasChartData(): boolean {
+    return this.doughnutChartData.datasets[0].data.some(value => value > 0);
+  }
+
+  private loadStreak() {
+    this.streakService.getStreak(this.userId).subscribe({
+      next: res => this.streak = res.streak || 0,
+      error: () => this.streak = 0
     });
   }
+
+  private updateStreak() {
+    this.streakService.updateStreak(this.userId).subscribe({
+      next: res => {
+        this.streak = res.streak || 0;
+        console.log('Streak updated to:', this.streak);
+      },
+      error: err => console.error('Update failed:', err)
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.testTimer) clearTimeout(this.testTimer);
+  }
+
 }
