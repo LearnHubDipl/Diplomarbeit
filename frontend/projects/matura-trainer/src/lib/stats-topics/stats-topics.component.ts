@@ -4,8 +4,9 @@ import { ChartConfiguration, ChartData, ChartType, Plugin } from 'chart.js';
 import { StatsService, StatsOverviewDto, StatsLegendEntry } from '../../../../shared/src/lib/services/stats.service';
 import { CenterTextPlugin } from '../plugin/chart-text.plugin';
 import { FormsModule } from '@angular/forms';
-import { NgClass, NgForOf, NgStyle } from '@angular/common';
+import {NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
 import {UserInitializationService} from '../../../../shared/src/lib/services/user-initialization.service';
+import {RouterLink} from '@angular/router';
 
 export interface TopicPool {
   id: number;
@@ -20,7 +21,9 @@ export interface TopicPool {
     NgForOf,
     NgChartsModule,
     NgStyle,
-    NgClass
+    NgClass,
+    NgIf,
+    RouterLink
   ],
   templateUrl: './stats-topics.component.html',
   styleUrls: ['./stats-topics.component.css', '../styles/shared-styles.css']
@@ -34,10 +37,9 @@ export class StatsTopicsComponent implements OnInit {
   topicPools: TopicPool[] = [];
   selectedTopicPoolId = 0;
   isDropdownOpen = false;
+  userId = -1;
 
   chartPlugins: Plugin[] = [CenterTextPlugin];
-
-  doughnutChartLabels: string[] = [];
   doughnutChartData: ChartData<'doughnut'> = {
     labels: [],
     datasets: [{ data: [], backgroundColor: [] }]
@@ -51,20 +53,34 @@ export class StatsTopicsComponent implements OnInit {
     }
   };
 
-  legendData: StatsLegendEntry[] = [];
-  userId = -1;
+  // VORINITIALISIERUNG: Damit die Legende immer da ist
+  legendData: StatsLegendEntry[] = [
+    { label: 'ausreichend gelernt', value: 0, color: '#28a745' },
+    { label: '2x richtig beantwortet', value: 0, color: '#44ff44' },
+    { label: '1x richtig beantwortet', value: 0, color: '#b3ffb3' },
+    { label: 'falsch', value: 0, color: '#ff8888' },
+    { label: 'nicht beantwortet', value: 0, color: '#ffeeba' }
+  ];
 
   constructor(private statsService: StatsService) {}
 
   ngOnInit(): void {
-    this.userId = this.userService.getCurrentUser()!.id;
-    this.statsService.getTopicPools(this.userId).subscribe(pools => {
-      this.topicPools = pools;
-      if (pools.length > 0) {
-        this.selectedTopicPoolId = pools[0].id;
-        this.loadChartData();
-      }
-    });
+    const user = this.userService.getCurrentUser();
+    if (user) {
+      this.userId = user.id;
+      this.statsService.getTopicPools(this.userId).subscribe(pools => {
+        this.topicPools = pools;
+        if (pools.length > 0) {
+          this.selectedTopicPoolId = pools[0].id;
+          this.loadChartData();
+        }
+      });
+    }
+  }
+
+  get hasChartData(): boolean {
+    const data = this.doughnutChartData.datasets[0].data;
+    return data && data.length > 0 && data.some(value => value > 0);
   }
 
   onTopicPoolChange(value: any): void {
@@ -73,27 +89,21 @@ export class StatsTopicsComponent implements OnInit {
   }
 
   loadChartData(): void {
-    if (!this.selectedTopicPoolId) {
-      this.doughnutChartData.datasets[0].data = [];
-      this.legendData = [];
-      this.chart?.update();
-      return;
-    }
-
+    if (!this.selectedTopicPoolId) return;
     this.statsService.getStatsOverviewForTopicPool(this.userId, this.selectedTopicPoolId)
       .subscribe((data: StatsOverviewDto) => {
-
-        this.doughnutChartLabels = data.legend.map(entry => entry.label);
         const rawData = data.legend.map(entry => entry.value);
         const colors = data.legend.map(entry => entry.color);
 
         this.doughnutChartData = {
-          labels: this.doughnutChartLabels,
+          labels: data.legend.map(entry => entry.label),
           datasets: [{ data: rawData, backgroundColor: colors }]
         };
 
         this.legendData = data.legend;
 
+        const unansweredEntry = data.legend.find(e => e.label.toLowerCase().includes('nicht beantwortet'));
+        this.chartOptions!.plugins!.centerText!.text = unansweredEntry ? `${unansweredEntry.value} offene Fragen` : '';
         this.chartOptions!.plugins!.centerText!.text = `${data.unanswered} offene Fragen`;
 
         this.chart?.update();

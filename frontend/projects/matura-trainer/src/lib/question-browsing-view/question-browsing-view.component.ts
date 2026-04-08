@@ -217,4 +217,36 @@ export class QuestionBrowsingViewComponent implements OnInit {
       this.showOnlyPool = false;
     }
   }
+
+
+  resetSelection() {
+    this.selectedTopicPool = null;
+    this.viewedQuestions = [];
+  }
+
+  handleBulkAction() {
+    const currentIds = this.viewedQuestions.map(q => q.id);
+    const userId = this.userService.getCurrentUser()!.id;
+
+    const request: QuestionPoolEntryRequest = {
+      userId: userId,
+      questionIds: currentIds
+    };
+
+    if (!this.allQuestionsSelected()) {
+      this.questionPoolService.postQuestionsToQuestionPool(request).subscribe(() => {
+        currentIds.forEach(id => {
+          if (!this.selectedQuestionIds.includes(id)) {
+            this.selectedQuestionIds.push(id);
+          }
+        });
+      });
+    } else {
+      this.questionPoolService.removeQuestionsFromPool(request).subscribe(() => {
+        this.selectedQuestionIds = this.selectedQuestionIds.filter(
+          id => !currentIds.includes(id)
+        );
+      });
+    }
+  }
 }

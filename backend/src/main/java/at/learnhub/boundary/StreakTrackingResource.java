@@ -5,20 +5,13 @@ import at.learnhub.model.User;
 import at.learnhub.repository.StreakTrackingRepository;
 import at.learnhub.service.StreakTrackingService;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/streak")
+@Path("/api/streak")
 @Produces(MediaType.APPLICATION_JSON)
 public class StreakTrackingResource {
-
-    //TODO: Login / Update
-
-
 
         @Inject
         StreakTrackingService streakTrackingService;
@@ -50,4 +43,19 @@ public class StreakTrackingResource {
                 this.streak = streak;
             }
         }
+
+
+    @POST
+    @Path("/user/{userId}/update")
+    public Response updateStreak(@PathParam("userId") Long userId) {
+        User user = streakTrackingRepository.findById(userId);
+        if (user == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("User not found").build();
+        }
+
+        StreakTracking updated = streakTrackingService.updateStreakOnLogin(user);
+        return Response.ok(new StreakDTO(updated.getStreak())).build();
+    }
+
 }

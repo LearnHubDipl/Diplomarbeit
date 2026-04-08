@@ -115,7 +115,7 @@ public class QuestionPoolRepository {
                                 "  e.lastAnsweredCorrectly IS NULL OR " +
                                 "  e.lastAnsweredCorrectly = false OR " +
                                 "  (e.correctCount = 1 AND e.answeredAt <= CAST(CURRENT_TIMESTAMP AS LocalDateTime) - 1 DAY) OR " +
-                                "  (e.correctCount = 2 AND e.answeredAt <= CAST(CURRENT_TIMESTAMP AS LocalDateTime) - 7 DAY)" +
+                                "  (e.correctCount = 2 AND e.answeredAt <= CAST(CURRENT_TIMESTAMP AS LocalDateTime) - 3 DAY)" +
                                 ")", Long.class)
                 .setParameter("userId", userId)
                 .setParameter("topicPoolIds", topicPoolIds)
@@ -131,8 +131,7 @@ public class QuestionPoolRepository {
                                 "  e.lastAnsweredCorrectly IS NULL OR " +
                                 "  e.lastAnsweredCorrectly = false OR " +
                                 "  (e.correctCount = 1 AND e.answeredAt <= CAST(CURRENT_TIMESTAMP AS LocalDateTime) - 1 DAY) OR " +
-                                "  (e.correctCount = 2 AND e.answeredAt <= CAST(CURRENT_TIMESTAMP AS LocalDateTime) - 7 DAY) OR " +
-                                "  (e.correctCount >= 3 AND e.answeredAt <= CAST(CURRENT_TIMESTAMP AS LocalDateTime) - 30 DAY)" +
+                                "  (e.correctCount = 2 AND e.answeredAt <= CAST(CURRENT_TIMESTAMP AS LocalDateTime) - 3 DAY)" +
                                 ")", Long.class)
                 .setParameter("userId", userId)
                 .getResultList();

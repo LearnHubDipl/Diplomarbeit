@@ -173,7 +173,7 @@
   .nav-toggle {
     position: absolute;
     top: .8rem;
-    left: .8rem;
+    right: 85%;
     background: #f3c400;
     border: none;
     color: white;
@@ -181,12 +181,11 @@
     padding: .6rem .9rem;
     border-radius: .5rem;
     z-index: 1100;
-    transform: translateX(0);
-    transition: transform .35s ease;
+    transition: all .35s ease;
   }
 
   .nav-toggle.open {
-    transform: translateX(700%);
+    right: .8rem;
   }
 
   .user-info {

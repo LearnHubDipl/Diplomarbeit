@@ -53,9 +53,14 @@
 
 <div class="widget-wrapper question-wrapper" [hidden]="showSolutionEditor">
   <div class="header flex-between">
-    {{ question?.topicPool?.subject?.name || 'Fach' }} &gt; {{ question?.topicPool?.name || 'Themenpool' }}
+    <span class="subject-and-topic-pool">
+      {{ question?.topicPool?.subject?.name || 'Fach' }} &gt; {{ question?.topicPool?.name || 'Themenpool' }}
+    </span>
     <span *ngIf="this.mode !== 'practice'" class="timer-badge">
-      {{ Math.floor(timeLeft / 60).toString().padStart(2, '0') }}:{{ Math.floor(timeLeft % 60).toString().padStart(2, '0') }}
+      {{ getDisplayTime() }}
+    </span>
+    <span *ngIf="this.mode === 'practice'" class="timer-badge">
+      {{ this.currentQuestionIndex+1 }} / {{ this.questionIdList.length}}
     </span>
   </div>
 
@@ -96,8 +101,10 @@
                 'incorrect': isIncorrectAnswer(answer.id, i)
               }"
             >
-              <input type="checkbox" [formControlName]="i" [disabled]="submitted">
-              {{ answer.text }}
+              <label>
+                <input type="checkbox" [formControlName]="i" [disabled]="submitted">
+                {{ answer.text }}
+              </label>
             </li>
           </ul>
         </ng-container>
@@ -158,7 +165,7 @@
       <img
         src="/assets/restart.png"
         *ngIf="this.mode === 'review'"
-        style="height: 5vh; align-self: end; margin-right: -25%; cursor: pointer"
+        class="copy-exam-icon"
         (click)="createExamCopy(this.exam!.id)"
       >
 
@@ -236,5 +243,4 @@
 </div>
 
 <!-- Add this to the footer later
-  <a href="https://www.flaticon.com/free-icons/restart" title="restart icons">Restart icons created by Fathema Khanom - Flaticon</a>
 -->

@@ -1,9 +1,7 @@
 name,description,subjectId
 "Algebra Grundlagen","Grundlagen der Algebra und linearen Gleichungen",1
-"Planung","Projektplanung, Zeitmanagement und Ressourcenverteilung",2
 "Web Technologien","Entwicklung von Websites mit modernen Webframeworks",3
 "Analysis","Einstieg in die Differentialrechnung",1
-"Kontrolle und Steuerung","Überwachung des Projektfortschritts und Anpassung von Prozessen",2
 "Akustische und visuelle Wahrnehmung","Gestaltung, Design, Schall, Printtechnik und Datenbereitstellung",3
 "Kombinatorik","Teil der Wahrscheinlichkeitsberechnung",1
 
@@ -30,6 +28,8 @@ name,description,subjectId
 "Design","Gestaltung und Strukturierung von Softwareprojekten",2
 "Qualitätssicherung","Teststrategien und Qualitätssicherungsmethoden",2
 "Vorgehensmodelle","Projektablaufmodelle wie Wasserfall und agile Methoden",2
+"Planung","Projektplanung, Zeitmanagement und Ressourcenverteilung",2
+"Kontrolle und Steuerung","Überwachung des Projektfortschritts und Anpassung von Prozessen",2
 
 "Foto- und Bildbearbeitung","Hard- und Softwareeinsatz in der Bildbearbeitung",3
 "Videotechnik","Anwendung von Hard- und Software zur Videoproduktion",3

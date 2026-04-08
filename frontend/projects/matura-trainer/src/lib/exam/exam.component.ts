@@ -1,4 +1,4 @@
-import {Component, inject, Input, OnInit} from '@angular/core';
+import {Component, HostListener, inject, Input, OnInit, ViewChild} from '@angular/core';
 import {QuestionRunnerComponent} from '../question-runner/question-runner.component';
 import {CheckAnswerRequest} from '../../../../shared/src/lib/interfaces/answer';
 import {CreatedExamResponse, ExamService} from '../../../../shared/src/lib/services/exam.service';
@@ -17,6 +17,7 @@ import {query} from '@angular/animations';
   styleUrl: './exam.component.css'
 })
 export class ExamComponent implements OnInit{
+  @ViewChild(QuestionRunnerComponent) runner!: QuestionRunnerComponent;
   answers: CheckAnswerRequest[] = [];
   examService: ExamService = inject(ExamService);
   activatedRoute: ActivatedRoute = inject(ActivatedRoute);
@@ -57,13 +58,36 @@ export class ExamComponent implements OnInit{
     } else {
       this.exam = settings;
       this.questionIds = this.exam!.questions.map(q => q.id);
+      this.initializeEmptyAnswers();
       this.isLoading = false;
     }
   }
 
+  private initializeEmptyAnswers() {
+    this.answers = this.questionIds.map(id => ({
+      questionId: id,
+      selectedAnswerIds: [],
+      freeTextAnswer: null
+    }));
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  handleBeforeUnload($event: BeforeUnloadEvent) {
+    if (this.exam && !this.examSubmitted) {
+      $event.preventDefault();
+      this.runner.finish()
+      $event.returnValue = true;
+    }
+  }
+
+
   storeAnswer(answer: CheckAnswerRequest) {
-    this.answers = this.answers.filter(a => a.questionId !== answer.questionId);
-    this.answers.push(answer);
+    const index = this.answers.findIndex(a => a.questionId === answer.questionId);
+    if (index !== -1) {
+      this.answers[index] = answer;
+    } else {
+      this.answers.push(answer);
+    }
   }
 
   submitExam(answers: CheckAnswerRequest[]) {

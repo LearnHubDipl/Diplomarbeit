@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import { UserService } from './user.service';
 import { KeycloakOperationService } from '../auth';
 import { UserSlim } from '../interfaces/userSlim';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {BehaviorSubject, firstValueFrom, Observable} from 'rxjs';
+import {StreakService} from './streak.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,8 @@ export class UserInitializationService {
 
   constructor(
     private userService: UserService,
-    private keycloakService: KeycloakOperationService
+    private keycloakService: KeycloakOperationService,
+    private streakService: StreakService
   ) {}
 
   /**
@@ -63,6 +65,11 @@ export class UserInitializationService {
 
       this.currentUserSubject.next(user);
 
+      if (user) {
+        console.log('User geladen, Streak updaten:', user.id);
+        await this.updateStreak(user.id);
+      }
+
       return user;
     } catch (error) {
       console.error('[UserInit] Error initializing user:', error);
@@ -82,5 +89,14 @@ export class UserInitializationService {
 
   isInitializingUser(): boolean {
     return this.isInitializing;
+  }
+
+  private async updateStreak(userId: number): Promise<void> {
+    try {
+      const streak = await firstValueFrom(this.streakService.updateStreak(userId));
+      console.log('Streak updated:', streak.streak);
+    } catch (error) {
+      console.warn('Streak-Update fehlgeschlagen:', error);
+    }
   }
 }

@@ -48,6 +48,7 @@ import {
 import {
   QuestionApprovalDetailComponent
 } from '../../projects/content-management/src/lib/question-approval-detail/question-approval-detail.component';
+import {pendingExamGuard} from '../../projects/matura-trainer/src/lib/pending-exam-guard';
 
 export const routes: Routes = [
   {
@@ -106,7 +107,7 @@ export const routes: Routes = [
             data: { breadcrumb: 'Prüfung konfigurieren' },
             children: [
               { path: '', component: ExamSetupComponent, data: { breadcrumb: null } },
-              { path: 'exam', component: ExamComponent, data: { breadcrumb: 'Prüfungsmodus' } }
+              { path: 'exam', component: ExamComponent, data: { breadcrumb: 'Prüfungsmodus' }, canDeactivate: [pendingExamGuard] }
             ]
           }
         ]

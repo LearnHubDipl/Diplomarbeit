@@ -145,3 +145,27 @@ label {
   text-overflow: ellipsis;
   line-height: 1;
 }
+
+.thempool-dropdown-menu {
+  width: 80%;
+}
+
+@media (max-width: 767px) {
+  .progress-wrapper {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+  }
+  .progress-container {
+    grid-row: 2;
+  }
+  .selection-container {
+    grid-row: 1;
+  }
+  .selection-container .thempool-container {
+    margin: 0;
+    padding: 10% 5%;
+  }
+  .thempool-dropdown-menu {
+    width: 100%;
+  }
+}

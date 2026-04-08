@@ -123,9 +123,10 @@ public class StatsService {
                     isLocked = now.isBefore(unlockTime);
                 }
             }
-            if (lastCorrect == null) {
+
+            if (answeredAt == null || lastCorrect == null) {
                 unanswered++;
-            } else if (correctCount == 0) {
+            } else if (!lastCorrect) {
                 incorrect++;
             } else if (correctCount == 1) {
                 if (isLocked) {
@@ -152,12 +153,12 @@ public class StatsService {
         )));
 
         levels.add(new ProgressLevelDto("Basislevel", List.of(
-                new ProgressEntryDto("1x richtig", "#B7F0B0", correctOnce, correctOnce + " Fragen einmal richtig beantwortet"),
+                new ProgressEntryDto("1x richtig", "#B7F0B0", correctOnce, correctOnce + " Fragen für das Wiederholen frei"),
                 new ProgressEntryDto("Davon fürs Wiederholen gesperrt", "#8FD187", lockedOnce, lockedOnce + " Fragen fürs Wiederholen gesperrt")
         )));
 
         levels.add(new ProgressLevelDto("Trainingslevel", List.of(
-                new ProgressEntryDto("2x richtig", "#3DD32B", correctTwice, correctTwice + " Fragen zweimal richtig beantwortet"),
+                new ProgressEntryDto("2x richtig", "#3DD32B", correctTwice, correctTwice + " Fragen für das Wiederholen frei"),
                 new ProgressEntryDto("Davon fürs Wiederholen gesperrt", "#2AB624", lockedTwice, lockedTwice + " Fragen fürs Wiederholen gesperrt")
         )));
 

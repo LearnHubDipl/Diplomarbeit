@@ -288,6 +288,16 @@ textarea[formControlName="freeTextAnswer"]:focus {
   height: 75%;
   overflow: scroll;
 }
+.question-wrapper .header .subject-and-topic-pool{
+  width: 70%;
+  align-self: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  overflow-x: scroll;
+  scrollbar-width: none;
+}
+
 .widget-content-top {
   height: 100%;
   display: flex;
@@ -348,19 +358,71 @@ textarea[formControlName="freeTextAnswer"]:focus {
   min-height: 70px;
 }
 
+/* Exam specific */
+.copy-exam-icon {
+  height: 5vh;
+  align-self: end;
+  margin-right: -25%;
+  cursor: pointer;
+}
+
 /****************/
 /** RESPONSIVE **/
 /****************/
 @media (max-width: 767px) {
+
+  .score-box[style*="opacity: 0"],
+  .score-box[style*="opacity:0"] {
+    display: none;
+  }
 
   .exam-score-nav-grid {
     grid-template-columns: 1fr;
     row-gap: 1rem;
   }
 
+  .exam-navigation {
+    flex-direction: row;
+    gap: 15px;
+    padding: 0;
+  }
+
+  .submit-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.8rem 0.5rem !important;
+    font-size: 1rem !important;
+    letter-spacing: normal !important;
+  }
+
+  .copy-exam-icon {
+    position: absolute;
+    height: 40px;
+    margin: 0;
+    right: 15%;
+    bottom: .8rem;
+  }
+
   .big-nav {
-    grid-template-columns: repeat(3, 1fr);
-    padding: 1rem;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: 1fr;
+    gap: 0.5rem;
+    max-height: 200px;
+    overflow-x: scroll;
+  }
+
+  .big-nav-item {
+    width: 100%;
+    height: 100%;
+  }
+
+  .result-badge {
+    top: -2rem;
+    right: -1.6rem;
+    font-size: 1.4rem;
+    align-items: center;
+    height: fit-content;
   }
 
   .widget-content-top {
@@ -397,20 +459,6 @@ textarea[formControlName="freeTextAnswer"]:focus {
     position: static;
     margin-top: 1.5rem;
     width: 100%;
-  }
-
-  button.submit-btn {
-    width: 100%;
-    padding: 1rem;
-    font-size: 1.2rem;
-  }
-
-  .big-nav-item {
-    min-height: 60px;
-  }
-
-  .big-nav-item p {
-    font-size: 1rem;
   }
 
   .inline-error {
@@ -458,10 +506,6 @@ textarea[formControlName="freeTextAnswer"]:focus {
 
   .widget-content-right {
     width: 35%;
-  }
-
-  button.submit-btn {
-    padding: 1rem 3rem;
   }
 }
 
@@ -570,11 +614,5 @@ textarea[formControlName="freeTextAnswer"]:focus {
   padding-top: 1rem;
 }
 
-/* Exam specific */
-.copy-exam-icon {
-  height: 5vh;
-  align-self: end;
-  margin-right: -25%;
-  cursor: pointer;
-}
+
 
