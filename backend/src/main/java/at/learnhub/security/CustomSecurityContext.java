@@ -63,7 +63,7 @@ public record CustomSecurityContext(String username, List<String> roles, String 
     }
 
     public boolean isStudent() {
-        if (distinguishedName != null && !distinguishedName.isBlank()) {
+             if (distinguishedName != null && !distinguishedName.isBlank()) {
             String dnUp = distinguishedName.toUpperCase();
             if (dnUp.contains("OU=STUDENTS") || dnUp.contains("STUDENTS")) {
                 return true;

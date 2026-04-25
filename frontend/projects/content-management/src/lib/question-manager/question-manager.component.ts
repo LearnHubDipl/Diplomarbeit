@@ -39,6 +39,7 @@ export class QuestionManagerComponent implements OnInit {
 
   isPublicMode = false;
   isAdmin = false;
+  isTeacher = false;
   userId: number | null = null;
 
   allQuestions: Question[] = [];
@@ -57,12 +58,14 @@ export class QuestionManagerComponent implements OnInit {
     if (user?.id) {
       this.userId = user.id;
       this.isAdmin = user.isAdmin || false;
+      this.isTeacher = user.isTeacher || false;
     } else {
       try {
         const initializedUser = await this.userInitService.initializeUser();
         if (initializedUser) {
           this.userId = initializedUser.id;
           this.isAdmin = initializedUser.isAdmin || false;
+          this.isTeacher = initializedUser.isTeacher || false;
         }
       } catch (err) {
         console.error('Fehler beim Laden des Users:', err);

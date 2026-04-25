@@ -307,9 +307,11 @@ public class QuestionResource {
                         .entity(Map.of("error", "You can only modify your own questions or public questions as admin"))
                         .build();
             }
-            if (dto.isPublic() != null && dto.isPublic() && !Boolean.TRUE.equals(currentUser.getAdmin()) && !Boolean.TRUE.equals(currentUser.getTeacher())) {
+            if (dto.isPublic() != null && dto.isPublic()
+                    && !Boolean.TRUE.equals(currentUser.getAdmin())
+                    && !Boolean.TRUE.equals(currentUser.getTeacher())) {
                 return Response.status(Response.Status.FORBIDDEN)
-                        .entity(Map.of("error", "Only admins can make questions public")).build();
+                        .entity(Map.of("error", "Only admins or teachers can make questions public")).build();
             }
 
             Question updatedQuestion = questionRepository.updateQuestion(id, dto);

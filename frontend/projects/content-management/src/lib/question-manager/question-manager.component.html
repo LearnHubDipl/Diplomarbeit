@@ -28,12 +28,12 @@
     <button type="button"
             class="btn hover-white"
             [ngClass]="isPublicMode ? 'btn-warning text-white' : 'btn-outline-warning'"
-            [disabled]="!isAdmin"
-            [title]="!isAdmin ? 'Nur Admins können öffentliche Fragen verwalten' : ''"
+            [disabled]="!isAdmin && !isTeacher"
+            [title]="(!isAdmin && !isTeacher) ? 'Nur Lehrkräfte können öffentliche Fragen verwalten' : ''"
             (click)="isPublicMode = true; loadQuestions()">
       <i class="bi bi-globe me-1"></i>
       Öffentlich
-      <small *ngIf="!isAdmin" class="d-block" style="font-size: 0.7rem;">(Nur für Admins)</small>
+      <small *ngIf="!isAdmin && !isTeacher" ...>(Nur für Lehrkräfte)</small>
     </button>
     <button type="button"
             class="btn hover-white"
@@ -115,7 +115,7 @@
       </div>
     </div>
   </div>
-  <div *ngIf="isPublicMode && isAdmin" class="mb-3">
+  <div *ngIf="isPublicMode && (isAdmin || isTeacher)" class="mb-3">
     <a
       routerLink="/questions/approve"
       class="btn btn-warning text-white rounded-pill px-4 py-2 fw-semibold shadow-sm">

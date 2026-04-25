@@ -31,6 +31,7 @@ export class EditQuestionComponent implements OnInit {
   questionForm!: FormGroup;
   questionId!: number;
   isAdmin: boolean = false;
+  isTeacher: boolean = false;
   userId: number | null = null;
 
   loadError = false;
@@ -63,12 +64,14 @@ export class EditQuestionComponent implements OnInit {
     if (user?.id) {
       this.userId = user.id;
       this.isAdmin = user.isAdmin || false;
+      this.isTeacher = user.isTeacher || false;
     } else {
       try {
         const initializedUser = await this.userInitService.initializeUser();
         if (initializedUser) {
           this.userId = initializedUser.id;
           this.isAdmin = initializedUser.isAdmin || false;
+          this.isTeacher = initializedUser.isTeacher || false;
         }
       } catch (error) {
         console.error('Error loading user:', error);
@@ -98,14 +101,11 @@ export class EditQuestionComponent implements OnInit {
 
   private canAccessQuestion(question: Question): boolean {
     if (!this.userId) return false;
-
     const isOwnQuestion = question.user?.id === this.userId;
     const isPublicQuestion = question.isPublic === true;
-
-    if (this.isAdmin) {
+    if (this.isAdmin || this.isTeacher) {
       return isOwnQuestion || isPublicQuestion;
     }
-
     return isOwnQuestion;
   }
 
@@ -132,7 +132,7 @@ export class EditQuestionComponent implements OnInit {
     this.questionForm.get('type')?.disable();
     this.questionForm.get('difficulty')?.disable();
 
-    if (!this.isAdmin) {
+    if (!this.isAdmin && !this.isTeacher) {
       this.questionForm.get('isPublic')?.disable();
     }
 

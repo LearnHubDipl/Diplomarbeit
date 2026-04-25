@@ -44,6 +44,7 @@ export class FragenKonfiguratorComponent implements OnInit {
   private topicPoolId?: number;
   private currentUserId: number | null = null;
   isAdmin: boolean = false;
+  isTeacher = false;
 
   async ngOnInit() {
     this.initForm();
@@ -76,11 +77,12 @@ export class FragenKonfiguratorComponent implements OnInit {
     if (user?.id) {
       this.currentUserId = user.id;
       this.isAdmin = user.isAdmin || false;
+      this.isTeacher = user.isTeacher || false;
       console.log('Current user ID loaded:', this.currentUserId);
       console.log('Is admin:', this.isAdmin);
 
       // Disable isPublic toggle if not admin
-      if (!this.isAdmin) {
+      if (!this.isAdmin && !this.isTeacher) {
         this.questionForm.get('isPublic')?.disable();
       }
     } else {
@@ -100,6 +102,8 @@ export class FragenKonfiguratorComponent implements OnInit {
         console.error('Error loading user:', error);
       }
     }
+
+    console.log('isAdmin:', this.isAdmin, 'isTeacher:', this.isTeacher);
   }
 
   private initForm() {
@@ -221,20 +225,19 @@ export class FragenKonfiguratorComponent implements OnInit {
       let isPublic = false;
       let approvalRequested = false;
 
-      if (this.isAdmin) {
+      if (this.isAdmin || this.isTeacher) {
         isPublic = formValue.isPublic || false;
         approvalRequested = false;
       } else {
         isPublic = false;
         approvalRequested = formValue.approvalRequested || false;
       }
-
       const questionRequest: QuestionRequest = {
         text: formValue.text,
         explanation: formValue.explanation || '',
         type: formValue.type,
         difficulty: formValue.difficulty,
-        isPublic: formValue.isPublic,
+        isPublic: isPublic,
         approvalRequested: approvalRequested,
         userId: this.currentUserId,
         topicPoolId: Number(formValue.topicPoolId),
@@ -266,7 +269,7 @@ export class FragenKonfiguratorComponent implements OnInit {
           this.initForm();
           this.setupFormSubscriptions();
 
-          if (!this.isAdmin) {
+          if (!this.isAdmin && !this.isTeacher) {
             this.questionForm.get('isPublic')?.disable();
           }
         },

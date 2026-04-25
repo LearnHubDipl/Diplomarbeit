@@ -107,12 +107,12 @@
                type="checkbox"
                id="isPublic"
                formControlName="isPublic"
-               [title]="!isAdmin ? 'Nur Admins können Fragen öffentlich machen' : ''">
+               [title]="(!isAdmin && !isTeacher) ? 'Nur Lehrkräfte können Fragen öffentlich machen' : ''">
         <label class="form-check-label"
                for="isPublic"
-               [class.text-muted]="!isAdmin">
+               [class.text-muted]="!isAdmin && !isTeacher">
           {{ questionForm.get('isPublic')?.value ? 'Öffentlich' : 'Privat' }}
-          <small *ngIf="!isAdmin" class="text-muted d-block">(Nur für Admins)</small>
+          <small *ngIf="!isAdmin && !isTeacher" class="text-muted d-block">(Nur für Lehrkräfte)</small>
         </label>
       </div>
 
